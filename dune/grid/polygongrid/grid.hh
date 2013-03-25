@@ -14,10 +14,10 @@ namespace Dune
   // -----------------------------
 
 #if HAVE_MPI
-  template< class ct, int dim, int dimworld = dim, class Comm = MPI_Comm >
+  template< class ct, int dim, class Comm = MPI_Comm >
   class PolygonGrid;
 #else
-  template< class ct, int dim, int dimworld = dim, class Comm = No_Comm >
+  template< class ct, int dim, class Comm = No_Comm >
   class PolygonGrid;
 #endif // #if !HAVE_MPI
 
@@ -26,12 +26,12 @@ namespace Dune
   // PolygonGridFamily
   // -----------------
 
-  template< class ct, int dim, int dimworld, class Comm >
+  template< class ct, int dim, class Comm >
   struct PolygonGridFamily
   {
     struct Traits
     {
-      typedef PolygonGrid< ct, dim, dimworld, Comm > Grid;
+      typedef PolygonGrid< ct, dim, Comm > Grid;
     };
   };
 
@@ -40,21 +40,32 @@ namespace Dune
   // PolygonGrid
   // -----------
 
-  template< class ct, int dim, int dimworld, class Comm >
+  template< class ct, int dim, class Comm >
   class SPGrid
-  : public GridDefaultImplementation< dim, dimworld, ct, PolygonGridFamily< ct, dim, dimworld, Comm > >
+  : public GridDefaultImplementation< dim, ct, PolygonGridFamily< ct, dim, Comm > >
   {
-    typedef PolygonGrid< ct, dim, dimworld, Comm > This;
-    typedef GridDefaultImplementation< dim, dimworld, ct, PolygonGridFamily< ct, dim, dimworld, Comm > > Base;
+    typedef PolygonGrid< ct, dim, Comm > This;
+    typedef GridDefaultImplementation< dim, ct, PolygonGridFamily< ct, dim, Comm > > Base;
 
   public:
-    typedef PolygonGridFamily< ct, dim, dimworld, Comm > GridFamily;
+    typedef PolygonGridFamily< ct, dim, Comm > GridFamily;
 
     typedef typename GridFamily::Traits Traits;
 
     static const int dimension = dim;
-    static const int dimensionworld = dimworld;
+    static const int dimensionworld = dim;
   };
+
+
+
+  // Implementation of PolygonGrid
+  // -----------------------------
+
+  template< class ct, int dim, class Comm >
+  const int SPGrid::dimension;
+
+  template< class ct, int dim, class Comm >
+  const int SPGrid::dimensionworld;
 
 } // namespace Dune
 
