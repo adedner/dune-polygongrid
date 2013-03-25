@@ -14,10 +14,10 @@ namespace Dune
   // -----------------------------
 
 #if HAVE_MPI
-  template< class ct, int dim, class Comm = MPI_Comm >
+  template< class ct, class Comm = MPI_Comm >
   class PolygonGrid;
 #else
-  template< class ct, int dim, class Comm = No_Comm >
+  template< class ct, class Comm = No_Comm >
   class PolygonGrid;
 #endif // #if !HAVE_MPI
 
@@ -26,12 +26,12 @@ namespace Dune
   // PolygonGridFamily
   // -----------------
 
-  template< class ct, int dim, class Comm >
+  template< class ct, class Comm >
   struct PolygonGridFamily
   {
     struct Traits
     {
-      typedef PolygonGrid< ct, dim, Comm > Grid;
+      typedef PolygonGrid< ct, Comm > Grid;
     };
   };
 
@@ -40,20 +40,20 @@ namespace Dune
   // PolygonGrid
   // -----------
 
-  template< class ct, int dim, class Comm >
+  template< class ct, class Comm >
   class SPGrid
-  : public GridDefaultImplementation< dim, ct, PolygonGridFamily< ct, dim, Comm > >
+  : public GridDefaultImplementation< 2, 2, ct, PolygonGridFamily< ct, Comm > >
   {
-    typedef PolygonGrid< ct, dim, Comm > This;
-    typedef GridDefaultImplementation< dim, ct, PolygonGridFamily< ct, dim, Comm > > Base;
+    typedef PolygonGrid< ct, Comm > This;
+    typedef GridDefaultImplementation< 2, 2, ct, PolygonGridFamily< ct, Comm > > Base;
 
   public:
-    typedef PolygonGridFamily< ct, dim, Comm > GridFamily;
+    typedef PolygonGridFamily< ct, Comm > GridFamily;
 
     typedef typename GridFamily::Traits Traits;
 
-    static const int dimension = dim;
-    static const int dimensionworld = dim;
+    static const int dimension = 2;
+    static const int dimensionworld = 2;
   };
 
 
@@ -61,10 +61,10 @@ namespace Dune
   // Implementation of PolygonGrid
   // -----------------------------
 
-  template< class ct, int dim, class Comm >
+  template< class ct, class Comm >
   const int SPGrid::dimension;
 
-  template< class ct, int dim, class Comm >
+  template< class ct, class Comm >
   const int SPGrid::dimensionworld;
 
 } // namespace Dune

@@ -1,5 +1,5 @@
 AC_DEFUN([DUNE_POLYGONGRID_CHECKS],[
-  DUNE_DEFINE_GRIDTYPE([POLYGONGRID],[GRIDDIM == WORLDDIM],[Dune::PolygonGrid< double, dimgrid >],[dune/grid/polygongrid.hh],[dune/grid/polygongrid/dgfparser.hh])
+  DUNE_DEFINE_GRIDTYPE([POLYGONGRID],[(GRIDDIM == 2) && (WORLDDIM == 2)],[Dune::PolygonGrid< double >],[dune/grid/polygongrid.hh],[dune/grid/polygongrid/dgfparser.hh])
 ])
 
 AC_DEFUN([DUNE_POLYGONGRID_CHECK_MODULE],[
