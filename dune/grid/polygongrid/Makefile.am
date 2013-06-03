@@ -1,5 +1,5 @@
 polygongriddir = $(includedir)/dune/grid/polygongrid
-polygongrid_HEADERS = declaration.hh grid.hh polygon.hh
+polygongrid_HEADERS = declaration.hh entity.hh grid.hh polygon.hh
 
 EXTRA_DIST = CMakeLists.txt
 
