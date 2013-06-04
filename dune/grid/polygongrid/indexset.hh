@@ -3,19 +3,18 @@
 
 #include <vector>
 
-#include <dune/common/nullptr.hh>
 #include <dune/common/typetraits.hh>
 
 #include <dune/grid/common/gridenums.hh>
 #include <dune/grid/common/indexidset.hh>
 
-#include <dune/grid/idgrid/declaration.hh>
+#include <dune/grid/polynomgrid/declaration.hh>
 
 namespace Dune
 {
 
   // PolygonGridIndexSet
-  // --------------
+  // -------------------
 
   template< class Grid >
   class PolygonGridIndexSet
