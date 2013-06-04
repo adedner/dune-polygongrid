@@ -7,7 +7,7 @@ namespace Dune
   // External Forward Declarations
   // -----------------------------
 
-  template< class ct, class Index, class Comm >
+  template< class ct, class idx, class Comm >
   class PolygonGrid;
 
 } // namespace Dune
