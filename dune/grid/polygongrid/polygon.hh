@@ -47,7 +47,7 @@ namespace Dune
     // HalfEdge
     // --------
 
-    template< class Comm >
+    template< class Index, class Comm >
     struct HalfEdge
     : public Object< Comm >
     {
@@ -60,7 +60,7 @@ namespace Dune
     // Polygon
     // -------
 
-    template< class Comm >
+    template< class Index, class Comm >
     struct Polygon
     : public Object< Comm >
     {

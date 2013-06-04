@@ -38,6 +38,7 @@ namespace Dune
     static const int dimensionworld = 2;
 
     typedef typename Traits::ctype ctype;
+    typedef typename Traits::Index Index;
 
     typedef typename Grid::template Codim< codimension >::EntitySeed EntitySeed;
     typedef typename Traits::template Codim< codimension >::Geometry Geometry;

@@ -14,10 +14,10 @@ namespace Dune
   // -----------------------------
 
 #if HAVE_MPI
-  template< class ct, class Comm = MPI_Comm >
+  template< class ct, class idx = unsigned int, class Comm = MPI_Comm >
   class PolygonGrid;
 #else
-  template< class ct, class Comm = No_Comm >
+  template< class ct, class idx = unsigned int, class Comm = No_Comm >
   class PolygonGrid;
 #endif // #if !HAVE_MPI
 
@@ -26,11 +26,14 @@ namespace Dune
   // PolygonGridFamily
   // -----------------
 
-  template< class ct, class Comm >
+  template< class ct, class idx, class Comm >
   struct PolygonGridFamily
   {
     struct Traits
     {
+      typedef ct ctype;
+      typedef idx Index;
+
       typedef PolygonGrid< ct, Comm > Grid;
     };
   };
@@ -40,15 +43,15 @@ namespace Dune
   // PolygonGrid
   // -----------
 
-  template< class ct, class Comm >
+  template< class ct, class idx, class Comm >
   class SPGrid
-  : public GridDefaultImplementation< 2, 2, ct, PolygonGridFamily< ct, Comm > >
+  : public GridDefaultImplementation< 2, 2, ct, PolygonGridFamily< ct, idx, Comm > >
   {
     typedef PolygonGrid< ct, Comm > This;
-    typedef GridDefaultImplementation< 2, 2, ct, PolygonGridFamily< ct, Comm > > Base;
+    typedef GridDefaultImplementation< 2, 2, ct, PolygonGridFamily< ct, idx, Comm > > Base;
 
   public:
-    typedef PolygonGridFamily< ct, Comm > GridFamily;
+    typedef PolygonGridFamily< ct, idx, Comm > GridFamily;
 
     typedef typename GridFamily::Traits Traits;
 
@@ -61,11 +64,11 @@ namespace Dune
   // Implementation of PolygonGrid
   // -----------------------------
 
-  template< class ct, class Comm >
-  const int SPGrid::dimension;
+  template< class ct, class idx, class Comm >
+  const int PolygonGrid< ct, idx, Comm >::dimension;
 
-  template< class ct, class Comm >
-  const int SPGrid::dimensionworld;
+  template< class ct, class idx, class Comm >
+  const int PolygonGrid< ct, idx, Comm >::dimensionworld;
 
 } // namespace Dune
 
