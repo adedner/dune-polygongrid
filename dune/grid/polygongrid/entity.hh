@@ -65,8 +65,29 @@ namespace Dune
 
     EntitySeed seed () const { return typename EntitySeed::Implementation( index() ); }
 
-    Index index () const { return index_; }
+    template< int cd >
+    int count () const
+    {
+      // use a helper, here
+    }
+
+    template< int cd >
+    typename Grid::template Codim< cd >::EntityPointer
+    subEntity ( int i ) const
+    {
+      typedef typename Traits::template Codim< cd >::EntityPointerImpl EntityPointerImpl;
+      assert( (i >= 0) && (i <= count< cd >()) );
+      return EntityPointerImpl( grid(), subIndex( i, cd ) );
+    }
+
     const Grid &grid () const { return *grid_; }
+
+    Index index () const { return index_; }
+
+    Index subIndex ( int i, unsigned int codim ) const
+    {
+      // use a helper, here
+    }
 
   private:
     const Grid *grid_;
@@ -111,17 +132,6 @@ namespace Dune
     : Base( grid, index )
     {}
 
-    template< int codim >
-    int count () const { return (codim == 0 ? 1 : numVertices()); }
-    
-    template< int codim >
-    typename Grid::template Codim< codim >::EntityPointer
-    subEntity ( int i ) const
-    {
-      typedef typename Traits::template Codim< codim >::EntityPointerImpl EntityPointerImpl;
-      return EntityPointerImpl( hostEntity().template subEntity< codim >( i ) );
-    }
-
     bool hasBoundaryIntersections () const
     {
       return hostEntity().hasBoundaryIntersections();
@@ -135,11 +145,8 @@ namespace Dune
       return EntityPointerImpl( hostEntity().father() );
     }
 
-    bool hasFather () const
-    {
-      return hostEntity().hasFather();
-    }
-      
+    bool hasFather () const { return false; }
+
     LocalGeometry geometryInFather () const
     {
       return LocalGeometry( hostEntity().geometryInFather() );

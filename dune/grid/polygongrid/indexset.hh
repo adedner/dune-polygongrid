@@ -65,7 +65,7 @@ namespace Dune
     template< int cd >
     IndexType subIndex ( const typename Traits::template Codim< cd >::Entity &entity, int i, unsigned int codim ) const
     {
-      return entity.impl().subEntity( i, codim )->impl().index();
+      return entity.impl().subIndex( i, codim );
     }
 
     IndexType size ( GeometryType type ) const { return grid().size( type ); }
