@@ -1,6 +1,8 @@
 #ifndef DUNE_POLYGONGRID_POLYGON_HH
 #define DUNE_POLYGONGRID_POLYGON_HH
 
+#include <vector>
+
 namespace Dune
 {
 
@@ -44,6 +46,7 @@ namespace Dune
     };
 
 
+
     // HalfEdge
     // --------
 
@@ -66,6 +69,23 @@ namespace Dune
     {
       Index firstHalfEdge;
       Index numHalfEdges;
+    };
+
+
+
+    // Mesh
+    // ----
+
+    template< class ct, class Index, class Comm >
+    struct Mesh
+    {
+      typedef PolygonGridImpl::Vertex< ct, Comm > Vertex;
+      typedef PolygonGridImpl::HalfEdge< Index, Comm > HalfEdge;
+      typedef PolygonGridImpl::Polygon< Index, Comm > Polygon;
+
+      std::vector< Vertex > vertices;
+      std::vector< HalfEdge > halfEdges;
+      std::vector< Polygon > polygons;
     };
 
   } // namespace PolygonGridImpl
