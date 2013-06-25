@@ -21,6 +21,7 @@ AC_CONFIG_FILES([
   dune/grid/polygongrid/Makefile
   dune/grid/test/Makefile
   m4/Makefile
+  polygongrid/Makefile
   dune-polygongrid.pc
 ])
 

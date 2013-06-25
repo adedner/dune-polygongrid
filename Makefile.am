@@ -1,7 +1,7 @@
 EXTRA_DIST = dune.module
 EXTRA_DIST += CMakeLists.txt dune-polygongrid-config.cmake.in dune-polygongrid-version.cmake.in
 
-SUBDIRS = cmake m4 dune
+SUBDIRS = cmake m4 dune polygongrid
 
 DISTCHECK_CONFIGURE_FLAGS = --with-dune-common=$(DUNE_COMMON_ROOT) --with-dune-grid=$(DUNE_GRID_ROOT)  CXX="$(CXX)" CC="$(CC)"
 
