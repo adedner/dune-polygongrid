@@ -1,95 +1,95 @@
-#ifndef DUNE_POLYGONGRID_POLYGON_HH
-#define DUNE_POLYGONGRID_POLYGON_HH
+#ifndef POLYGONGRID_POLYGON_HH
+#define POLYGONGRID_POLYGON_HH
 
 #include <vector>
 
-namespace Dune
+namespace PolygonGrid
 {
 
-  namespace PolygonGridImpl
+  // Internal Forward Declarations
+  // -----------------------------
+
+  template< class Object >
+  struct Vertex;
+
+  template< class Object >
+  struct HalfEdge;
+
+  template< class Object >
+  struct Polygon;
+
+
+
+  // Vertex
+  // ------
+
+  template< class Object >
+  struct Vertex
+  : public Object
   {
+    typedef typename Object::Vector Vector;
 
-    // Object
-    // ------
+    const Vector &position () const { return position_; }
 
-    template< class Comm >
-    struct Object;
-
-#if HAVE_MPI
-    struct Object< MPI_Comm >
-    {
-      PartitionType partition () { return partition_; }
-
-    private:
-      PartitionType partition_;
-    };
-#endif // #if HAVE_MPI
-
-    struct Object< No_Comm >
-    {
-      PartitionType partition () { return InteriorEntity; }
-    };
+  private:
+    Vector position_;
+  };
 
 
 
-    // Vertex
-    // ------
+  // HalfEdge
+  // --------
 
-    template< class ct, class Comm >
-    struct Vertex
-    : public Object< Comm >
-    {
-      const FieldVector< ct, 2 > &position () const { return position_; }
+  template< class Object >
+  struct HalfEdge
+  : public Object
+  {
+    typedef PolygonGrid::Vertex< Object > Vertex;
+    typedef PolygonGrid::HalfEdge< Object > HalfEdge;
 
-    private:
-      FieldVector< ct, 2 > position_;
-    };
+    typedef typename Object::template Pointer< Vertex >::Type VertexPtr;
+    typedef typename Object::template Pointer< HalfEdge >::Type HalfEdgePtr;
 
-
-
-    // HalfEdge
-    // --------
-
-    template< class Index, class Comm >
-    struct HalfEdge
-    : public Object< Comm >
-    {
-      Index targetVertex;
-      Index nextHalfEdge;
-    };
+  private:
+    VertexPtr target;
+    HalfEdgePtr next;
+  };
 
 
 
-    // Polygon
-    // -------
+  // Polygon
+  // -------
 
-    template< class Index, class Comm >
-    struct Polygon
-    : public Object< Comm >
-    {
-      Index firstHalfEdge;
-      Index numHalfEdges;
-    };
+  template< class Object >
+  struct Polygon
+  : public Object
+  {
+    typedef PolygonGrid::HalfEdge< Object > HalfEdge;
+
+    typedef typename Object::Size Size;
+    typedef typename Object::template Pointer< HalfEdge >::Type HalfEdgePtr;
+
+    HalfEdgePtr first;
+    Index numHalfEdges;
+  };
 
 
 
-    // Mesh
-    // ----
+  // Mesh
+  // ----
 
-    template< class ct, class Index, class Comm >
-    struct Mesh
-    {
-      typedef PolygonGridImpl::Vertex< ct, Comm > Vertex;
-      typedef PolygonGridImpl::HalfEdge< Index, Comm > HalfEdge;
-      typedef PolygonGridImpl::Polygon< Index, Comm > Polygon;
+  template< class Object >
+  struct Mesh
+  {
+    typedef PolygonGrid::Vertex< Object > Vertex;
+    typedef PolygonGrid::HalfEdge< Object > HalfEdge;
+    typedef PolygonGrid::Polygon< Object > Polygon;
 
-      std::vector< Vertex > vertices;
-      std::vector< HalfEdge > halfEdges;
-      std::vector< Polygon > polygons;
-    };
+    std::vector< Vertex > vertices;
+    std::vector< HalfEdge > halfEdges;
+    std::vector< Polygon > polygons;
+  };
 
-  } // namespace PolygonGridImpl
+} // namespace PolygonGrid
 
-} // namespace Dune
-
-#endif // #ifndef DUNE_POLYGONGRID_POLYGON_HH
+#endif // #ifndef POLYGONGRID_POLYGON_HH
