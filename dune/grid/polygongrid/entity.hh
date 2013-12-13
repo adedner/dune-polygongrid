@@ -1,13 +1,10 @@
 #ifndef DUNE_POLYGONGRID_ENTITY_HH
 #define DUNE_POLYGONGRID_ENTITY_HH
 
-//- dune-common includes
 #include <dune/common/typetraits.hh>
 
-//- dune-grid includes
 #include <dune/grid/common/entity.hh>
 
-//- dune-polygongrid includes
 #include <dune/grid/polygongrid/entityseed.hh>
 #include <dune/grid/polygongrid/geometry.hh>
 
@@ -57,8 +54,6 @@ namespace Dune
       return type;
     }
 
-    int level () const { return 0; }
-    
     PartitionType partitionType () const { return InteriorEntity; }
 
     Geometry geometry () const { return Geometry( grid(), index() ); }
