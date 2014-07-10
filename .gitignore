@@ -18,9 +18,10 @@
 /ltmain.sh
 /missing
 /stamp-h1
+/test-driver
 
-.deps
-.libs
+.deps/
+.libs/
 Makefile
 Makefile.in
 
