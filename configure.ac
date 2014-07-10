@@ -1,6 +1,5 @@
-AC_PREREQ(2.50)
+AC_PREREQ([2.62])
 DUNE_AC_INIT
-AM_INIT_AUTOMAKE([foreign 1.5])
 AC_CONFIG_SRCDIR([dune/grid/polygongrid.hh])
 AM_CONFIG_HEADER([config.h])
 
