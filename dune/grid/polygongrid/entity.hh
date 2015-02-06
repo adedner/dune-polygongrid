@@ -15,7 +15,7 @@ namespace Dune
   // Internal Forward Declarations
   // -----------------------------
 
-  template< int codim, int dim, class Grid >
+  template< int codim, class Grid >
   class PolygonGridEntity;
 
 
@@ -87,8 +87,8 @@ namespace Dune
   // -----------------
 
   template< int codim, class Grid >
-  class PolygonGridEntity< codim, 2, Grid >
-  : public PolygonGridBasicEntity< codim, Grid >
+  class PolygonGridEntity< codim, Grid >
+    : public PolygonGridBasicEntity< codim, Grid >
   {
     typedef PolygonGridBasicEntity< codim, Grid > Base;
 
@@ -104,9 +104,10 @@ namespace Dune
   // -----------------------------------
 
   template< class Grid >
-  class PolygonGridEntity< 0, 2, Grid >
-  : public PolygonGridBasicEntity< 0, Grid >
+  class PolygonGridEntity< 0, Grid >
+    : public PolygonGridBasicEntity< 0, Grid >
   {
+    typedef PolygonGridEntity< 0, Grid > This;
     typedef PolygonGridBasicEntity< 0, Grid > Base;
 
   public:
@@ -116,21 +117,17 @@ namespace Dune
     typedef typename Traits::HierarchicIterator HierarchicIterator;
 
     PolygonGridEntity ( const Grid &grid, Index index )
-    : Base( grid, index )
+      : Base( grid, index )
     {}
 
     bool hasBoundaryIntersections () const
     {
-      return hostEntity().hasBoundaryIntersections();
+      // ...
     }
 
     bool isLeaf () const { return true; }
  
-    Entity father () const
-    {
-      typedef typename Traits::template Codim< 0 >::EntityPointerImpl EntityPointerImpl;
-      return EntityPointerImpl( hostEntity().father() );
-    }
+    Entity father () const { DUNE_THROW( GridError, "father not implemented, yet" ); }
 
     bool hasFather () const { return false; }
 
