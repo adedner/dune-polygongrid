@@ -1,2 +1,5 @@
-install(FILES DunePolygongridMacros.cmake
-        DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/cmake/modules)
+set( MODULES
+  DunePolygongridMacros.cmake
+)
+
+install( FILES ${MODULES} DESTINATION ${DUNE_INSTALL_MODULEDIR} )

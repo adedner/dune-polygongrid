@@ -1,2 +1,5 @@
-install(FILES polygon.hh
-        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/polygongrid)
+set( HEADERS
+  polygon.hh
+)
+
+install( FILES ${HEADERS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/polygongrid )

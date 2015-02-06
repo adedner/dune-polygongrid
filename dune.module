@@ -1,4 +1,5 @@
 Module: dune-polygongrid
-Version: 2013.13
+Version: 2015.13
 Maintainer: nolte@mathematik.uni-freiburg.de
-Depends: dune-grid (>= 2.3)
+Depends: dune-grid (>= 3.0)
+Whitespace-Hook: Yes
