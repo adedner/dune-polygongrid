@@ -32,7 +32,6 @@ namespace Dune
     static const int codimension = codim;
     static const int dimension = 2;
     static const int mydimension = dimension - codimension;
-    static const int dimensionworld = 2;
 
     typedef typename Traits::ctype ctype;
     typedef typename Traits::Index Index;
@@ -41,8 +40,8 @@ namespace Dune
     typedef typename Traits::template Codim< codimension >::Geometry Geometry;
 
     PolygonGridEntity ( const Grid &grid, Index index )
-    : grid_( &grid ).
-      index_( index )
+      : grid_( &grid ).
+        index_( index )
     {}
 
     operator bool () const { return index_ < std::numeric_limits< Index >::max(); }
@@ -55,19 +54,17 @@ namespace Dune
 
     EntitySeed seed () const { return typename EntitySeed::Implementation( index() ); }
 
-    template< int cd >
-    int count () const
+    unsigned int subEntities ( unsigned int codim ) const
     {
       // use a helper, here
     }
 
-    template< int cd >
-    typename Grid::template Codim< cd >::EntityPointer
-    subEntity ( int i ) const
+    template< int codim >
+    typename Codim< codim >::Entity subEntity ( int i ) const
     {
-      typedef typename Traits::template Codim< cd >::EntityPointerImpl EntityPointerImpl;
-      assert( (i >= 0) && (i <= count< cd >()) );
-      return EntityPointerImpl( grid(), subIndex( i, cd ) );
+      typedef typename Traits::template Codim< codim >::EntityImpl EntityImpl;
+      assert( static_cast< unsigned int >( i ) < subEntities( codim ) );
+      return EntityImpl( grid(), subIndex( i, codim ) );
     }
 
     const Grid &grid () const { return *grid_; }
@@ -97,7 +94,7 @@ namespace Dune
 
   public:
     PolygonGridEntity ( const Grid &grid, Index index )
-    : Base( grid, index )
+      : Base( grid, index )
     {}
   };
 
@@ -129,7 +126,7 @@ namespace Dune
 
     bool isLeaf () const { return true; }
  
-    EntityPointer father () const
+    Entity father () const
     {
       typedef typename Traits::template Codim< 0 >::EntityPointerImpl EntityPointerImpl;
       return EntityPointerImpl( hostEntity().father() );
