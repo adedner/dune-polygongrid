@@ -46,12 +46,7 @@ namespace Dune
 
     // interface for reference mapping
 
-    GeometryType type () const
-    {
-      GeometryType type;
-      type.makeNone( mydimension );
-      return type;
-    }
+    GeometryType type () const { return GeometryType( GeometryType::None(), dimension ); }
 
     bool affine () const
     {

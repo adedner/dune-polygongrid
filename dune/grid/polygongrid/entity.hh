@@ -47,12 +47,7 @@ namespace Dune
 
     operator bool () const { return index_ < std::numeric_limits< Index >::max(); }
 
-    GeometryType type () const
-    {
-      GeometryType type;
-      type.makeNone( mydimension );
-      return type;
-    }
+    GeometryType type () const { return GeometryType( GeometryType::None(), dimension ); }
 
     PartitionType partitionType () const { return InteriorEntity; }
 
