@@ -120,11 +120,6 @@ namespace Dune
       : Base( grid, index )
     {}
 
-    bool hasBoundaryIntersections () const
-    {
-      // ...
-    }
-
     bool isLeaf () const { return true; }
  
     Entity father () const { DUNE_THROW( GridError, "father not implemented, yet" ); }
