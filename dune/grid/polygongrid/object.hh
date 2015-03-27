@@ -4,7 +4,7 @@
 namespace Dune
 {
 
-  namespace PolygonGrid
+  namespace __PolygonGrid
   {
 
     // Object
@@ -28,8 +28,8 @@ namespace Dune
       PartitionType partition () { return InteriorEntity; }
     };
 
-  } // namespace Dune
+  } // namespace __PolygonGrid
 
-} // namespace PolygonGrid
+} // namespace Dune
 
 #endif // #ifndef DUNE_POLYGONGRID_OBJECT_HH

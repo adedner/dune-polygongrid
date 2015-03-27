@@ -44,10 +44,10 @@ namespace Dune
   // -----------
 
   template< class ct, class idx, class Comm >
-  class SPGrid
+  class PolygonGrid
   : public GridDefaultImplementation< 2, 2, ct, PolygonGridFamily< ct, idx, Comm > >
   {
-    typedef PolygonGrid< ct, Comm > This;
+    typedef PolygonGrid< ct, idx, Comm > This;
     typedef GridDefaultImplementation< 2, 2, ct, PolygonGridFamily< ct, idx, Comm > > Base;
 
   public:

@@ -1,9 +1,8 @@
 #ifndef DUNE_POLYGONGRID_INDEXSET_HH
 #define DUNE_POLYGONGRID_INDEXSET_HH
 
+#include <typetraits>
 #include <vector>
-
-#include <dune/common/typetraits.hh>
 
 #include <dune/grid/common/gridenums.hh>
 #include <dune/grid/common/indexidset.hh>
@@ -13,77 +12,70 @@
 namespace Dune
 {
 
-  // PolygonGridIndexSet
-  // -------------------
-
-  template< class Grid >
-  class PolygonGridIndexSet
-  : public IndexSet< Grid, PolygonGridIndexSet< Grid >, typename remove_const< Grid >::type::Traits::Index >
+  namespace __PolygonGrid
   {
-    typedef PolygonGridIndexSet< Grid, HostIndexSet > This;
-    typedef IndexSet< Grid, PolygonGridIndexSet< Grid >, typename remove_const< Grid >::type::Traits::Index > Base;
 
-    typedef typename remove_const< Grid >::type::Traits Traits;
+    // IndexSet
+    // --------
 
-  public:
-    static const int dimension = Traits::dimension;
-
-    typedef typename Base::IndexType IndexType;
-
-    PolygonGridIndexSet ( const Grid &grid )
-    : grid_( &grid )
-    {}
-
-    PolygonGridIndexSet ( const This &other )
-    : grid_( other.grid_ )
-    {}
-
-    const This &operator= ( const This &other )
+    template< class Grid >
+    class IndexSet
+      : public Dune::IndexSet< Grid, IndexSet< Grid >, typename std::remove_const< Grid >::type::Traits::Index >
     {
-      grid_ = other.grid_;
-      return *this;
-    }
+      typedef IndexSet< Grid, HostIndexSet > This;
+      typedef Dune::IndexSet< Grid, IndexSet< Grid >, typename std::remove_const< Grid >::type::Traits::Index > Base;
 
-    template< class Entity >
-    IndexType index ( const Entity &entity ) const
-    {
-      return index< Entity::codimension >( entity );
-    }
+      typedef typename remove_const< Grid >::type::Traits Traits;
 
-    template< int cd >
-    IndexType index ( const typename Traits::template Codim< cd >::Entity &entity ) const
-    {
-      return entity.impl().index();
-    }
+    public:
+      static const int dimension = Traits::dimension;
 
-    template< class Entity >
-    IndexType subIndex ( const Entity &entity, int i, unsigned int codim ) const
-    {
-      return subIndex< Entity::codimension >( entity, i, codim );
-    }
+      typedef typename Base::Index Index;
 
-    template< int cd >
-    IndexType subIndex ( const typename Traits::template Codim< cd >::Entity &entity, int i, unsigned int codim ) const
-    {
-      return entity.impl().subIndex( i, codim );
-    }
+      IndexSet ( const Grid &grid ) : grid_( &grid ) {}
 
-    IndexType size ( GeometryType type ) const { return grid().size( type ); }
-    IndexType size ( int codim ) const { return grid().size( codim ); }
+      template< class Entity >
+      Index index ( const Entity &entity ) const
+      {
+        return index< Entity::codimension >( entity );
+      }
 
-    template< class Entity >
-    bool contains ( const Entity &entity ) const { return true; }
+      template< int cd >
+      Index index ( const typename Traits::template Codim< cd >::Entity &entity ) const
+      {
+        return entity.impl().index();
+      }
 
-    const std::vector< GeometryType > &geomTypes ( int codim ) const
-    {
-      return grid().geomTypes_( codim );
-    }
+      template< class Entity >
+      Index subIndex ( const Entity &entity, int i, unsigned int codim ) const
+      {
+        return subIndex< Entity::codimension >( entity, i, codim );
+      }
 
-    const Grid &grid () const { return *grid_; }
+      template< int cd >
+      Index subIndex ( const typename Traits::template Codim< cd >::Entity &entity, int i, unsigned int codim ) const
+      {
+        return entity.impl().subIndex( i, codim );
+      }
 
-  private:
-    const Grid *grid_;
-  };
+      Index size ( GeometryType type ) const { return grid().size( type ); }
+      Index size ( int codim ) const { return grid().size( codim ); }
+
+      template< class Entity >
+      bool contains ( const Entity &entity ) const { return true; }
+
+      const std::vector< GeometryType > &types ( int codim ) const
+      {
+        return grid().geomTypes_( codim );
+      }
+
+      const Grid &grid () const { return *grid_; }
+
+    private:
+      const Grid *grid_;
+    };
+
+  } // namespace __PolygonGrid
 
 } // namespace Dune
 

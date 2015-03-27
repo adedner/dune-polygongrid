@@ -4,7 +4,6 @@ set( HEADERS
   grid.hh
   indexset.hh
   object.hh
-  polytopegeometry.hh
 )
 
 install( FILES ${HEADERS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/dune/grid/polygongrid )
