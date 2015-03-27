@@ -4,7 +4,7 @@
 
 #include <dune/grid/polygongrid.hh>
 
-#include <dune/grid/test/gridcheck.cc>
+#include <dune/grid/test/gridcheck.hh>
 
 
 // main

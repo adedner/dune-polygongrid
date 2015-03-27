@@ -1,5 +1,4 @@
 add_subdirectory( polygongrid )
-add_subdirectory( test )
 
 set( HEADERS
   polygongrid.hh

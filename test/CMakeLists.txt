@@ -6,5 +6,5 @@ foreach( test test-polygongrid )
   add_dune_mpi_flags( ${test} )
 
   add_test( ${test} ${test} )
-  add_dependencies( ${alltests} ${test} ) 
+  add_dependencies( ${alltests} ${test} )
 endforeach()
