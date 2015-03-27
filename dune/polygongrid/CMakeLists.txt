@@ -7,4 +7,4 @@ set( HEADERS
   object.hh
 )
 
-install( FILES ${HEADERS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/dune/grid/polygongrid )
+install( FILES ${HEADERS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/dune/polygongrid )

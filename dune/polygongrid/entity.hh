@@ -5,8 +5,7 @@
 
 #include <dune/grid/common/entity.hh>
 
-#include <dune/grid/polygongrid/entityseed.hh>
-#include <dune/grid/polygongrid/geometry.hh>
+#include <dune/polygongrid/entityseed.hh>
 
 
 namespace Dune

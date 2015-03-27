@@ -5,7 +5,7 @@
 
 #include <dune/grid/common/grid.hh>
 
-#include <dune/grid/polygongrid/declaration.hh>
+#include <dune/polygongrid/declaration.hh>
 
 namespace Dune
 {

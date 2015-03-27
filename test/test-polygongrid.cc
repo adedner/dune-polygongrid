@@ -2,7 +2,7 @@
 
 #include <dune/common/parallel/mpihelper.hh>
 
-#include <dune/grid/polygongrid.hh>
+#include <dune/polygongrid/grid.hh>
 
 #include <dune/grid/test/gridcheck.hh>
 

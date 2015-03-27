@@ -7,7 +7,7 @@
 #include <dune/grid/common/gridenums.hh>
 #include <dune/grid/common/indexidset.hh>
 
-#include <dune/grid/polynomgrid/declaration.hh>
+#include <dune/polynomgrid/declaration.hh>
 
 namespace Dune
 {
