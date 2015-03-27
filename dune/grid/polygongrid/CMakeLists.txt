@@ -2,6 +2,7 @@ set( HEADERS
   declaration.hh
   entity.hh
   grid.hh
+  gridfamily.hh
   indexset.hh
   object.hh
 )
