@@ -1,5 +1,5 @@
-project( "dune-polygongrid" C CXX )
-cmake_minimum_required( VERSION 2.8.6 )
+cmake_minimum_required( VERSION 2.8.12 )
+project( dune-polygongrid CXX )
 
 find_package( dune-common )
 list( APPEND CMAKE_MODULE_PATH ${dune-common_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/modules" )
