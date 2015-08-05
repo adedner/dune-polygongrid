@@ -17,14 +17,6 @@ namespace Dune
   namespace __PolygonGrid
   {
 
-    // External forward declaration
-    // ----------------------------
-
-    template< class Grid >
-    class IntersectionIterator;
-
-
-
     // Intersection
     // ------------
 
