@@ -6,6 +6,7 @@ set( HEADERS
   geometry.hh
   grid.hh
   gridfamily.hh
+  halfedge.hh
   indexset.hh
   intersection.hh
 )

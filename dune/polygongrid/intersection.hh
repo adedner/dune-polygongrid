@@ -69,7 +69,7 @@ namespace Dune
 
       Geometry geometry () const
       {
-        return inside().subEntity( indexInInside(), Codim< 1 >() ).geometry();
+        // return inside().subEntity( indexInInside(), Codim< 1 >() ).geometry();
       }
 
       LocalGeometry geometryInInside () const
@@ -97,7 +97,7 @@ namespace Dune
     private:
       GlobalCoordinate outerNormal () const
       {
-        const GlobalCoordinate tangent = (halfEdge_.target() - halfEdge_.flip().target());
+        const GlobalCoordinate tangent = (halfEdge_.target().position() - halfEdge_.flip().target().position());
         return GlobalCoordinate( -tangent[ 1 ], tangent[ 0 ] );
       }
 
