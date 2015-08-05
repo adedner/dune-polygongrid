@@ -3,6 +3,9 @@
 
 #include <dune/common/parallel/mpicollectivecommunication.hh>
 
+#include <dune/geometry/dimension.hh>
+
+#include <dune/grid/common/entityseed.hh>
 #include <dune/grid/common/grid.hh>
 
 #include <dune/polygongrid/declaration.hh>
@@ -25,6 +28,12 @@ namespace Dune
         typedef idx Index;
 
         typedef Dune::PolygonGrid< ct, idx, Comm > Grid;
+
+        template< dim_t codim >
+        struct Codim
+        {
+          typedef Dune::EntitySeed< __PolygonGrid::EntitySeed< codim > > EntitySeed;
+        };
       };
     };
 

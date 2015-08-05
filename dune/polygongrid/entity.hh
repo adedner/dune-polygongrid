@@ -1,7 +1,7 @@
 #ifndef DUNE_POLYGONGRID_ENTITY_HH
 #define DUNE_POLYGONGRID_ENTITY_HH
 
-#include <dune/common/typetraits.hh>
+#include <type_traits>
 
 #include <dune/grid/common/entity.hh>
 
@@ -17,7 +17,7 @@ namespace Dune
     // Internal Forward Declarations
     // -----------------------------
 
-    template< int codim, class Grid >
+    template< dim_t codim, class Grid >
     class Entity;
 
 
@@ -25,15 +25,15 @@ namespace Dune
     // BasicEntity
     // -----------
 
-    template< int codim, class Grid >
+    template< dim_t codim, class Grid >
     class BasicEntity
     {
-      typedef typename remove_const< Grid >::type::Traits Traits;
+      typedef typename std::remove_const< Grid >::type::Traits Traits;
 
     public:
-      static const int codimension = codim;
-      static const int dimension = 2;
-      static const int mydimension = dimension - codimension;
+      static const dim_t codimension = codim;
+      static const dim_t dimension = 2;
+      static const dim_t mydimension = dimension - codimension;
 
       typedef typename Traits::ctype ctype;
       typedef typename Traits::Index Index;
@@ -43,22 +43,20 @@ namespace Dune
 
       Entity ( const Grid &grid, Index index ) : grid_( &grid ), index_( index ) {}
 
-      operator bool () const { return index_ < std::numeric_limits< Index >::max(); }
+      GeometryType type () const { return GeometryType( GeometryType::None(), mydimension ); }
 
-      GeometryType type () const { return GeometryType( GeometryType::None(), dimension ); }
-
-      PartitionType partitionType () const { return InteriorEntity; }
+      PartitionType partitionType () const { return grid().partitionType( index(), Dune::Codim< codimension >() ); }
 
       Geometry geometry () const { return Geometry( grid(), index() ); }
 
       EntitySeed seed () const { return typename EntitySeed::Implementation( index() ); }
 
-      unsigned int subEntities ( unsigned int codim ) const
+      unsigned int subEntities ( dim_t codim ) const
       {
         // use a helper, here
       }
 
-      template< int codim >
+      template< dim_t codim >
       typename Codim< codim >::Entity subEntity ( int i ) const
       {
         typedef typename Traits::template Codim< codim >::EntityImpl EntityImpl;
@@ -70,7 +68,7 @@ namespace Dune
 
       Index index () const { return index_; }
 
-      Index subIndex ( int i, unsigned int codim ) const
+      Index subIndex ( int i, dim_t codim ) const
       {
         // use a helper, here
       }
@@ -85,7 +83,7 @@ namespace Dune
     // Entity
     // ------
 
-    template< int codim, class Grid >
+    template< dim_t codim, class Grid >
     class Entity< codim, Grid >
       : public BasicEntity< codim, Grid >
     {
@@ -109,7 +107,6 @@ namespace Dune
 
     public:
       typedef typename Traits::template Codim< 0 >::LocalGeometry LocalGeometry;
-      typedef typename Traits::template Codim< 0 >::EntityPointer EntityPointer;
 
       typedef typename Traits::HierarchicIterator HierarchicIterator;
 
@@ -125,14 +122,12 @@ namespace Dune
 
       HierarchicIterator hbegin ( int maxLevel ) const
       {
-        typedef IdGridIterator< Grid, typename HostEntity::HierarchicIterator > IteratorImpl;
-        return IteratorImpl( hostEntity().hbegin( maxLevel ) );
+        // ...
       }
 
       HierarchicIterator hend ( int maxLevel ) const
       {
-        typedef IdGridIterator< Grid, typename HostEntity::HierarchicIterator > IteratorImpl;
-        return IteratorImpl( hostEntity().hend( maxLevel ) );
+        // ...
       }
 
       bool isRegular () const { return true; }
