@@ -1,6 +1,8 @@
 #ifndef DUNE_POLYGONGRID_INDEXSET_HH
 #define DUNE_POLYGONGRID_INDEXSET_HH
 
+#include <cassert>
+
 #include <array>
 #include <type_traits>
 
@@ -34,7 +36,7 @@ namespace Dune
 
       typedef typename Base::Index Index;
 
-      IndexSet ( const Grid &grid ) : grid_( &grid ) {}
+      IndexSet () : size_{{ 0u, 0u, 0u }} {}
 
       template< class Entity >
       Index index ( const Entity &entity ) const
@@ -60,18 +62,21 @@ namespace Dune
         return entity.impl().subIndex( i, codim );
       }
 
-      Index size ( GeometryType type ) const { return grid().size( type ); }
-      Index size ( dim_t codim ) const { return grid().size( codim ); }
+      Index size ( GeometryType type ) const { return (type.isNone() ? size( dimension - type.dimension() ) : 0u); }
+      Index size ( dim_t codim ) const { assert( (codim >= 0) && (codim <= dimension) ); return size_[ codim ]; }
 
       template< class Entity >
-      bool contains ( const Entity &entity ) const { return true; }
+      bool contains ( const Entity &entity ) const
+      {
+        return true;
+      }
 
       Types types ( int codim ) const noexcept { return {{ GeometryType( GeometryType::None(), dimension - codim ); }}; }
 
-      const Grid &grid () const { return *grid_; }
+      void update ( Index numPolygons, Index numEdges, Index numVertices ) { size_ = {{ numPolygons, numEdges, numVertices }}; }
 
     private:
-      const Grid *grid_;
+      std::array< Index, dimension+1 > size_;
     };
 
   } // namespace __PolygonGrid
