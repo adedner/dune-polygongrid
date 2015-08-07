@@ -7,6 +7,7 @@
 #include <vector>
 
 #include <dune/common/inline.hh>
+#include <dune/common/iterator/tags.hh>
 
 namespace Dune
 {
@@ -20,6 +21,24 @@ namespace Dune
     enum MeshType : std::size_t { Primal = 0u, Dual = 1u };
 
     inline static constexpr MeshType dual ( MeshType type ) { return static_Cast< MeshType >( type^1u ); }
+
+
+
+    // NodeIndex
+    // ---------
+
+    template< MeshType type >
+    struct NodeIndex
+    {
+      explicit NodeIndex ( std::size_t index = std::numeric_limits< std::size_t >::max() ) : index_( index ) {}
+
+      explicit operator std::size_t () const { return index_; }
+
+      explicit operator bool () const { return (index_ < std::numeric_limits< std::size_t >::max()); }
+
+    private:
+      std::size_t index_;
+    };
 
 
 
@@ -53,39 +72,64 @@ namespace Dune
 
     public:
       template< MeshType type >
-      DUNE_INLINE std::size_t target ( HalfEdgeIndex< type > index ) const
+      DUNE_INLINE NodeIndex< type > target ( HalfEdgeIndex< type > index ) const noexcept
       {
-        return pair( index ).first;
+        return NodeIndex< type >( pair( index ).first );
       }
 
       template< MeshType type >
-      DUNE_INLINE HalfEdgeIndex< __PolygonGrid::dual( type ) > dual ( HalfEdgeIndex< type > index ) const
+      DUNE_INLINE GlobalCoordinate position ( NodeIndex< type > index ) const noexcept
+      {
+        assert( static_cast< std::size_t >( index ) < position_[ type ].size() );
+        return position_[ type ][ static_cast< std::size_t >( index ) ];
+      }
+
+      template< MeshType type >
+      DUNE_INLINE HalfEdgeIndex< __PolygonGrid::dual( type ) > dual ( HalfEdgeIndex< type > index ) const noexcept
       {
         return halfEdgeIndex< __PolygonGrid::dual( type ) >( pair( index ) );
       }
 
       template< MeshType type >
-      DUNE_INLINE HalfEdgeIndex< type > flip ( HalfEdgeIndex< type > index ) const
+      DUNE_INLINE HalfEdgeIndex< type > flip ( HalfEdgeIndex< type > index ) const noexcept
       {
         return dual( dual( index ) );
       }
 
     private:
       template< MeshType type >
-      DUNE_INLINE HalfEdgeIndex< type > halfEdgeIndex ( const Pair &pair ) const
+      DUNE_INLINE HalfEdgeIndex< type > halfEdgeIndex ( const Pair &pair ) const noexcept
       {
         return HalfEdgeIndex< type >( offset_[ type ][ pair.first ] + pair.second );
       }
 
-      template< std::size_t i >
-      DUNE_INLINE const Pair &pair ( HalfEdgeIndex< i > index ) const
+      template< MeshType type >
+      DUNE_INLINE const Pair &pair ( HalfEdgeIndex< type > index ) const noexcept
       {
-        assert( static_cast< std::size_t >( index ) < pair_[ i ].size() );
-        return pair_[ i ][ static_cast< std::size_t >( index ) ];
+        assert( static_cast< std::size_t >( index ) < pair_[ type ].size() );
+        return pair_[ type ][ static_cast< std::size_t >( index ) ];
       }
 
       std::array< std::vector< std::size_t >, 2 > offset_;
       std::array< std::vector< Pair >, 2 > pair_;
+      std::array< std::vector< GlobalCoordinate >, 2 > position_;
+    };
+
+
+
+    // Node
+    // ----
+
+    template< class ct, MeshType type >
+    class Node
+    {
+      typedef Node< ct, type > This;
+
+    public:
+
+    private:
+      const Mesh *mesh_;
+      NodeIndex< type > index_;
     };
 
 
@@ -125,23 +169,34 @@ namespace Dune
     // HalfEdgeIterator
     // ----------------
 
-    template< class Grid >
+    template< class ct, MeshType type >
     class HalfEdgeIterator
-      : public VirtualIterator< std::forward_iterator_tag, HalfEdge< Grid > >
+      : public VirtualIterator< std::random_access_iterator_tag, HalfEdge< ct, type > >
     {
-      typedef HalfEdgeIterator< Grid > This;
-      typedef VirtualIterator< std::forward_iterator_tag, HalfEdge< Grid > > Base;
+      typedef HalfEdgeIterator< ct, type > This;
+      typedef VirtualIterator< std::random_access_iterator_tag, HalfEdge< ct, type > > Base;
 
     public:
+      typedef typename Base::value_type value_type;
       typedef typename Base::pointer pointer;
       typedef typename Base::reference reference;
 
-      reference operator* () const { return reference( halfEdge_ ); }
-      pointer operator-> () const { return pointer( halfEdge_ ); }
+      HalfEdgeIterator () = default;
 
+      DUNE_INLINE reference operator* () const { return value_type( mesh(), index_ ); }
+      DUNE_INLINE pointer operator-> () const { return value_type( mesh(), index_ ); }
+
+      DUNE_INLINE bool operator== ( const This &other ) const noexcept { return (index_ == other.index_); }
+      DUNE_INLINE bool operator!= ( const This &other ) const noexcept { return (index_ != other.index_); }
+
+      DUNE_INLINE This &operator++ () { ++index_; return *this; }
+      DUNE_INLINE This operator++ ( int ) { This copy( *this ); ++(*this); return copy; }
+
+      DUNE_INLINE const Mesh &mesh () const { return *mesh_; }
 
     private:
-      HalfEdge< Grid > halfEdge_;
+      const Mesh *mesh_ = nullptr;
+      HalfEdgeIndex< type > index_;
     };
 
   } // namespace __PolygonGrid
