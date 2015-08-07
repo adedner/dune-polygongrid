@@ -9,6 +9,7 @@ set( HEADERS
   indexset.hh
   intersection.hh
   mesh.hh
+  meshobjects.hh
 )
 
 install( FILES ${HEADERS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/dune/polygongrid )
