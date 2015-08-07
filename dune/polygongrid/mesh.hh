@@ -6,6 +6,7 @@
 #include <utility>
 #include <vector>
 
+#include <dune/common/fvector.hh>
 #include <dune/common/inline.hh>
 #include <dune/common/iterator/tags.hh>
 
@@ -71,6 +72,8 @@ namespace Dune
       typedef std::pair< std::size_t, std::size_t > Pair;
 
     public:
+      typedef FieldVector< ct, 2 > GlobalCoordinate;
+
       template< MeshType type >
       DUNE_INLINE NodeIndex< type > target ( HalfEdgeIndex< type > index ) const noexcept
       {
@@ -78,7 +81,7 @@ namespace Dune
       }
 
       template< MeshType type >
-      DUNE_INLINE GlobalCoordinate position ( NodeIndex< type > index ) const noexcept
+      DUNE_INLINE const GlobalCoordinate &position ( NodeIndex< type > index ) const noexcept
       {
         assert( static_cast< std::size_t >( index ) < position_[ type ].size() );
         return position_[ type ][ static_cast< std::size_t >( index ) ];
@@ -126,6 +129,13 @@ namespace Dune
       typedef Node< ct, type > This;
 
     public:
+      typedef __PolygonGrid::Mesh< ct > Mesh;
+
+      typedef typename Mesh::GlobalCoordinate GlobalCoordinate;
+
+      DUNE_INLINE const GlobalCoordinate &position () const noexcept { return mesh().position( index_ ); }
+
+      DUNE_INLINE const Mesh &mesh () const { return *mesh_; }
 
     private:
       const Mesh *mesh_;
