@@ -75,39 +75,57 @@ namespace Dune
       typedef FieldVector< ct, 2 > GlobalCoordinate;
 
       template< MeshType type >
-      DUNE_INLINE NodeIndex< type > target ( HalfEdgeIndex< type > index ) const noexcept
+      NodeIndex< type > target ( HalfEdgeIndex< type > index ) const noexcept
       {
         return NodeIndex< type >( pair( index ).first );
       }
 
       template< MeshType type >
-      DUNE_INLINE const GlobalCoordinate &position ( NodeIndex< type > index ) const noexcept
+      const GlobalCoordinate &position ( NodeIndex< type > index ) const noexcept
       {
         assert( static_cast< std::size_t >( index ) < position_[ type ].size() );
         return position_[ type ][ static_cast< std::size_t >( index ) ];
       }
 
       template< MeshType type >
-      DUNE_INLINE HalfEdgeIndex< __PolygonGrid::dual( type ) > dual ( HalfEdgeIndex< type > index ) const noexcept
+      HalfEdgeIndex< __PolygonGrid::dual( type ) > dual ( HalfEdgeIndex< type > index ) const noexcept
       {
         return halfEdgeIndex< __PolygonGrid::dual( type ) >( pair( index ) );
       }
 
       template< MeshType type >
-      DUNE_INLINE HalfEdgeIndex< type > flip ( HalfEdgeIndex< type > index ) const noexcept
+      HalfEdgeIndex< type > flip ( HalfEdgeIndex< type > index ) const noexcept
       {
         return dual( dual( index ) );
       }
 
+      template< MeshType type >
+      std::size_t size ( NodeIndex< type > index ) const noexcept
+      {
+        return (offset_[ type ][ static_cast< std::size_t >( index )+1 ] - offset_[ type ][ static_cast< std::size_t >( index ) ]);
+      }
+
+      template< MeshType type >
+      HalfEdgeIndex< __PolygonGrid::dual( type ) > begin ( NodeIndex< type > index ) const noexcept
+      {
+        return halfEdgeIndex< __PolygonGrid::dual( type ) >( Pair( static_cast< std::size_t >( index ), 0 ) );
+      }
+
+      template< MeshType type >
+      HalfEdgeIndex< __PolygonGrid::dual( type ) > end ( NodeIndex< type > index ) const noexcept
+      {
+        return halfEdgeIndex< __PolygonGrid::dual( type ) >( Pair( static_cast< std::size_t >( index ), size( index ) ) );
+      }
+
     private:
       template< MeshType type >
-      DUNE_INLINE HalfEdgeIndex< type > halfEdgeIndex ( const Pair &pair ) const noexcept
+      HalfEdgeIndex< type > halfEdgeIndex ( const Pair &pair ) const noexcept
       {
         return HalfEdgeIndex< type >( offset_[ type ][ pair.first ] + pair.second );
       }
 
       template< MeshType type >
-      DUNE_INLINE const Pair &pair ( HalfEdgeIndex< type > index ) const noexcept
+      const Pair &pair ( HalfEdgeIndex< type > index ) const noexcept
       {
         assert( static_cast< std::size_t >( index ) < pair_[ type ].size() );
         return pair_[ type ][ static_cast< std::size_t >( index ) ];
@@ -159,15 +177,15 @@ namespace Dune
 
       HalfEdge ( const Mesh &mesh, HalfEdgeIndex< type > index ) : mesh_( &mesh ), index_( index ) {}
 
-      DUNE_INLINE bool boundary () const { return flip().polygon().boundary(); }
+      bool boundary () const { return flip().polygon().boundary(); }
 
-      DUNE_INLINE This flip () const { return This( mesh(), mesh().flip( index ) );
+      This flip () const { return This( mesh(), mesh().flip( index ) );
 
-      DUNE_ININE Vertex target () const { return Vertex( mesh(), mesh().target( index_ ) ); }
+      Vertex target () const { return Vertex( mesh(), mesh().target( index_ ) ); }
 
-      DUNE_ININE Polygon polygon () const { return Polygon( mesh(), mesh().target( mesh().dual( index_ ) ) ); }
+      Polygon polygon () const { return Polygon( mesh(), mesh().target( mesh().dual( index_ ) ) ); }
 
-      DUNE_INLINE const Mesh &mesh () const { return *mesh_; }
+      const Mesh &mesh () const { return *mesh_; }
 
     private:
       const Mesh *mesh_;
@@ -193,20 +211,34 @@ namespace Dune
 
       HalfEdgeIterator () = default;
 
-      DUNE_INLINE reference operator* () const { return value_type( mesh(), index_ ); }
-      DUNE_INLINE pointer operator-> () const { return value_type( mesh(), index_ ); }
+      reference operator* () const { return value_type( mesh(), index_ ); }
+      pointer operator-> () const { return value_type( mesh(), index_ ); }
 
-      DUNE_INLINE bool operator== ( const This &other ) const noexcept { return (index_ == other.index_); }
-      DUNE_INLINE bool operator!= ( const This &other ) const noexcept { return (index_ != other.index_); }
+      bool operator== ( const This &other ) const noexcept { return (index_ == other.index_); }
+      bool operator!= ( const This &other ) const noexcept { return (index_ != other.index_); }
 
-      DUNE_INLINE This &operator++ () { ++index_; return *this; }
-      DUNE_INLINE This operator++ ( int ) { This copy( *this ); ++(*this); return copy; }
+      This &operator++ () { ++index_; return *this; }
+      This operator++ ( int ) { This copy( *this ); ++(*this); return copy; }
 
-      DUNE_INLINE const Mesh &mesh () const { return *mesh_; }
+      const Mesh &mesh () const { return *mesh_; }
 
     private:
       const Mesh *mesh_ = nullptr;
       HalfEdgeIndex< type > index_;
+    };
+
+
+    // HalfEdges
+    // ---------
+
+    template< class ct, MeshType type >
+    class HalfEdges
+    {
+      typedef HalfEdges< ct, type > This;
+
+    public:
+
+    private:
     };
 
   } // namespace __PolygonGrid
