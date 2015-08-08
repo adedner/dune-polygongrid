@@ -102,6 +102,8 @@ namespace Dune
     public:
       typedef FieldVector< ct, 2 > GlobalCoordinate;
 
+      Mesh ( std::vector< GlobalCoordinate > vertices, std::vector< std::size_t > offsets, std::vector< std::size_t > polygons );
+
       template< MeshType type >
       NodeIndex< type > target ( HalfEdgeIndex< type > index ) const noexcept
       {
@@ -163,6 +165,39 @@ namespace Dune
       std::array< std::vector< Pair >, 2 > pair_;
       std::array< std::vector< GlobalCoordinate >, 2 > position_;
     };
+
+
+
+    // Implementation of Mesh
+    // ----------------------
+
+    template< class ct >
+    inline Mesh< ct >::Mesh ( std::vector< GlobalCoordinate > position, std::vector< std::size_t > offset, std::vector< std::size_t > polygons )
+    {
+      const std::size_t numVertices = position.size();
+
+      position_[ Primal ] = std::move( position );
+      offset_[ Primal ] = std::move( offset );
+
+      std::vector< std::size_t > count( numVertices, 0u );
+      for( std::size_t vtx : polygons )
+        ++count[ vtx ];
+
+      std::vector< std::size_t > edgeOffset;
+      edgeOffset.reserve( numVertices+1 );
+      edgeOffset.emplace_back( 0u );
+      for( std::size_t c : count )
+        edgeOffset.emplace_back( edgeOffset.back() + 2*c );
+
+      std::vector< std::size_t > edgeTarget( edgeoffset.back(), std::numeric_limits< std::size_t >::max() );
+      std::vector< std::size_t > edgeCount( numVertices, 0u );
+
+      // ...
+
+
+
+      pair_[ Primal ].resize( offset_.back() );
+    }
 
   } // namespace __PolygonGrid
 
