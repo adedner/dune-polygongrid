@@ -8,6 +8,8 @@
 
 #include <dune/common/fvector.hh>
 
+#include <dune/polygongrid/multivector.hh>
+
 namespace Dune
 {
 
@@ -84,6 +86,13 @@ namespace Dune
 
     template< MeshType type >
     using HalfEdgeIndex = Index< HalfEdgeTag< type > >;
+
+
+
+    // library functions
+    // -----------------
+
+    void halfEdges ();
 
 
 
@@ -175,25 +184,71 @@ namespace Dune
     inline Mesh< ct >::Mesh ( std::vector< GlobalCoordinate > position, std::vector< std::size_t > offset, std::vector< std::size_t > polygons )
     {
       const std::size_t numVertices = position.size();
+      const std::size_t numPolygons = offset.size()-1;
 
-      position_[ Primal ] = std::move( position );
-      offset_[ Primal ] = std::move( offset );
+      // halfEdges();
 
       std::vector< std::size_t > count( numVertices, 0u );
       for( std::size_t vtx : polygons )
         ++count[ vtx ];
 
-      std::vector< std::size_t > edgeOffset;
-      edgeOffset.reserve( numVertices+1 );
-      edgeOffset.emplace_back( 0u );
-      for( std::size_t c : count )
-        edgeOffset.emplace_back( edgeOffset.back() + 2*c );
+      std::vector< std::size_t > edgeOffset( numVertices+1 );
+      edgeOffset[ 0u ] = 0u;
+      for( std::size_t k = 0u; k < numVertices; ++k )
+        edgeOffset[ k+1 ] = edgeOffset[ k ] + 2*count[ k ];
 
+      // compute all neighboring vertices
       std::vector< std::size_t > edgeTarget( edgeoffset.back(), std::numeric_limits< std::size_t >::max() );
-      std::vector< std::size_t > edgeCount( numVertices, 0u );
+      std::fill( count.begin(), count.end(), 0u );
+      for( std::size_t i = 0u; i < numPolygons; ++i )
+      {
+        const std::size_t n = offset[ i+1 ] - offset[ i ];
+        for( std::size_t j = 0u; j < n; ++j )
+        {
+          const std::size_t vtx = polygons[ offset[ i ] + j ];
+          edgeTarget[ edgeOffset[ vtx ] + count[ vtx ]++ ] = polygons[ offset[ i ] + ((j+1)%n) ];
+          edgeTarget[ edgeOffset[ vtx ] + count[ vtx ]++ ] = polygons[ offset[ i ] + ((j+n-1)%n) ];
+        }
+      }
+
+      // make neighboring vertices unique
+      auto rit = edgeTarget.begin();
+      auto wit = edgeTarget.begin();
+      for( std::size_t k = 0u; k < numVertices; ++k )
+      {
+        std::sort( rit, rit + count[ k ] );
+        auto end = std::unique_copy( rit, rit + count[ k ], wit );
+        edgeOffset[ k+1 ] = end - wit;
+        wit = end;
+      }
+      edgeTarget.resize( edgeOffset.back() );
+
+      // find boundary half edges
+      const std::size_t numBoundarySegments = edgeOffset.back() - offset.back();
 
       // ...
 
+      pair_[ Primal ].resize( offset.back() );
+      for( std::size_t i = 0u; i < numPolygons; ++i )
+      {
+        const std::size_t n = offset[ i+1 ] - offset[ i ];
+        for( std::size_t j = 0u; j < n; ++j )
+        {
+          const std::size_t vtx = polygons[ offset[ i ] + j ];
+          const std::size_t m = edgeOffset[ vtx+1 ] - edgeOffset[ vtx ];
+          const auto eit = edgeTarget.begin() + edgeOffset[ vtx ];
+          const std::size_t k = std::distance( eit, std::find( eit, eit + m, polygons[ offset[ i ] + ((j+1)%n) ] ) );
+          //pair_[ Primal ][ offset[ i ] + j ] = Pair( vtx, ((k+m-1)%m) );
+          //pair_[ Dual ][ edgeOffset[ i ] + k ] = Pair( i, j );
+        }
+      }
+
+
+      // ...
+
+
+      position_[ Primal ] = std::move( position );
+      offset_[ Primal ] = std::move( offset );
 
 
       pair_[ Primal ].resize( offset_.back() );
