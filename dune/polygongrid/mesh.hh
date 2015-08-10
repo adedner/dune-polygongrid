@@ -113,7 +113,7 @@ namespace Dune
     public:
       typedef FieldVector< ct, 2 > GlobalCoordinate;
 
-      Mesh ( std::vector< GlobalCoordinate > vertices, MultiVector< std::size_t > polygons );
+      Mesh ( const std::vector< GlobalCoordinate > &vertices, const MultiVector< std::size_t > &polygons );
 
       template< MeshType type >
       NodeIndex< type > target ( HalfEdgeIndex< type > index ) const noexcept
@@ -143,37 +143,36 @@ namespace Dune
       template< MeshType type >
       std::size_t size ( NodeIndex< type > index ) const noexcept
       {
-        return (offset_[ type ][ index+1 ] - offset_[ type ][ index ]);
+        return pair_[ type ].size();
       }
 
       template< MeshType type >
       HalfEdgeIndex< dual( type ) > begin ( NodeIndex< type > index ) const noexcept
       {
-        return HalfEdgeIndex< dual( type ) >( offset_[ dual( type ) ][ index ] );
+        return HalfEdgeIndex< dual( type ) >( pair_[ dual( type ) ].begin_of( index ) );
       }
 
       template< MeshType type >
       HalfEdgeIndex< dual( type ) > end ( NodeIndex< type > index ) const noexcept
       {
-        return HalfEdgeIndex< dual( type ) >( offset_[ dual( type ) ][ index+1 ] );
+        return HalfEdgeIndex< dual( type ) >( pair_[ dual( type ) ].end_of( index ) );
       }
 
     private:
       template< MeshType type >
       HalfEdgeIndex< type > halfEdgeIndex ( const Pair &pair ) const noexcept
       {
-        return HalfEdgeIndex< type >( offset_[ type ][ pair.first ] + pair.second );
+        return HalfEdgeIndex< type >( pair_[ type ].position_of( pair ) );
       }
 
       template< MeshType type >
       const Pair &pair ( HalfEdgeIndex< type > index ) const noexcept
       {
-        assert( index < pair_[ type ].size() );
-        return pair_[ type ][ index ];
+        assert( index < pair_[ type ].values().size() );
+        return pair_[ type ].values()[ index ];
       }
 
-      std::array< std::vector< std::size_t >, 2 > offset_;
-      std::array< std::vector< Pair >, 2 > pair_;
+      std::array< MultiVector< Pair >, 2 > pair_;
       std::array< std::vector< GlobalCoordinate >, 2 > position_;
     };
 
@@ -183,7 +182,7 @@ namespace Dune
     // ----------------------
 
     template< class ct >
-    inline Mesh< ct >::Mesh ( std::vector< GlobalCoordinate > position, MultiVector< std::size_t > polygons )
+    inline Mesh< ct >::Mesh ( const std::vector< GlobalCoordinate > &position, const MultiVector< std::size_t > &polygons )
     {
       const std::size_t numVertices = position.size();
       const std::size_t numPolygons = polygons.size();

@@ -127,11 +127,14 @@ namespace Dune
       explicit MultiVector ( const std::vector< size_type > &counts ) { resize( counts ); }
       MultiVector ( const std::vector< size_type > &counts, const T &value ) { resize( counts, value ) }
 
-      size_type position_of( std::size_t i, std::size_t k ) const { return (offsets_[ i ] + k); }
-      size_type position_of( index_type i ) const { return position_of( i.first, i.second ); }
+      size_type begin_of ( std::size_t i ) const noexcept { return offsets_[ i ]; }
+      size_type end_of ( std::size_t i ) const noexcept { return offsets_[ i+1 ]; }
 
-      const_reference operator[] ( size_type i ) const noexcept { return const_reference( values_.begin() + offsets_[ i ], values_.begin() + offsets_[ i+1 ] ); }
-      reference operator[] ( size_type i ) noexcept { return reference( values_.begin() + offsets_[ i ], values_.begin() + offsets_[ i+1 ] ); }
+      size_type position_of ( std::size_t i, std::size_t k ) const noexcept { return (begin_of( i ) + k); }
+      size_type position_of ( index_type i ) const noexcept { return position_of( i.first, i.second ); }
+
+      const_reference operator[] ( size_type i ) const noexcept { return const_reference( values_.begin() + begin_of( i ), values_.begin() + end_of( i ) ); }
+      reference operator[] ( size_type i ) noexcept { return reference( values_.begin() + begin_of( i ), values_.begin() + end_of( i ) ); }
       const_reference at ( size_type i ) const { return const_reference( values_.begin() + offsets_.at( i ), values_.begin() + offsets_.at( i+1 ) ); }
       reference at ( size_type i ) { return reference( values_.begin() + offsets_.at( i ), values_.begin() + offsets_.at( i+1 ) ); }
 
@@ -141,9 +144,18 @@ namespace Dune
       T &at ( index_type i ) { return values_.at( offsets_.at( i.first ) + i.second ); }
 
       bool empty () const noexcept { return (offsets_.size() == 1u); }
-      bool empty ( size_type i ) const noexcept { return (offsets_[ i ] == offsets_[ i+1 ]); }
+      bool empty ( size_type i ) const noexcept { return (begin_of( i ) == end_of( i )); }
       size_type size () const noexcept { return (offsets_.size()-1); }
-      size_type size ( size_type i ) const noexcept { return (offsets_[ i+1 ] - offsets[ i ]); }
+      size_type size ( size_type i ) const noexcept { return (end_of( i ) - begin_of( i )); }
+
+      std::vector< size_type > sizes () const
+      {
+        const std::size_t n = size();
+        std::vector< size_type > sizes( n );
+        for( std::size_t k = 0; k < n; ++k )
+          sizes[ k ] = end_of( k ) - begin_of( k );
+        return std::move( sizes );
+      }
 
       void resize ( const std::vector< size_type > &counts )
       {
@@ -184,7 +196,7 @@ namespace Dune
       void sortEach ()
       {
         for( size_type k = 0u; k < size(); ++k )
-          std::sort( values_.begin() + offsets_[ k ], values_.begin() + offets_[ k+1 ] );
+          std::sort( values_.begin() + begin_of( k ), values_.begin() + end_of( k ) );
       }
 
       void uniqueEach ()
