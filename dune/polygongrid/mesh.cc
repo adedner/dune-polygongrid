@@ -60,7 +60,6 @@ namespace Dune
         }
       }
 
-      const std::size_t numBoundaries = (halfEdges.values().size() - polygons.values().size());
       MultiVector< std::size_t > boundaries;
       for( std::size_t vtx = 0u; vtx < halfEdges.size(); ++vtx )
       {
