@@ -94,6 +94,8 @@ namespace Dune
 
     MultiVector< std::size_t > halfEdges ( std::size_t numVertices, const MultiVector< std::size_t > &polygons );
 
+    std::vector< std::size_t > boundaries ( const MultiVector< std::size_t > &polygons, const MultiVector< std::size_t > &halfEdges )
+
 
 
     // Mesh
@@ -187,21 +189,8 @@ namespace Dune
       const std::size_t numPolygons = polygons.size();
 
       MultiVector< std::size_t > halfEdges = __PolygonGrid::halfEdges( numVertices, polygons );
+      MultiVector< std::size_t > boundaries = __polygonGrid::boundaries( polygons, halfEdges );
 
-      const std::size_t numBoundarySegments = (halfEdges.values().size() - polygons.values().size());
-      const std::size_t numBoundaryVertices = numBoundarySegments;
-
-      // find boundary half edges
-      std::vector< bool > isBoundary( halfEdges.values().size(), true );
-      for( auto polygon : polygons )
-      {
-        for( std::size_t j = 0u; j < polygon.size(); ++j )
-        {
-          const std::size_t vtx = polygon[ j ];
-          const std::size_t k = std::distance( halfEdges[ vtx ].begin(), std::find( halfEdges[ vtx ].begin(), halfEdges[ vtx ].end(), (j+1)%n ) );
-          isBoundary[ halfEdges.position_of( vtx, k ) ] = false;
-        }
-      }
 
       // ...
 
