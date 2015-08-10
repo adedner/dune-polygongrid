@@ -23,17 +23,10 @@ namespace Dune
 
       typedef std::pair< std::size_t, std::size_t > index_type;
 
-      explicit MultiVector ( const std::vector< std::size_t > &counts )
-      {
-        computeOffsets( counts );
-        values_.resize( offsets_.back() );
-      }
+      explicit MultiVector ( std::size_t size ) : offsets_( size+1, 0u ) {}
 
-      MultiVector ( const std::vector< std::size_t > &counts, const T &value )
-      {
-        computeOffsets( counts );
-        values_.resize( offsets_.back(), value );
-      }
+      explicit MultiVector ( const std::vector< std::size_t > &counts ) { resize( counts ); }
+      MultiVector ( const std::vector< std::size_t > &counts, const T &value ) { resize( counts, value ) }
 
       const value_type &operator[] ( index_type i ) const noexcept { return values_[ offsets_[ i.first ] + i.second ]; }
       value_type operator[] ( index_type i ) noexcept { return values_[ offsets_[ i.first ] + i.second ]; }
@@ -43,6 +36,18 @@ namespace Dune
 
       bool empty () const noexcept { return (offsets_.size() == 1u); }
       std::size_t size () const noexcept { return (offsets_.size()-1); }
+
+      void resize ( const std::vector< std::size_t > &counts )
+      {
+        computeOffsets( counts );
+        values_.resize( offsets_.back() );
+      }
+
+      void resize ( const std::vector< std::size_t > &counts, const T &value )
+      {
+        computeOffsets( counts );
+        values_.resize( offsets_.back(), value );
+      }
 
       void clear ()
       {
