@@ -36,8 +36,8 @@ namespace Dune
       }
 
       // make neighboring vertices unique
-      halfEdges.sortEach();
-      halfEdges.uniqueEach();
+      halfEdges.sort_each();
+      halfEdges.unique_each();
 
       return std::move( halfEdges );
     }

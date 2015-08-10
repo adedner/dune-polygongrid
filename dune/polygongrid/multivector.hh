@@ -159,13 +159,13 @@ namespace Dune
 
       void resize ( const std::vector< size_type > &counts )
       {
-        computeOffsets( counts );
+        compute_offsets( counts );
         values_.resize( offsets_.back() );
       }
 
       void resize ( const std::vector< size_type > &counts, const T &value )
       {
-        computeOffsets( counts );
+        compute_offsets( counts );
         values_.resize( offsets_.back(), value );
       }
 
@@ -193,13 +193,13 @@ namespace Dune
       const std::vector< T > &values () const noexcept { return values_; }
       std::vector< T > &values () noexcept { return values_; }
 
-      void sortEach ()
+      void sort_each ()
       {
         for( size_type k = 0u; k < size(); ++k )
           std::sort( values_.begin() + begin_of( k ), values_.begin() + end_of( k ) );
       }
 
-      void uniqueEach ()
+      void unique_each ()
       {
         auto pos = values_.begin();
         size_type offset = 0u;
@@ -213,7 +213,7 @@ namespace Dune
       }
 
     private:
-      void computeOffsets ( const std::vector< size_type > &counts )
+      void compute_offsets ( const std::vector< size_type > &counts )
       {
         const size_type size = counts.size();
         offsets_.resize( size+1 );
