@@ -18,20 +18,20 @@ namespace Dune
       const std::size_t numPolygons = polygons.size();
 
       std::vector< std::size_t > count( numVertices, 0u );
-      for( std::size_t vtx : polygons )
+      for( std::size_t vtx : polygons.values() )
         count[ vtx ] += 2u;
 
       // compute all neighboring vertices
       MultiVector< std::size_t > halfEdges( count, std::numeric_limits< std::size_t >::max() );
       std::fill( count.begin(), count.end(), 0u );
-      for( std::size_t i = 0u; i < numPolygons; ++i )
+      for( auto polygon : polygons )
       {
-        const std::size_t n = offset[ i+1 ] - offset[ i ];
+        const std::size_t n = polygon.size();
         for( std::size_t j = 0u; j < n; ++j )
         {
-          const std::size_t vtx = polygons[ offset[ i ] + j ];
-          halfEdges[ Pair( vtx, count[ vtx ]++ ) ] = polygons[ Pair( i, (j+1)%n ) ];
-          halfEdges[ Pair( vtx, count[ vtx ]++ ) ] = polygons[ Pair( i, (j+n-1)%n ) ];
+          const std::size_t vtx = polygon[ j ];
+          halfEdges[ vtx ][ count[ vtx ]++ ] = polygon[ (j+1)%n ];
+          halfEdges[ vtx ][ count[ vtx ]++ ] = polygon[ (j+n-1)%n ];
         }
       }
 
@@ -81,7 +81,6 @@ namespace Dune
       }
       return std::move( boundaries );
     }
-
 
   } // namespace __PolygonGrid
 
