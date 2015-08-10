@@ -3,6 +3,7 @@
 
 #include <algorithm>
 #include <iterator>
+#include <vector>
 
 namespace Dune
 {
@@ -192,6 +193,8 @@ namespace Dune
 
       const std::vector< T > &values () const noexcept { return values_; }
       std::vector< T > &values () noexcept { return values_; }
+
+      void fill_each ( const T &value ) { std::fill( values_.begin(), values_.end(), value ) }
 
       void sort_each ()
       {
