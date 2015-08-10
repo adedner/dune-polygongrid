@@ -188,16 +188,27 @@ namespace Dune
 
       MultiVector< std::size_t > halfEdges = __PolygonGrid::halfEdges( numVertices, polygons );
 
+      const std::size_t numBoundarySegments = (halfEdges.values().size() - polygons.values().size());
+      const std::size_t numBoundaryVertices = numBoundarySegments;
+
       // find boundary half edges
-      const std::size_t numBoundarySegments = edgeOffset.back() - offset.back();
+      std::vector< bool > isBoundary( halfEdges.values().size(), true );
+      for( auto polygon : polygons )
+      {
+        for( std::size_t j = 0u; j < polygon.size(); ++j )
+        {
+          const std::size_t vtx = polygon[ j ];
+          const std::size_t k = std::distance( halfEdges[ vtx ].begin(), std::find( halfEdges[ vtx ].begin(), halfEdges[ vtx ].end(), (j+1)%n ) );
+          isBoundary[ halfEdges.position_of( vtx, k ) ] = false;
+        }
+      }
 
       // ...
 
       pair_[ Primal ].resize( offset.back() );
       for( std::size_t i = 0u; i < numPolygons; ++i )
       {
-        const std::size_t n = offset[ i+1 ] - offset[ i ];
-        for( std::size_t j = 0u; j < n; ++j )
+        for( std::size_t j = 0u; j < polygons.size( i ); ++j )
         {
           const std::size_t vtx = polygons[ offset[ i ] + j ];
           const std::size_t m = edgeOffset[ vtx+1 ] - edgeOffset[ vtx ];

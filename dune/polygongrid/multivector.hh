@@ -1,11 +1,103 @@
 #ifndef DUNE_POLYGONGRID_MULTIVECTOR_HH
 #define DUNE_POLYGONGRID_MULTIVECTOR_HH
 
+#include <algorithm>
+#include <iterator>
+
 namespace Dune
 {
 
   namespace __PolygonGrid
   {
+
+    namespace __MultiVector
+    {
+
+      // Reference
+      // ---------
+
+      template< class I, class CI >
+      class Reference
+      {
+        typedef Reference< I, CI > This;
+
+      public:
+        typedef I iterator;
+        typedef CI const_iterator;
+
+        typedef std::reverse_iterator< const_iterator > const_reverse_iterator;
+        typedef std::reverse_iterator< iterator > reverse_iterator;
+
+        typedef typename std::iterator_traits< iterator >::value_type value_type;
+
+        typedef typename std::iterator_traits< iterator >::reference reference;
+        typedef typename std::iterator_traits< const_iterator >::reference const_reference;
+
+        typedef typename std::iterator_traits< iterator >::pointer pointer;
+        typedef typename std::iterator_traits< const_iterator >::pointer const_pointer;
+
+        typedef typename std::iterator_traits< iterator >::difference_type difference_type;
+        typedef std::size_t size_type;
+
+        Reference ( iterator begin, iterator end ) : begin_( begin ), end_( end ) {}
+
+        template< class II >
+        Reference ( const Reference< II, CI > &other )
+          : begin_( other.begin() ), end_( other.end() )
+        {}
+
+        Reference ( const This & ) = default;
+        Reference ( This && ) = delete;
+
+        This &operator= ( const This &other ) { assign( other.begin(), other.end() ); return *this; }
+        This &operator= ( const value_type &other ) { assign( other.begin(), other.end() ); return *this; }
+
+        const_iterator begin () const noexcept { return begin_; }
+        iterator begin () noexcept { return begin_; }
+        const_iterator end () const noexcept { return end_; }
+        iterator end () noexcept { return end_; }
+
+        const_reverse_iterator rbegin () const noexcept { return const_reverse_iterator( end() ); }
+        reverse_iterator rbegin () noexcept { return reverse_iterator( end() ); }
+        const_reverse_iterator rend () const noexcept { return const_reverse_iterator( begin() ); }
+        reverse_iterator rend () noexcept { return reverse_iterator( begin() ); }
+
+        const_iterator cbegin () const noexcept { return begin_; }
+        const_iterator cend () const noexcept { return end_; }
+        const_reverse_iterator crbegin () const noexcept { return const_reverse_iterator( end() ); }
+        const_reverse_iterator crend () const noexcept { return const_reverse_iterator( begin() ); }
+
+        const_reference operator[] ( size_type i ) const { return begin()[ i ]; }
+        reference operator[] ( size_type i ) { return begin()[ i ]; }
+
+        const_reference at ( size_type i ) const { return begin()[ i ]; }
+        reference at ( size_type i ) { return begin()[ i ]; }
+
+        const_reference front () const noexcept { return *begin(); }
+        reference front () noexcept { return *begin(); }
+        const_reference back () const noexcept { return *rbegin(); }
+        reference back () noexcept { return *rbegin(); }
+
+        bool empty () const noexcept { return (begin() == end()); }
+        size_type size () const noexcept { return (end() - begin()); }
+        size_type max_size () const noexcept { return size(); }
+
+        template< class InputIterator, class InputIterator >
+        void assign ( InputIterator first, InputIterator last )
+        {
+          assert( std::distance( first, last ) == size() );
+          std::copy( first, last, begin() );
+        }
+
+        void fill ( const value_type &value ) { std::fill( begin(), end(), value ); }
+
+      private:
+        iterator begin_, end_;
+      };
+
+    } // namespace __MultiVector
+
+
 
     // MultiVector
     // -----------
@@ -17,33 +109,49 @@ namespace Dune
      * std::vector< std::vector< T > >.
      */
     template< class T >
-    struct MultiVector
+    class MultiVector
     {
-      typedef T value_type;
+      typedef MultiVector< T > This;
 
-      typedef std::pair< std::size_t, std::size_t > index_type;
+    public:
+      typedef std::vector< T > value_type;
+      typedef std::size_t size_type;
 
-      explicit MultiVector ( std::size_t size ) : offsets_( size+1, 0u ) {}
+      typedef std::pair< size_type, size_type > index_type;
 
-      explicit MultiVector ( const std::vector< std::size_t > &counts ) { resize( counts ); }
-      MultiVector ( const std::vector< std::size_t > &counts, const T &value ) { resize( counts, value ) }
+      typedef __MultiVector::Reference< typename value_type::iterator, typename value_type::const_iterator > reference;
+      typedef __MultiVector::Reference< typename value_type::const_iterator, typename value_type::const_iterator > const_reference;
 
-      const value_type &operator[] ( index_type i ) const noexcept { return values_[ offsets_[ i.first ] + i.second ]; }
-      value_type operator[] ( index_type i ) noexcept { return values_[ offsets_[ i.first ] + i.second ]; }
+      explicit MultiVector ( size_type size ) : offsets_( size+1, 0u ) {}
 
-      const value_type &at ( index_type i ) const { return values_.at( offsets_.at( i.first ) + i.second ); }
-      value_type &at ( index_type i ) { return values_.at( offsets_.at( i.first ) + i.second ); }
+      explicit MultiVector ( const std::vector< size_type > &counts ) { resize( counts ); }
+      MultiVector ( const std::vector< size_type > &counts, const T &value ) { resize( counts, value ) }
+
+      size_type position_of( std::size_t i, std::size_t k ) const { return (offsets_[ i ] + k); }
+      size_type position_of( index_type i ) const { return position_of( i.first, i.second ); }
+
+      const_reference operator[] ( size_type i ) const noexcept { return const_reference( values_.begin() + offsets_[ i ], values_.begin() + offsets_[ i+1 ] ); }
+      reference operator[] ( size_type i ) noexcept { return reference( values_.begin() + offsets_[ i ], values_.begin() + offsets_[ i+1 ] ); }
+      const_reference at ( size_type i ) const { return const_reference( values_.begin() + offsets_.at( i ), values_.begin() + offsets_.at( i+1 ) ); }
+      reference at ( size_type i ) { return reference( values_.begin() + offsets_.at( i ), values_.begin() + offsets_.at( i+1 ) ); }
+
+      const T &operator[] ( index_type i ) const noexcept { return values_[ position_of( i ) ]; }
+      T operator[] ( index_type i ) noexcept { return values_[ position_of( i ) ]; }
+      const T &at ( index_type i ) const { return values_.at( offsets_.at( i.first ) + i.second ); }
+      T &at ( index_type i ) { return values_.at( offsets_.at( i.first ) + i.second ); }
 
       bool empty () const noexcept { return (offsets_.size() == 1u); }
-      std::size_t size () const noexcept { return (offsets_.size()-1); }
+      bool empty ( size_type i ) const noexcept { return (offsets_[ i ] == offsets_[ i+1 ]); }
+      size_type size () const noexcept { return (offsets_.size()-1); }
+      size_type size ( size_type i ) const noexcept { return (offsets_[ i+1 ] - offsets[ i ]); }
 
-      void resize ( const std::vector< std::size_t > &counts )
+      void resize ( const std::vector< size_type > &counts )
       {
         computeOffsets( counts );
         values_.resize( offsets_.back() );
       }
 
-      void resize ( const std::vector< std::size_t > &counts, const T &value )
+      void resize ( const std::vector< size_type > &counts, const T &value )
       {
         computeOffsets( counts );
         values_.resize( offsets_.back(), value );
@@ -55,9 +163,9 @@ namespace Dune
         values_.clear();
       }
 
-      void push_back ( std::vector< T > &vector )
+      void push_back ( const value_type &vector )
       {
-        std::size_t size = vector.size();
+        size_type size = vector.size();
         offsets_.push_back( offsets_.back() + size );
         values_.reserve( offsets_.back() );
         for( const T &value : vector )
@@ -75,15 +183,15 @@ namespace Dune
 
       void sortEach ()
       {
-        for( std::size_t k = 0u; k < size(); ++k )
+        for( size_type k = 0u; k < size(); ++k )
           std::sort( values_.begin() + offsets_[ k ], values_.begin() + offets_[ k+1 ] );
       }
 
       void uniqueEach ()
       {
         auto pos = values_.begin();
-        std::size_t offset = 0u;
-        for( std::size_t k = 0u; k < size(); ++k )
+        size_type offset = 0u;
+        for( size_type k = 0u; k < size(); ++k )
         {
           auto end = std::unique_copy( values_.begin() + offset, values_.end() + offsets_[ k+1 ], pos );
           offset_[ k+1 ] = std::distance( pos, end );
@@ -93,16 +201,16 @@ namespace Dune
       }
 
     private:
-      void computeOffsets ( const std::vector< std::size_t > &counts )
+      void computeOffsets ( const std::vector< size_type > &counts )
       {
-        const std::size_t size = counts.size();
+        const size_type size = counts.size();
         offsets_.resize( size+1 );
         offsets_[ 0 ] = 0u;
-        for( std::size_t k = 0u; k < size; ++k )
+        for( size_type k = 0u; k < size; ++k )
           offsets_[ k+1 ] = offsets_[ k ] + counts[ k ];
       }
 
-      std::vector< std::size_t > offsets_;
+      std::vector< size_type > offsets_;
       std::vector< T > values_;
     };
 
