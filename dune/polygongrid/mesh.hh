@@ -181,6 +181,7 @@ namespace Dune
         return structure_[ type ].values()[ index ];
       }
 
+      std::array< std::size_t, 2 > numRegular_;
       MeshStructure structure_;
       std::array< std::vector< GlobalCoordinate >, 2 > position_;
     };
@@ -192,11 +193,10 @@ namespace Dune
 
     template< class ct >
     inline Mesh< ct >::Mesh ( const std::vector< GlobalCoordinate > &position, const MultiVector< std::size_t > &polygons )
+      : numRegular_{{ polygons.size(), position.size() }}
     {
-      const std::size_t numVertices = position.size();
-
-      MultiVector< std::size_t > boundaries = __polygonGrid::boundaries( numVertices, polygons );
-      structure_ = __polygonGrid::meshStructure( numVertices, polygons, boundaries );
+      MultiVector< std::size_t > boundaries = __polygonGrid::boundaries( numRegular_[ Dual ], polygons )
+      structure_ = __polygonGrid::meshStructure( numRegular_[ Dual ], polygons, boundaries );
 
     }
 
