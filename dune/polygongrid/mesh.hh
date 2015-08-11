@@ -89,10 +89,21 @@ namespace Dune
 
 
 
+    // Type Definitions
+    // ----------------
+
+    typedef std::pair< std::size_t, std::size_t > IndexPair;
+
+    typedef std::array< MultiVector< IndexPair >, 2 > MeshStructure;
+
+
+
     // External Forward Declarations
     // -----------------------------
 
     MultiVector< std::size_t > boundaries ( std::size_t numVertices, const MultiVector< std::size_t > &polygons );
+
+    MeshStructure meshStructure ( std::size_t numVertices, const MultiVector< std::size_t > &polygons, const MultiVector< std::size_t > &boundaries );
 
 
 
@@ -116,7 +127,7 @@ namespace Dune
       template< MeshType type >
       NodeIndex< type > target ( HalfEdgeIndex< type > index ) const noexcept
       {
-        return NodeIndex< type >( pair( index ).first );
+        return NodeIndex< type >( indexPair( index ).first );
       }
 
       template< MeshType type >
@@ -129,7 +140,7 @@ namespace Dune
       template< MeshType type >
       HalfEdgeIndex< dual( type ) > dual ( HalfEdgeIndex< type > index ) const noexcept
       {
-        return halfEdgeIndex< dual( type ) >( pair( index ) );
+        return halfEdgeIndex< dual( type ) >( indexPair( index ) );
       }
 
       template< MeshType type >
@@ -141,36 +152,36 @@ namespace Dune
       template< MeshType type >
       std::size_t size ( NodeIndex< type > index ) const noexcept
       {
-        return pair_[ type ].size();
+        return structure_[ type ].size();
       }
 
       template< MeshType type >
       HalfEdgeIndex< dual( type ) > begin ( NodeIndex< type > index ) const noexcept
       {
-        return HalfEdgeIndex< dual( type ) >( pair_[ dual( type ) ].begin_of( index ) );
+        return HalfEdgeIndex< dual( type ) >( structure_[ dual( type ) ].begin_of( index ) );
       }
 
       template< MeshType type >
       HalfEdgeIndex< dual( type ) > end ( NodeIndex< type > index ) const noexcept
       {
-        return HalfEdgeIndex< dual( type ) >( pair_[ dual( type ) ].end_of( index ) );
+        return HalfEdgeIndex< dual( type ) >( structure_[ dual( type ) ].end_of( index ) );
       }
 
     private:
       template< MeshType type >
-      HalfEdgeIndex< type > halfEdgeIndex ( const Pair &pair ) const noexcept
+      HalfEdgeIndex< type > halfEdgeIndex ( const IndexPair &indexPair ) const noexcept
       {
-        return HalfEdgeIndex< type >( pair_[ type ].position_of( pair ) );
+        return HalfEdgeIndex< type >( structure_[ type ].position_of( indexPair ) );
       }
 
       template< MeshType type >
-      const Pair &pair ( HalfEdgeIndex< type > index ) const noexcept
+      const IndexPair &indexPair ( HalfEdgeIndex< type > index ) const noexcept
       {
-        assert( index < pair_[ type ].values().size() );
-        return pair_[ type ].values()[ index ];
+        assert( index < structure_[ type ].values().size() );
+        return structure_[ type ].values()[ index ];
       }
 
-      std::array< MultiVector< Pair >, 2 > pair_;
+      MeshStructure structure_;
       std::array< std::vector< GlobalCoordinate >, 2 > position_;
     };
 
@@ -183,9 +194,9 @@ namespace Dune
     inline Mesh< ct >::Mesh ( const std::vector< GlobalCoordinate > &position, const MultiVector< std::size_t > &polygons )
     {
       const std::size_t numVertices = position.size();
-      const std::size_t numPolygons = polygons.size();
 
       MultiVector< std::size_t > boundaries = __polygonGrid::boundaries( numVertices, polygons );
+      structure_ = __polygonGrid::meshStructure( numVertices, polygons, boundaries );
 
     }
 
