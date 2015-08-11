@@ -5,6 +5,8 @@
 #include <iterator>
 #include <vector>
 
+#include <dune/common/iterator/tags.hh>
+
 namespace Dune
 {
 
@@ -63,10 +65,10 @@ namespace Dune
         const_reverse_iterator rend () const noexcept { return const_reverse_iterator( begin() ); }
         reverse_iterator rend () noexcept { return reverse_iterator( begin() ); }
 
-        const_iterator cbegin () const noexcept { return begin_; }
-        const_iterator cend () const noexcept { return end_; }
-        const_reverse_iterator crbegin () const noexcept { return const_reverse_iterator( end() ); }
-        const_reverse_iterator crend () const noexcept { return const_reverse_iterator( begin() ); }
+        const_iterator cbegin () const noexcept { return begin(); }
+        const_iterator cend () const noexcept { return end(); }
+        const_reverse_iterator crbegin () const noexcept { return rbegin(); }
+        const_reverse_iterator crend () const noexcept { return rend(); }
 
         const_reference operator[] ( size_type i ) const { return begin()[ i ]; }
         reference operator[] ( size_type i ) { return begin()[ i ]; }
@@ -96,6 +98,57 @@ namespace Dune
         iterator begin_, end_;
       };
 
+
+
+      // Iterator
+      // --------
+
+      template< I, R >
+      class Iterator
+        : public VirtualIterator< std::random_access_iteator, typename R::value_type, typename std::iterator_traits< I >::difference_type,  R >
+      {
+        typedef Iterator< I, R > This;
+        typedef VirtualIterator< std::random_access_iteator, typename R::value_type, typename std::iterator_traits< I >::difference_type,  R > Base;
+
+      public:
+        typedef typename Base::reference reference;
+        typedef typename Base::pointer pointer;
+
+        typedef typename Base::difference_type difference_type;
+
+        Iterator () = default;
+        Iterator ( I iterator, typename reference::iterator begin ) : iterator_( iterator ), begin_( begin ) {}
+
+        bool operator== ( const This &other ) const { return (iterator_ == other.iterator_); }
+        bool operator!= ( const This &other ) const { return (iterator_ != other.iterator_); }
+
+        bool operator< ( const This &other ) const { return (iterator_ < other.iterator_); }
+        bool operator<= ( const This &other ) const { return (iterator_ <= other.iterator_); }
+        bool operator> ( const This &other ) const { return (iterator_ > other.iterator_); }
+        bool operator>= ( const This &other ) const { return (iterator_ >= other.iterator_); }
+
+        reference operator[] ( difference_type n ) const { return reference( begin_ + iterator_[ n ], begin_ + iterator_[ n+1 ] ); }
+        reference operator* () const { return reference( begin_ + iterator_[ 0 ], begin_ + iterator_[ 1 ] ); }
+        pointer operator-> () const { return pointer( begin_ + iterator_[ 0 ], begin_ + iterator_[ 1 ] ); }
+
+        This &operator++ () { ++iterator_; }
+        This operator++ ( int ) { This copy; ++(*this); return copy; }
+        This &operator-- () { --iterator_; }
+        This operator-- ( int ) { This copy; --(*this); return copy; }
+
+        This &operator+= ( difference_type n ) { iterator_ += n; }
+        This &operator-= ( difference_type n ) { iterator_ -= n; }
+
+        friend This operator+ ( This a, difference_type n ) { return This( a.iterator_ + n, a.begin_ ); }
+        friend This operator+ ( difference_type n, This a ) { return This( a.iterator_ + n, a.begin_ ); }
+        friend This operator- ( This a, difference_type n ) { return This( a.iterator_ - n, a.begin_ ); }
+
+        difference_type operator- ( const This &other ) const { return (a.iterator_ - b.iterator_); }
+
+        Iterator iterator_;
+        typename reference::iterator begin_;
+      };
+
     } // namespace __MultiVector
 
 
@@ -123,6 +176,9 @@ namespace Dune
       typedef __MultiVector::Reference< typename value_type::iterator, typename value_type::const_iterator > reference;
       typedef __MultiVector::Reference< typename value_type::const_iterator, typename value_type::const_iterator > const_reference;
 
+      typedef __MultiVector::Iterator< typename std::vector< size_type >::iterator, reference > iterator;
+      typedef __MultiVector::Iterator< typename std::vector< size_type >::const_iterator, const_reference > const_iterator;
+
       explicit MultiVector ( size_type size ) : offsets_( size+1, 0u ) {}
 
       explicit MultiVector ( const std::vector< size_type > &counts ) { resize( counts ); }
@@ -133,6 +189,21 @@ namespace Dune
 
       size_type position_of ( std::size_t i, std::size_t k ) const noexcept { return (begin_of( i ) + k); }
       size_type position_of ( index_type i ) const noexcept { return position_of( i.first, i.second ); }
+
+      const_iterator begin () const noexcept { return const_iterator( offsets_.begin(), values_.begin() ); }
+      iterator begin () noexcept { return iterator( offsets_.begin(), values_.begin() ); }
+      const_iterator end () const noexcept { return const_iterator( offsets_.end()-1, values_.begin() ); }
+      iterator end () noexcept { return iterator( offsets_.end()-1, values_.begin() ); }
+
+      const_reverse_iterator rbegin () const noexcept { return const_reverse_iterator( end() ); }
+      reverse_iterator rbegin () noexcept { return reverse_iterator( end() ); }
+      const_reverse_iterator rend () const noexcept { return const_reverse_iterator( begin() ); }
+      reverse_iterator rend () noexcept { return reverse_iterator( begin() ); }
+
+      const_iterator cbegin () const noexcept { return begin(); }
+      const_iterator cend () const noexcept { return end(); }
+      const_reverse_iterator crbegin () const noexcept { return rbegin(); }
+      const_reverse_iterator crend () const noexcept { return rend(); }
 
       const_reference operator[] ( size_type i ) const noexcept { return const_reference( values_.begin() + begin_of( i ), values_.begin() + end_of( i ) ); }
       reference operator[] ( size_type i ) noexcept { return reference( values_.begin() + begin_of( i ), values_.begin() + end_of( i ) ); }
