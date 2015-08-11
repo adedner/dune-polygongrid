@@ -92,9 +92,7 @@ namespace Dune
     // External Forward Declarations
     // -----------------------------
 
-    MultiVector< std::size_t > halfEdges ( std::size_t numVertices, const MultiVector< std::size_t > &polygons );
-
-    std::vector< std::size_t > boundaries ( const MultiVector< std::size_t > &polygons, const MultiVector< std::size_t > &halfEdges )
+    MultiVector< std::size_t > boundaries ( std::size_t numVertices, const MultiVector< std::size_t > &polygons );
 
 
 
@@ -187,35 +185,8 @@ namespace Dune
       const std::size_t numVertices = position.size();
       const std::size_t numPolygons = polygons.size();
 
-      MultiVector< std::size_t > halfEdges = __PolygonGrid::halfEdges( numVertices, polygons );
-      MultiVector< std::size_t > boundaries = __polygonGrid::boundaries( polygons, halfEdges );
+      MultiVector< std::size_t > boundaries = __polygonGrid::boundaries( numVertices, polygons );
 
-
-      // ...
-
-      pair_[ Primal ].resize( offset.back() );
-      for( std::size_t i = 0u; i < numPolygons; ++i )
-      {
-        for( std::size_t j = 0u; j < polygons.size( i ); ++j )
-        {
-          const std::size_t vtx = polygons[ offset[ i ] + j ];
-          const std::size_t m = edgeOffset[ vtx+1 ] - edgeOffset[ vtx ];
-          const auto eit = edgeTarget.begin() + edgeOffset[ vtx ];
-          const std::size_t k = std::distance( eit, std::find( eit, eit + m, polygons[ offset[ i ] + ((j+1)%n) ] ) );
-          //pair_[ Primal ][ offset[ i ] + j ] = Pair( vtx, ((k+m-1)%m) );
-          //pair_[ Dual ][ edgeOffset[ i ] + k ] = Pair( i, j );
-        }
-      }
-
-
-      // ...
-
-
-      position_[ Primal ] = std::move( position );
-      offset_[ Primal ] = std::move( offset );
-
-
-      pair_[ Primal ].resize( offset_.back() );
     }
 
   } // namespace __PolygonGrid
