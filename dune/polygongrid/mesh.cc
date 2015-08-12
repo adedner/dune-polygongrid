@@ -115,7 +115,7 @@ namespace Dune
       // a regular vertex points to:
       // - the succeeding position in a polygon
       // - the second position in a boundary edge
-      // - ...
+      // - the
       structure[ Dual ].resize( count );
       std::fill( count.begin(), count.end(), 0u );
       for( std::size_t i = 0; i < numPolygons )
@@ -138,9 +138,9 @@ namespace Dune
       }
       for( std::size_t i = 0; i < numBoundaries; ++i )
       {
-        structure[ Dual ][ numVertices + 2*i+1 ][ 0 ] = boundaries[ i ][ 1 ];
+        structure[ Dual ][ numVertices + 2*i+1 ][ 0 ] = IndexPair( numPolygons + numBoundaries + i, 0 );
         const std::size_t vtx = boundaries[ i ][ 1 ];
-        structure[ Dual ][ vtx ][ count[ vtx ]++ ] = IndexPair( numPolygons + numBoundaries + i, 2*((j+1) % numBoundaries) );
+        structure[ Dual ][ vtx ][ count[ vtx ]++ ] = IndexPair( numPolygons + numBoundaries + i, 1 );
       }
 
       // sort dual elements
