@@ -120,13 +120,27 @@ namespace Dune
       std::fill( count.begin(), count.end(), 0u );
       for( std::size_t i = 0; i < numPolygons )
       {
-        const auto polygon = polygons[ i ];
-        const std::size_t n = polygon.size();
+        const std::size_t n = polygons[ i ].size();
         for( std::size_t j = 0u; j < n; ++j )
         {
-          const std::size_t vtx = polygon[ j ];
+          const std::size_t vtx = polygons[ i ][ j ];
           structure[ Dual ][ vtx ][ count[ vtx ]++ ] = IndexPair( i, (j+1)%n );
         }
+      }
+      for( std::size_t i = 0; i < numBoundaries; ++i )
+      {
+        structure[ Dual ][ numVertices + 2*i ][ 0 ] = IndexPair( numPolygons + i, 0 );
+        for( std::size_t j = 0u; j < 2u; ++j )
+        {
+          const std::size_t vtx = boundaries[ i ][ j ];
+          structure[ Dual ][ vtx ][ count[ vtx ]++ ] = IndexPair( numPolygons + i, j+1 );
+        }
+      }
+      for( std::size_t i = 0; i < numBoundaries; ++i )
+      {
+        structure[ Dual ][ numVertices + 2*i+1 ][ 0 ] = boundaries[ i ][ 1 ];
+        const std::size_t vtx = boundaries[ i ][ 1 ];
+        structure[ Dual ][ vtx ][ count[ vtx ]++ ] = IndexPair( numPolygons + numBoundaries + i, 2*((j+1) % numBoundaries) );
       }
 
       // sort dual elements
