@@ -64,15 +64,36 @@ namespace Dune
       const std::size_t numBoundaries = boundaries.size();
 
       MeshStructure structure;
-      std::array< std::vector< std::size_t >, 2 > count;
+      std::vector< std::size_t > count;
 
       // number of halfedges for primal grid:
       // - p.size() for each polygon p
       // - 3 for each boundary edge
       // - 2 for each boundary vertex
-      count[ Primal ] = polygons.sizes();
-      count[ Primal ].insert( count[ Primal ].end(), numBoundaries, 3u );
-      count[ Primal ].insert( count[ Primal ].end(), numBoundaries, 2u );
+      count = polygons.sizes();
+      count.insert( count.end(), numBoundaries, 3u );
+      count.insert( count.end(), numBoundaries, 2u );
+
+      // initialize primal structure (without target position)
+      structure[ Primal ].resize( count );
+      auto makeIndexPair = [] ( std::size_t i ) { return IndexPair( i, std::numeric_limits< std::size_t >::max() ); }
+      for( std::size_t i = 0; i < numPolygons; ++i )
+        std::transform( polygons[ i ].begin(), polygons[ i ].end(), structure[ Primal ][ i ].begin(), makeIndexPair );
+      for( std::size_t i = 0; i < numBoundaries; ++i )
+      {
+        // create boundary edge cell
+        auto item = structure[ Primal ][ numPolygons + i ];
+        item[ 0 ] = makeIndexPair( boundaries[ i ][ 0 ] );
+        item[ 1 ] = makeIndexPair( boundaries[ i ][ 1 ] );
+        item[ 2 ] = IndexPair( numVertices + 2*i+1, 0 );
+      }
+      for( std::size_t i = 0; i < numBoundaries; ++i )
+      {
+        // create boundary vertex cell
+        auto item = structure[ Primal ][ numPolygons + numBoundaries + i ];
+        item[ 0 ] = makeIndexPair( boundaries[ i ][ 0 ] );
+        item[ 1 ] = IndexPair( numVertices + 2*i, 0 );
+      }
 
       // number of halfedges for dual grid:
       // - for each regular vertex:
@@ -80,30 +101,23 @@ namespace Dune
       //   + 1 for each adjacent boundary edge (for bisected boundary edge)
       //   + 1 for being a boundary vertex (for vertex element)
       // - 1 for each bisected boundary edge center
-      count[ Dual ] = std::vector< std::size_t >( numVertices, 0u );
+      count = std::vector< std::size_t >( numVertices, 0u );
       for( std::size_t vtx : polygons.values() )
-        ++count[ Dual ][ vtx ];
+        ++count[ vtx ];
       for( auto boundary : boundaries )
       {
-        ++count[ Dual ][ boundary[ 0 ] ];
+        ++count[ boundary[ 0 ] ];
         for( std::size_t vtx : boundary )
-          ++count[ Dual ][ vtx ];
+          ++count[ vtx ];
       }
-      count[ Dual ].insert( count[ Dual ].end(), 2*numBoundaries, 1u );
-
-      // resize structures
-      structure[ Primal ].resize( count[ Primal ] );
-      structure[ Dual ].resize( count[ Dual ] );
-
-      // reset counts (for indexing)
-      std::fill( count[ Primal ].begin(), count[ Primal ].end(), 0u );
-      std::fill( count[ Dual ].begin(), count[ Dual ].end(), 0u );
-
+      count.insert( count.end(), 2*numBoundaries, 1u );
 
       // a regular vertex points to:
       // - the succeeding position in a polygon
       // - the second position in a boundary edge
       // - ...
+      structure[ Dual ].resize( count );
+      std::fill( count.begin(), count.end(), 0u );
       for( std::size_t i = 0; i < numPolygons )
       {
         const auto polygon = polygons[ i ];
@@ -111,7 +125,7 @@ namespace Dune
         for( std::size_t j = 0u; j < n; ++j )
         {
           const std::size_t vtx = polygon[ j ];
-          structure[ Dual ][ vtx ][ count[ Dual ][ vtx ]++ ] = IndexPair( i, (j+1)%n );
+          structure[ Dual ][ vtx ][ count[ vtx ]++ ] = IndexPair( i, (j+1)%n );
         }
       }
 
