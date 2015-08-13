@@ -83,7 +83,7 @@ namespace Dune
       {
         // create boundary edge cell
         auto item = structure[ Primal ][ numPolygons + i ];
-        item[ 0 ] = makeIndexPair( boundaries[ i ][ 0 ] );
+        item[ 0 ] = IndexPair( boundaries[ i ][ 0 ], 1 );
         item[ 1 ] = makeIndexPair( boundaries[ i ][ 1 ] );
         item[ 2 ] = IndexPair( numVertices + 2*i+1, 0 );
       }
@@ -91,7 +91,7 @@ namespace Dune
       {
         // create boundary vertex cell
         auto item = structure[ Primal ][ numPolygons + numBoundaries + i ];
-        item[ 0 ] = makeIndexPair( boundaries[ i ][ 0 ] );
+        item[ 0 ] = IndexPair( boundaries[ i ][ 0 ], 2 );
         item[ 1 ] = IndexPair( numVertices + 2*i, 0 );
       }
 
@@ -114,10 +114,23 @@ namespace Dune
 
       // a regular vertex points to:
       // - the succeeding position in a polygon
-      // - the second position in a boundary edge
-      // - the
+      // - the second position in a boundary edge cell
+      // - the second position in a boundary vertex cell
       structure[ Dual ].resize( count );
       std::fill( count.begin(), count.end(), 0u );
+      for( std::size_t i = 0; i < numBoundaries; ++i )
+      {
+        // boundary vertices automatically get 3 connections
+        const std::size_t v0 = boundaries[ i ][ 0 ];
+        count[ v0 ] = 3;
+        structure[ Dual ][ v0 ][ 0 ] = IndexPair( numPolygons + i, 1 );
+        structure[ Dual ][ v0 ][ 1 ] = IndexPair( numPolygons + numBoundaries + i, 1 );
+        const std::size_t v1 = boundaries[ i ][ 1 ];
+        structure[ Dual ][ v1 ][ 2 ] = IndexPair( numPolygons + i, 2 );
+
+        structure[ Dual ][ numVertices + 2*i ][ 0 ] = IndexPair( numPolygons + i, 0 );
+        structure[ Dual ][ numVertices + 2*i+1 ][ 0 ] = IndexPair( numPolygons + numBoundaries + (i+1)%numBoundaries, 0 );
+      }
       for( std::size_t i = 0; i < numPolygons )
       {
         const std::size_t n = polygons[ i ].size();
@@ -127,40 +140,34 @@ namespace Dune
           structure[ Dual ][ vtx ][ count[ vtx ]++ ] = IndexPair( i, (j+1)%n );
         }
       }
-      for( std::size_t i = 0; i < numBoundaries; ++i )
-      {
-        structure[ Dual ][ numVertices + 2*i ][ 0 ] = IndexPair( numPolygons + i, 0 );
-        for( std::size_t j = 0u; j < 2u; ++j )
-        {
-          const std::size_t vtx = boundaries[ i ][ j ];
-          structure[ Dual ][ vtx ][ count[ vtx ]++ ] = IndexPair( numPolygons + i, j+1 );
-        }
-      }
-      for( std::size_t i = 0; i < numBoundaries; ++i )
-      {
-        structure[ Dual ][ numVertices + 2*i+1 ][ 0 ] = IndexPair( numPolygons + numBoundaries + i, 0 );
-        const std::size_t vtx = boundaries[ i ][ 1 ];
-        structure[ Dual ][ vtx ][ count[ vtx ]++ ] = IndexPair( numPolygons + numBoundaries + i, 1 );
-      }
 
-      // sort dual elements
-      for( auto element : structure[ Dual ] )
+      // sort regular dual cells (those corresponding to regular vertices)
+      for( std::size_t i = 0; i < numVertices; ++i )
       {
-        const std::size_t m = element.size();
-        for( std::size_t k = 1u; k < m; ++k )
+        auto cell2 = structure[ Dual ][ i ];
+        const std::size_t n2 = cell2.size();
+        std::size_t k2 = (cell2[ 0 ].first >= numPolygons ? 4u : 1u);
+        assert( k2 < n2 );
+        while( true )
         {
-          auto polygon = polygons[ element[ k-1 ].first ];
-          const std::size_t n = polygon.size();
-          const std::size_t j = element[ k-1 ].second;
+          // look at preceeding half edge
+          auto cell1 = structure[ Primal ][ cell2[ k2-1 ].first ];
+          const std::size_t n1 = cell1.size();
+          const std::size_t k1 = cell2[ k2-1 ].second;
+
           // the preceeding vertex points to us
-          std::size_t nbvtx = polygon[ (j+n-1)%n ];
-          // so we have a half edge pointing to it
-          auto pos = std::find_if( element.begin()+k, element.end(), [ &polygons, nbvtx ] ( IndexPair p ) { return (polygons[ p ] == nbvtx); } );
-          std::swap( element[ k ], *pos );
+          assert( cell1[ (k1+n1-1)%n1 ].first == i );
+          cell[ (k1+n1-1)%n1 ].second = k2 % n2;
+
+          // now find the next half edge
+          std::size_t nbvtx = cell1[ (k1+n1-2)%n1 ].first;
+          auto pos = std::find_if( cell2.begin()+k2, cell2.end(), [ &structure, nbvtx ] ( IndexPair p ) { return (structure[ Primal ][ p ].first == nbvtx); } );
+          assert( (k2 == n2) || (pos != cell2.end()) );
+          if( pos == cells2.end() )
+            break;
+          std::swap( cell2[ k2 ], *pos );
         }
       }
-
-
 
       return std::move( structure );
     }
