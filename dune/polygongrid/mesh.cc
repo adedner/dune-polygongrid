@@ -1,8 +1,7 @@
 #include <config.h>
 
 #include <algorithm>
-#include <iostream>
-#include <utility>
+#include <array>
 
 #include <dune/polygongrid/mesh.hh>
 
@@ -57,7 +56,7 @@ namespace Dune
     // printStructure
     // --------------
 
-    void printStructure ( MultiVector< IndexPair > structure, std::ostream &out = std::cout )
+    void printStructure ( const MultiVector< IndexPair > &structure, std::ostream &out )
     {
       out << std::endl;
       for( std::size_t i = 0u; i < structure.size(); ++i )
@@ -201,6 +200,45 @@ namespace Dune
       printStructure( structure[ Dual ] );
 
       return std::move( structure );
+    }
+
+
+
+    // checkStructure
+    // --------------
+
+    bool checkStructure ( const MeshStructure &structure, MeshType type, std::ostream &out )
+    {
+      const std::size_t size1 = structure[ type ].size();
+      const std::array< MeshType, 4 > types = {{ type, dual( type ), type, dual( type ) }};
+      for( std::size_t i = 0; i < size1; ++i )
+      {
+        auto cell = structure[ type ][ i ];
+        const std::size_t n = cell.size();
+        for( std::size_t j = 0u; j < n; ++j )
+        {
+          std::array< IndexPair, 5 > p;
+          p[ 0 ] = IndexPair( i, j );
+          for( std::size_t k = 0u; k < 4u; ++k )
+            p[ k+1 ] = structure[ types[ k ] ].at( p[ k ] );
+          if( p[ 4 ] == p[ 0 ] )
+            continue;
+
+          out << "Invalid half edge cycle in " << type << " mesh:";
+          for( IndexPair q : p )
+            out << "  " << q.first << " [" << q.second << "]";
+          out << std::endl;
+
+          return false;
+        }
+      }
+
+      return true;
+    }
+
+    bool checkStructure ( const MeshStructure &structure, std::ostream &out )
+    {
+      return checkStructure( structure, Primal ) && checkStructure( structure, Dual );
     }
 
   } // namespace __PolygonGrid

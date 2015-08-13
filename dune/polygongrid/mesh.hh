@@ -3,6 +3,7 @@
 
 #include <cstddef>
 
+#include <iostream>
 #include <utility>
 #include <vector>
 
@@ -22,6 +23,8 @@ namespace Dune
     enum MeshType : std::size_t { Primal = 0u, Dual = 1u };
 
     inline static constexpr MeshType dual ( MeshType type ) noexcept { return static_cast< MeshType >( type^1u ); }
+
+    inline std::ostream &operator<< ( std::ostream &out, MeshType type ) { return out << (type == Primal ? "primal" : "dual"); }
 
 
 
@@ -103,7 +106,12 @@ namespace Dune
 
     MultiVector< std::size_t > boundaries ( std::size_t numVertices, const MultiVector< std::size_t > &polygons );
 
+    void printStructure ( const MultiVector< IndexPair > &structure, std::ostream &out = std::cout );
+
     MeshStructure meshStructure ( std::size_t numVertices, const MultiVector< std::size_t > &polygons, const MultiVector< std::size_t > &boundaries );
+
+    bool checkStructure ( const MeshStructure &structure, MeshType type, std::ostream &out = std::cout );
+    bool checkStructure ( const MeshStructure &structure, std::ostream &out = std::cout );
 
 
 

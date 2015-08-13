@@ -11,6 +11,8 @@ using Dune::__PolygonGrid::Mesh;
 using Dune::__PolygonGrid::MeshStructure;
 
 using Dune::__PolygonGrid::boundaries;
+using Dune::__PolygonGrid::checkStructure;
+using Dune::__PolygonGrid::meshStructure;
 
 
 // main
@@ -27,6 +29,9 @@ try
 
   MultiVector< std::size_t > bnds = boundaries( numVertices, polys );
   MeshStructure mesh = meshStructure( numVertices, polys, bnds );
+
+  if( !checkStructure( mesh ) )
+    std::cerr << "Error: Mesh structure not valid." << std::endl;
 
   return 0;
 }
