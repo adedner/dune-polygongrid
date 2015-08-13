@@ -5,6 +5,8 @@
 #include <dune/polygongrid/mesh.hh>
 #include <dune/polygongrid/multivector.hh>
 
+using Dune::__PolygonGrid::Primal;
+using Dune::__PolygonGrid::Dual;
 
 using Dune::__PolygonGrid::MultiVector;
 using Dune::__PolygonGrid::Mesh;
@@ -29,6 +31,16 @@ try
 
   MultiVector< std::size_t > bnds = boundaries( numVertices, polys );
   MeshStructure mesh = meshStructure( numVertices, polys, bnds );
+
+  std::cout << std::endl << std::endl;
+  std::cout << "Primal Structure:" << std::endl;
+  printStructure( mesh[ Primal ] );
+  std::cout << std::endl;
+
+  std::cout << std::endl << std::endl;
+  std::cout << "Dual Structure:" << std::endl;
+  printStructure( mesh[ Dual ] );
+  std::cout << std::endl;
 
   if( !checkStructure( mesh ) )
     std::cerr << "Error: Mesh structure not valid." << std::endl;

@@ -194,14 +194,6 @@ namespace Dune
         }
       }
 
-      std::cout << std::endl << std::endl << std::endl;
-      std::cout << "Primal Structure:" << std::endl;
-      printStructure( structure[ Primal ] );
-
-      std::cout << std::endl << std::endl << std::endl;
-      std::cout << "Dual Structure:" << std::endl;
-      printStructure( structure[ Dual ] );
-
       return std::move( structure );
     }
 
