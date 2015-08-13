@@ -188,8 +188,8 @@ namespace Dune
       explicit MultiVector ( const std::vector< size_type > &counts ) { resize( counts ); }
       MultiVector ( const std::vector< size_type > &counts, const T &value ) { resize( counts, value ); }
 
-      explicit MultiVector ( std::initializer_list< value_type > values ) { assign( values ); }
-      explicit MultiVector ( std::initializer_list< std::initializer_list< T > > values ) { assign( values ); }
+      MultiVector ( std::initializer_list< value_type > values ) { assign( values ); }
+      MultiVector ( std::initializer_list< std::initializer_list< T > > values ) { assign( values ); }
 
       size_type begin_of ( std::size_t i ) const noexcept { return offsets_[ i ]; }
       size_type end_of ( std::size_t i ) const noexcept { return offsets_[ i+1 ]; }
@@ -239,6 +239,7 @@ namespace Dune
       void assign ( std::initializer_list< value_type > values )
       {
         compute_offsets( values.size(), [ values ] ( std::size_t i ) { return values.begin()[ i ].size(); } );
+        values_.resize( offsets_.back() );
         auto it = values_.begin();
         for( const value_type &value : values )
           it = std::copy( value.begin(), value.end(), it );
@@ -247,6 +248,7 @@ namespace Dune
       void assign ( std::initializer_list< std::initializer_list< T > > values )
       {
         compute_offsets( values.size(), [ values ] ( std::size_t i ) { return values.begin()[ i ].size(); } );
+        values_.resize( offsets_.back() );
         auto it = values_.begin();
         for( const value_type &value : values )
           it = std::copy( value.begin(), value.end(), it );
