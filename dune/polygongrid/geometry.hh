@@ -12,11 +12,19 @@ namespace Dune
   namespace __PolygonGrid
   {
 
-    // Geometry
-    // --------
+    // Internal Forward Declarations
+    // -----------------------------
 
     template< int codim, class Grid >
-    class Geometry
+    class Geometry;
+
+
+
+    // BasicGeometry
+    // -------------
+
+    template< int codim, class Grid >
+    class BasicGeometry
     {
       typedef Geometry< codim, Grid > This;
 
@@ -34,34 +42,7 @@ namespace Dune
       typedef FieldMatrix< ctype, mydimension, coorddimension > JacobianTransposed;
       typedef FieldMatrix< ctype, coorddimension, mydimension > JacobianInverseTransposed;
 
-      Geometry () = default;
-
-      Geometry ( const Grid &grid, std::size_t index ) : grid_( &grid ), index_( index ) {}
-
-      DUNE_INLINE constexpr GeometryType type () const noexcept
-      {
-        return GeometryType( GeometryType::None(), mydimension );
-      }
-
-      DUNE_INLINE int corners () const
-      {
-        // ...
-      }
-
-      GlobalCoordinate corner ( int i ) const
-      {
-        // ...
-      }
-
-      GlobalCoordinate center () const
-      {
-        // ...
-      }
-
-      ctype volume () const noexcept
-      {
-        // ...
-      }
+      DUNE_INLINE constexpr GeometryType type () const noexcept { return GeometryType( GeometryType::None(), mydimension ); }
 
       bool affine () const
       {
@@ -92,6 +73,130 @@ namespace Dune
       {
         DUNE_THROW( InvalidStateException, "Geometry::jacobianInverseTransposed does not make for arbitrary polytopes." );
       }
+    };
+
+
+
+    // Geometry for Codimension 0
+    // --------------------------
+
+    template< class Grid >
+    class Geometry< 0, Grid >
+      : public BasicGeometry< 0, Grid >
+    {
+      typedef Geometry< 0, Grid > This;
+      typedef BasicGeometry< 0, Grid > Base;
+
+    public:
+      typedef typename Base::ctype ctype;
+      typedef typename Base::GlobalCoordinate GlobalCoordinate;
+
+      Geometry () = default;
+
+      Geometry ( const Grid &grid, std::size_t index ) : grid_( &grid ), index_( index ) {}
+
+      DUNE_INLINE int corners () const
+      {
+        // ...
+      }
+
+      GlobalCoordinate corner ( int i ) const
+      {
+        // ...
+      }
+
+      GlobalCoordinate center () const
+      {
+        // ...
+      }
+
+      ctype volume () const noexcept
+      {
+        ctype volume = Math::zero;
+        for( int i = 0; i < corners(); ++i )
+        {
+          const GlobalCoordinate &x = corner( i );
+          const GlobalCoordinate &y = corner( (i+1) % corners() );
+          volume += x[ 0 ]*y[ 1 ] - x[ 1 ]*y[ 0 ];
+        }
+        return volume / ctype( 2 );
+      }
+
+    private:
+      const Grid *grid_;
+      std::size_t index_;
+    };
+
+
+
+    // Geometry for Codimension 1
+    // --------------------------
+
+    template< class Grid >
+    class Geometry< 1, Grid >
+      : public BasicGeometry< 1, Grid >
+    {
+      typedef Geometry< 1, Grid > This;
+      typedef BasicGeometry< 1, Grid > Base;
+
+    public:
+      typedef typename Base::ctype ctype;
+      typedef typename Base::GlobalCoordinate GlobalCoordinate;
+
+      Geometry () = default;
+
+      Geometry ( const Grid &grid, std::size_t index ) : grid_( &grid ), index_( index ) {}
+
+      DUNE_INLINE int corners () const { return 2; }
+
+      GlobalCoordinate corner ( int i ) const
+      {
+        // ...
+      }
+
+      GlobalCoordinate center () const
+      {
+        GlobalCoordinate center( corner( 0 ) + corner( 1 ) );
+        return center /= ctype( 2 );
+      }
+
+      ctype volume () const noexcept { return (corner( 1 ) - corner( 0 )).two_norm(); }
+
+    private:
+      const Grid *grid_;
+      std::size_t index_;
+    };
+
+
+
+    // Geometry for Codimension 2
+    // --------------------------
+
+    template< class Grid >
+    class Geometry< 2, Grid >
+      : public BasicGeometry< 2, Grid >
+    {
+      typedef Geometry< 2, Grid > This;
+      typedef BasicGeometry< 2, Grid > Base;
+
+    public:
+      typedef typename Base::ctype ctype;
+      typedef typename Base::GlobalCoordinate GlobalCoordinate;
+
+      Geometry () = default;
+
+      Geometry ( const Grid &grid, std::size_t index ) : grid_( &grid ), index_( index ) {}
+
+      DUNE_INLINE int corners () const { return 1; }
+
+      GlobalCoordinate corner ( int i ) const
+      {
+        // ...
+      }
+
+      GlobalCoordinate center () const { return corner( 0 ); }
+
+      ctype volume () const noexcept { return Math::one; }
 
     private:
       const Grid *grid_;
