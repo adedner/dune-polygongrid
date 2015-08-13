@@ -107,7 +107,17 @@ namespace Dune
 
       GlobalCoordinate center () const
       {
-        // ...
+        GlobalCoordinate center( Math::zero );
+        ctype volume = Math::zero;
+        for( int i = 0; i < corneres(); ++i )
+        {
+          const GlobalCoordinate &x = corner( i );
+          const GlobalCoordinate &y = corner( (i+1) % corners() );
+          const ctype weight = x[ 0 ]*y[ 1 ] - x[ 1 ]*y[ 0 ];
+          axpy( weight, x+y, center );
+          volume += weight;
+        }
+        return center *= Math::one / (ctype( 3 )*volume);
       }
 
       ctype volume () const noexcept
