@@ -21,7 +21,7 @@ namespace Dune
 
     enum MeshType : std::size_t { Primal = 0u, Dual = 1u };
 
-    inline static constexpr MeshType dual ( MeshType type ) noexcept { return static_Cast< MeshType >( type^1u ); }
+    inline static constexpr MeshType dual ( MeshType type ) noexcept { return static_cast< MeshType >( type^1u ); }
 
 
 
@@ -68,11 +68,11 @@ namespace Dune
     // NodeIndex
     // ---------
 
-    template< class MeshType type >
+    template< MeshType type >
     struct NodeTag
     {};
 
-    template< class MeshType type >
+    template< MeshType type >
     using NodeIndex = Index< NodeTag< type > >;
 
 
@@ -80,7 +80,7 @@ namespace Dune
     // HalfEdgeIndex
     // -------------
 
-    template< class MeshType type >
+    template< MeshType type >
     struct HalfEdgeTag
     {};
 
@@ -195,8 +195,8 @@ namespace Dune
     inline Mesh< ct >::Mesh ( const std::vector< GlobalCoordinate > &position, const MultiVector< std::size_t > &polygons )
       : numRegular_{{ polygons.size(), position.size() }}
     {
-      MultiVector< std::size_t > boundaries = __polygonGrid::boundaries( numRegular_[ Dual ], polygons )
-      structure_ = __polygonGrid::meshStructure( numRegular_[ Dual ], polygons, boundaries );
+      MultiVector< std::size_t > boundaries = __PolygonGrid::boundaries( numRegular_[ Dual ], polygons );
+      structure_ = __PolygonGrid::meshStructure( numRegular_[ Dual ], polygons, boundaries );
 
     }
 

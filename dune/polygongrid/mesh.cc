@@ -16,8 +16,6 @@ namespace Dune
 
     MultiVector< std::size_t > boundaries ( std::size_t numVertices, const MultiVector< std::size_t > &polygons )
     {
-      const std::size_t numPolygons = polygons.size();
-
       // count number of polygons adjacent to a vertex
       std::vector< std::size_t > count( numVertices, 0u );
       for( std::size_t vtx : polygons.values() )
@@ -76,7 +74,7 @@ namespace Dune
 
       // initialize primal structure (without target position)
       structure[ Primal ].resize( count );
-      auto makeIndexPair = [] ( std::size_t i ) { return IndexPair( i, std::numeric_limits< std::size_t >::max() ); }
+      auto makeIndexPair = [] ( std::size_t i ) { return IndexPair( i, std::numeric_limits< std::size_t >::max() ); };
       for( std::size_t i = 0; i < numPolygons; ++i )
         std::transform( polygons[ i ].begin(), polygons[ i ].end(), structure[ Primal ][ i ].begin(), makeIndexPair );
       for( std::size_t i = 0; i < numBoundaries; ++i )
@@ -131,7 +129,7 @@ namespace Dune
         structure[ Dual ][ numVertices + 2*i ][ 0 ] = IndexPair( numPolygons + i, 0 );
         structure[ Dual ][ numVertices + 2*i+1 ][ 0 ] = IndexPair( numPolygons + numBoundaries + (i+1)%numBoundaries, 0 );
       }
-      for( std::size_t i = 0; i < numPolygons )
+      for( std::size_t i = 0; i < numPolygons; ++i )
       {
         const std::size_t n = polygons[ i ].size();
         for( std::size_t j = 0u; j < n; ++j )
@@ -157,13 +155,13 @@ namespace Dune
 
           // the preceeding vertex points to us
           assert( cell1[ (k1+n1-1)%n1 ].first == i );
-          cell[ (k1+n1-1)%n1 ].second = k2 % n2;
+          cell1[ (k1+n1-1)%n1 ].second = k2 % n2;
 
           // now find the next half edge
           std::size_t nbvtx = cell1[ (k1+n1-2)%n1 ].first;
           auto pos = std::find_if( cell2.begin()+k2, cell2.end(), [ &structure, nbvtx ] ( IndexPair p ) { return (structure[ Primal ][ p ].first == nbvtx); } );
           assert( (k2 == n2) || (pos != cell2.end()) );
-          if( pos == cells2.end() )
+          if( pos == cell2.end() )
             break;
           std::swap( cell2[ k2 ], *pos );
         }
@@ -175,5 +173,3 @@ namespace Dune
   } // namespace __PolygonGrid
 
 } // namespace Dune
-
-#endif // #ifndef DUNE_POLYGONGRID_MESH_HH
