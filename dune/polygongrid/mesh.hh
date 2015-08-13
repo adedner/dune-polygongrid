@@ -3,11 +3,14 @@
 
 #include <cstddef>
 
+#include <algorithm>
+#include <array>
 #include <iostream>
 #include <utility>
 #include <vector>
 
 #include <dune/common/fvector.hh>
+#include <dune/common/math.hh>
 
 #include <dune/polygongrid/multivector.hh>
 
@@ -115,6 +118,60 @@ namespace Dune
 
 
 
+    // vertexPositions
+    // ---------------
+
+    template< class V >
+    inline std::array< std::vector< V >, 2 > positions ( const MeshStructure &structure, const std::vector< V > &vertices )
+    {
+      typedef typename FieldTraits< V >::field_type ctype;
+
+      const std::size_t numVertices = vertices.size();
+      const std::size_t numBoundaries = (structure[ Dual ].size() - numVertices) / 2u;
+      const std::size_t numPolygons = (structure[ Primal ].size() - 2u*numBoundaries);
+
+      std::array< std::vector< V >, 2 > positions;
+      positions[ Primal ].resize( structure[ Primal ].size(), Math::zero );
+      positions[ Dual ].resize( structure[ Dual ].size(), Math::zero );
+
+      // copy given vertex positions
+      std::copy( vertices.begin(), vertices.end(), positions[ Dual ].begin() );
+
+      // for now, use the average of polygon vertices as center position
+      for( std::size_t i = 0u; i < numPolygons; ++i )
+      {
+        for( IndexPair j : structure[ Primal ][ i ] )
+          positions[ Primal ][ i ] += positions[ Dual ][ j.first ];
+        positions[ Primal ][ i ] *= Math::one / ctype( structure[ Primal ][ i ].size() );
+      }
+
+      // positions for boundary edge cells
+      for( std::size_t i = numPolygons; i < numPolygons + numBoundaries; ++i )
+      {
+        for( std::size_t j = 0u; j < 2u; ++j )
+          axpy( Math::one / ctype( 2 ), positions[ Dual ][ structure[ Primal ][ i ][ j ] ], positions[ Primal ][ i ] );
+      }
+
+      // positions for boundary vertex cells
+      for( std::size_t i = numPolygons + numBoundaries; i < numPolygons + 2u*numBoundaries; ++i )
+        positions[ Primal ][ i ] = positions[ Dual ][ structure[ Primal ][ i ][ 0 ] ];
+
+      // positions for dual boundaries
+      for( std::size_t i = 0u; i < numBoundaries; ++i )
+      {
+        for( std::size_t j = 0u; j < 2u; ++j )
+        {
+          const std::size_t v = structure[ Primal ][ numPolygons + i ][ j ].first;
+          axpy( Math::one / ctype( 2 ), positions[ Dual ][ v ], positions[ Dual ][ numVertices + 2*i+j ] );
+          axpy( Math::one / ctype( 2 ), positions[ Primal ][ numPolygons + i ], positions[ Dual ][ numVertices + 2*i+j ] );
+        }
+      }
+
+      return std::move( positions );
+    }
+
+
+
     // Mesh
     // ----
 
@@ -130,7 +187,13 @@ namespace Dune
     public:
       typedef FieldVector< ct, 2 > GlobalCoordinate;
 
-      Mesh ( const std::vector< GlobalCoordinate > &vertices, const MultiVector< std::size_t > &polygons );
+      Mesh ( const std::vector< GlobalCoordinate > &vertices, const MultiVector< std::size_t > &polygons )
+        : numRegular_{{ polygons.size(), vertices.size() }}
+      {
+        MultiVector< std::size_t > boundaries = __PolygonGrid::boundaries( numRegular_[ Dual ], polygons );
+        structure_ = __PolygonGrid::meshStructure( numRegular_[ Dual ], polygons, boundaries );
+        positions_ = __PolygonGrid::positions( structure_, vertices );
+      }
 
       template< MeshType type >
       NodeIndex< type > target ( HalfEdgeIndex< type > index ) const noexcept
@@ -141,8 +204,8 @@ namespace Dune
       template< MeshType type >
       const GlobalCoordinate &position ( NodeIndex< type > index ) const noexcept
       {
-        assert( index < position_[ type ].size() );
-        return position_[ type ][ index ];
+        assert( index < positions_[ type ].size() );
+        return positions_[ type ][ index ];
       }
 
       template< MeshType type >
@@ -191,22 +254,8 @@ namespace Dune
 
       std::array< std::size_t, 2 > numRegular_;
       MeshStructure structure_;
-      std::array< std::vector< GlobalCoordinate >, 2 > position_;
+      std::array< std::vector< GlobalCoordinate >, 2 > positions_;
     };
-
-
-
-    // Implementation of Mesh
-    // ----------------------
-
-    template< class ct >
-    inline Mesh< ct >::Mesh ( const std::vector< GlobalCoordinate > &position, const MultiVector< std::size_t > &polygons )
-      : numRegular_{{ polygons.size(), position.size() }}
-    {
-      MultiVector< std::size_t > boundaries = __PolygonGrid::boundaries( numRegular_[ Dual ], polygons );
-      structure_ = __PolygonGrid::meshStructure( numRegular_[ Dual ], polygons, boundaries );
-
-    }
 
   } // namespace __PolygonGrid
 

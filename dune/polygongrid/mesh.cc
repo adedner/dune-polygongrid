@@ -1,8 +1,5 @@
 #include <config.h>
 
-#include <algorithm>
-#include <array>
-
 #include <dune/polygongrid/mesh.hh>
 
 namespace Dune
