@@ -148,9 +148,12 @@ namespace Dune
         structure[ Dual ][ v0 ][ 1 ] = IndexPair( numPolygons + numBoundaries + i, 1 );
         const std::size_t v1 = boundaries[ i ][ 1 ];
         structure[ Dual ][ v1 ][ 2 ] = IndexPair( numPolygons + i, 2 );
-
+      }
+      for( std::size_t i = 0; i < numBoundaries; ++i )
+      {
         structure[ Dual ][ numVertices + 2*i ][ 0 ] = IndexPair( numPolygons + i, 0 );
-        structure[ Dual ][ numVertices + 2*i+1 ][ 0 ] = IndexPair( numPolygons + numBoundaries + (i+1)%numBoundaries, 0 );
+        const std::size_t j = structure[ Dual ][ boundaries[ i ][ 1 ] ][ 0 ].first;
+        structure[ Dual ][ numVertices + 2*i+1 ][ 0 ] = IndexPair( j + numBoundaries, 0 );
       }
       for( std::size_t i = 0; i < numPolygons; ++i )
       {
