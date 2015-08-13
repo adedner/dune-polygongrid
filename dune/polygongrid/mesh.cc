@@ -1,6 +1,7 @@
 #include <config.h>
 
 #include <algorithm>
+#include <iostream>
 #include <utility>
 
 #include <dune/polygongrid/mesh.hh>
@@ -51,6 +52,29 @@ namespace Dune
       return std::move( boundaries );
     }
 
+
+
+    // printStructure
+    // --------------
+
+    void printStructure ( MultiVector< IndexPair > structure, std::ostream &out = std::cout )
+    {
+      out << std::endl;
+      for( std::size_t i = 0u; i < structure.size(); ++i )
+      {
+        auto cell = structure[ i ];
+        out << "cell " << i << ": ";
+        for( IndexPair p : cell )
+        {
+          out << "  " << p.first;
+          if( p.second < std::numeric_limits< std::size_t >::max() )
+            out << " [" << p.second << "]";
+          else
+            out << " [-]";
+        }
+        std::cout << std::endl;
+      }
+    }
 
 
     // meshStructure
@@ -144,14 +168,15 @@ namespace Dune
       {
         auto cell2 = structure[ Dual ][ i ];
         const std::size_t n2 = cell2.size();
-        std::size_t k2 = (cell2[ 0 ].first >= numPolygons ? 4u : 1u);
-        assert( k2 < n2 );
+        std::size_t k2 = (cell2[ 0 ].first >= numPolygons ? 2u : 0u);
         while( true )
         {
+          assert( k2 < n2 );
           // look at preceeding half edge
-          auto cell1 = structure[ Primal ][ cell2[ k2-1 ].first ];
+          auto cell1 = structure[ Primal ][ cell2[ k2 ].first ];
           const std::size_t n1 = cell1.size();
-          const std::size_t k1 = cell2[ k2-1 ].second;
+          const std::size_t k1 = cell2[ k2 ].second;
+          ++k2;
 
           // the preceeding vertex points to us
           assert( cell1[ (k1+n1-1)%n1 ].first == i );
@@ -166,6 +191,14 @@ namespace Dune
           std::swap( cell2[ k2 ], *pos );
         }
       }
+
+      std::cout << std::endl << std::endl << std::endl;
+      std::cout << "Primal Structure:" << std::endl;
+      printStructure( structure[ Primal ] );
+
+      std::cout << std::endl << std::endl << std::endl;
+      std::cout << "Dual Structure:" << std::endl;
+      printStructure( structure[ Dual ] );
 
       return std::move( structure );
     }

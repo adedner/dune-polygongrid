@@ -8,6 +8,7 @@
 
 using Dune::__PolygonGrid::MultiVector;
 using Dune::__PolygonGrid::Mesh;
+using Dune::__PolygonGrid::MeshStructure;
 
 using Dune::__PolygonGrid::boundaries;
 
@@ -25,6 +26,7 @@ try
     = { { 0, 1, 4, 3 }, { 1, 2, 6, 5, 4 }, { 3, 4, 5, 8, 11, 7 }, { 5, 6, 9, 8 }, { 7, 11, 10 }, { 8, 9, 12, 11 } };
 
   MultiVector< std::size_t > bnds = boundaries( numVertices, polys );
+  MeshStructure mesh = meshStructure( numVertices, polys, bnds );
 
   return 0;
 }
