@@ -2,6 +2,7 @@
 #define DUNE_POLYGONGRID_MULTIVECTOR_HH
 
 #include <algorithm>
+#include <initializer_list>
 #include <iterator>
 #include <vector>
 
@@ -187,6 +188,9 @@ namespace Dune
       explicit MultiVector ( const std::vector< size_type > &counts ) { resize( counts ); }
       MultiVector ( const std::vector< size_type > &counts, const T &value ) { resize( counts, value ); }
 
+      explicit MultiVector ( std::initializer_list< value_type > values ) { assign( values ); }
+      explicit MultiVector ( std::initializer_list< std::initializer_list< T > > values ) { assign( values ); }
+
       size_type begin_of ( std::size_t i ) const noexcept { return offsets_[ i ]; }
       size_type end_of ( std::size_t i ) const noexcept { return offsets_[ i+1 ]; }
 
@@ -232,22 +236,38 @@ namespace Dune
         return std::move( sizes );
       }
 
-      void resize ( const std::vector< size_type > &counts )
+      void assign ( std::initializer_list< value_type > values )
       {
-        compute_offsets( counts );
-        values_.resize( offsets_.back() );
+        compute_offsets( values.size(), [ values ] ( std::size_t i ) { return values.begin()[ i ].size(); } );
+        auto it = values_.begin();
+        for( const value_type &value : values )
+          it = std::copy( value.begin(), value.end(), it );
       }
 
-      void resize ( const std::vector< size_type > &counts, const T &value )
+      void assign ( std::initializer_list< std::initializer_list< T > > values )
       {
-        compute_offsets( counts );
-        values_.resize( offsets_.back(), value );
+        compute_offsets( values.size(), [ values ] ( std::size_t i ) { return values.begin()[ i ].size(); } );
+        auto it = values_.begin();
+        for( const value_type &value : values )
+          it = std::copy( value.begin(), value.end(), it );
       }
 
       void clear ()
       {
         offsets_.resize( 1 );
         values_.clear();
+      }
+
+      void resize ( const std::vector< size_type > &counts )
+      {
+        compute_offsets( counts.size(), [ &counts ] ( size_type i ) { return counts[ i ]; } );
+        values_.resize( offsets_.back() );
+      }
+
+      void resize ( const std::vector< size_type > &counts, const T &value )
+      {
+        compute_offsets( counts.size(), [ &counts ] ( size_type i ) { return counts[ i ]; } );
+        values_.resize( offsets_.back(), value );
       }
 
       void push_back ( const value_type &vector )
@@ -290,13 +310,13 @@ namespace Dune
       }
 
     private:
-      void compute_offsets ( const std::vector< size_type > &counts )
+      template< class Count >
+      void compute_offsets ( std::size_t size, Count count )
       {
-        const size_type size = counts.size();
         offsets_.resize( size+1 );
         offsets_[ 0 ] = 0u;
         for( size_type k = 0u; k < size; ++k )
-          offsets_[ k+1 ] = offsets_[ k ] + counts[ k ];
+          offsets_[ k+1 ] = offsets_[ k ] + count( k );
       }
 
       std::vector< size_type > offsets_;
