@@ -8,6 +8,8 @@
 
 #include <dune/geometry/dimension.hh>
 
+#include <dune/polygongrid/subentity.hh>
+
 namespace Dune
 {
 
@@ -95,11 +97,11 @@ namespace Dune
 
       explicit Geometry ( const Cell &cell ) : cell_( cell ) {}
 
-      DUNE_INLINE int corners () const noexcept { return cell.halfEdges().size(); }
+      DUNE_INLINE int corners () const noexcept { return subEntities( cell_, Dune::Codim< 2 >() ); }
 
       DUNE_INLINE const GlobalCoordinate &corner ( int i ) const noexcept
       {
-        cell.halfEdges().begin()[ i ].target().position();
+        return subEntity( cell_, Dune::Codim< 2 >, i ).position();
       }
 
       GlobalCoordinate center () const noexcept
@@ -153,14 +155,11 @@ namespace Dune
 
       Geometry ( const HalfEdge &halfEdge ) : halfEdge_( halfEdge ) {}
 
-      DUNE_INLINE int corners () const { return 2; }
+      DUNE_INLINE int corners () const { return subEntities( halfEdge_, Dune::Codim< 1 >() ); }
 
       const GlobalCoordinate &corner ( int i ) const
       {
-        if( i == 1 )
-          return halfEdge_.target().position();
-        else
-          return halfEdge_.flip().target().position();
+        return subEntity( halfEdge_, Dune::Codim< 1 >, i ).position();
       }
 
       GlobalCoordinate center () const

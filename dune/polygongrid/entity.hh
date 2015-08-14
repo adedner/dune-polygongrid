@@ -7,7 +7,7 @@
 
 #include <dune/polygongrid/entityseed.hh>
 #include <dune/polygongrid/geometry.hh>
-
+#include <dune/polygongrid/subentitiy.hh>
 
 namespace Dune
 {
@@ -26,70 +26,85 @@ namespace Dune
     // BasicEntity
     // -----------
 
-    template< class MeshObject, dim_t codim >
+    template< class Item, dim_t codim >
     class BasicEntity
     {
-      typedef BasicEntity< MeshObject, codim > This;
+      typedef BasicEntity< Item, codim > This;
 
-      typedef __PolygonGrid::Geometry< MeshObject, codim > GeometryImpl;
+      typedef __PolygonGrid::Geometry< Item, codim > GeometryImpl;
 
     public:
       static const dim_t codimension = codim;
       static const dim_t dimension = 2;
       static const dim_t mydimension = dimension - codimension;
 
+      template< dim_t cd >
+      struct Codim
+      {
+        typedef decltype( __PolygonGrid::subEntity( std::declval< Item >(), Dune::Codim< cd - codimension >(), std::size_t() ) ) SubItem;
+        typedef Dune::Entity< __PolygonGrid::Entity< SubItem, cd > > Entity;
+      };
+
       // typedef typename Grid::template Codim< codimension >::EntitySeed EntitySeed;
       typedef Dune::Geometry< GeometryImpl > Geometry;
 
-      explicit Entity ( const MeshObject &meshObject ) : meshObject_( meshObject ) {}
+      explicit Entity ( const Item &item ) : item_( item ) {}
 
       GeometryType type () const { return GeometryType( GeometryType::None(), mydimension ); }
 
       PartitionType partitionType () const { return InteriorEntity; }
 
-      Geometry geometry () const { return GeometryImpl( meshObject_ ); }
+      Geometry geometry () const { return GeometryImpl( item_ ); }
 
       // EntitySeed seed () const { return typename EntitySeed::Implementation( index() ); }
 
-#if 0
-      unsigned int subEntities ( dim_t codim ) const
+      template< dim_t cd >
+      typename Codim< cd >::Entity subEntity ( int i ) const
       {
-        // use a helper, here
+        typedef typename Codim< cd >::Entity::Implementation EntityImpl;
+        return EntityImpl( __PolygonGrid::subEntity( item_, Dune::Codim< cd - codimension >(), i ) );
       }
 
-      template< dim_t codim >
-      typename Codim< codim >::Entity subEntity ( int i ) const
-      {
-        typedef typename Traits::template Codim< codim >::EntityImpl EntityImpl;
-        assert( static_cast< unsigned int >( i ) < subEntities( codim ) );
-        return EntityImpl( grid(), subIndex( i, codim ) );
-      }
-
-      Index index () const { return index_; }
-
-      Index subIndex ( int i, dim_t codim ) const
-      {
-        // use a helper, here
-      }
-#endif
+      Index index () const { return item_.index(); }
 
     private:
-      MeshObject meshObject_;
+      Item item_;
     };
 
 
 
-    // Entity
-    // ------
+    // Entity for Codimension 2
+    // ------------------------
 
-    template< dim_t codim, class Grid >
-    class Entity< codim, Grid >
-      : public BasicEntity< codim, Grid >
+    template< class Item >
+    class Entity< Item, 2 >
+      : public BasicEntity< Item, 2 >
     {
-      typedef BasicEntity< codim, Grid > Base;
+      typedef Entity< Item, 2 > This;
+      typedef BasicEntity< Item, 2 > Base;
 
     public:
-      Entity ( const Grid &grid, Index index ) : Base( grid, index ) {}
+      explicit Entity ( const Item &item ) : Base( item ) {}
+
+      unsigned int subEntities ( dim_t codim ) const noexcept { return (codim == 2 ? 1u : 0u); }
+    };
+
+
+
+    // Entity for Codimension 1
+    // ------------------------
+
+    template< class Item >
+    class Entity< Item, 1 >
+      : public BasicEntity< Item, 1 >
+    {
+      typedef Entity< Item, 1 > This;
+      typedef BasicEntity< Item, 1 > Base;
+
+    public:
+      explicit Entity ( const Item &item ) : Base( item ) {}
+
+      unsigned int subEntities ( dim_t codim ) const noexcept { return (codim == 2 ? 2u : (codim == 1 ? 1u : 0u)); }
     };
 
 
@@ -97,19 +112,24 @@ namespace Dune
     // Entity for codimension 0
     // ------------------------
 
-    template< class Grid >
-    class Entity< 0, Grid >
-      : public BasicEntity< 0, Grid >
+    template< class Item >
+    class Entity< Item, 0 >
+      : public BasicEntity< Item, 0 >
     {
-      typedef Entity< 0, Grid > This;
-      typedef BasicEntity< 0, Grid > Base;
+      typedef Entity< Item, 0 > This;
+      typedef BasicEntity< Item, 0 > Base;
 
     public:
       typedef typename Traits::template Codim< 0 >::LocalGeometry LocalGeometry;
 
       typedef typename Traits::HierarchicIterator HierarchicIterator;
 
-      Entity ( const Grid &grid, Index index ) : Base( grid, index ) {}
+      explicit Entity ( const Item &item ) : Base( item ) {}
+
+      unsigned int subEntities ( dim_t codim ) const noexcept
+      {
+        return ((codim == 1) || (codim == 2) ? item_.halfEdges().size() : (codim == 0u ? 1u : 0u));
+      }
 
       bool isLeaf () const { return true; }
 

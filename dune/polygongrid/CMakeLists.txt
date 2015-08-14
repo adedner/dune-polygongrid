@@ -11,6 +11,7 @@ set( HEADERS
   mesh.hh
   meshobjects.hh
   multivector.hh
+  subentity.hh
 )
 
 install( FILES ${HEADERS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/dune/polygongrid )
