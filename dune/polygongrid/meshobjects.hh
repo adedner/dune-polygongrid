@@ -31,6 +31,12 @@ namespace Dune
     // Node
     // ----
 
+    /**
+     * \brief node (a.k.a. vertex)
+     *
+     * A node corresponds to the vertices of a mesh.
+     * Consequently, it also corresponds to an element in the dual mesh.
+     */
     template< class ct, MeshType type >
     class Node
     {
@@ -58,6 +64,20 @@ namespace Dune
     // HalfEdge
     // --------
 
+    /**
+     * \brief half edge (a.k.a. directed edge)
+     *
+     * A half edge corresponds to an edge in the mesh with an additinal
+     * direction.
+     * Thus, each edge is made up by two half edges, one for each direction.
+     *
+     * Moreover, an edge in the primal grid also corresponds to an edge in the
+     * dual grid, connecting the two neighbors.
+     * If elements are oriented, their boundaries are traversed in opposite
+     * direction.
+     * A half edge knows the element, whose boundary traverses it in the same
+     * direction.
+     */
     template< class ct, MeshType type = Primal >
     class HalfEdge
     {
