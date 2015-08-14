@@ -1,11 +1,12 @@
 #ifndef DUNE_POLYGONGRID_ENTITY_HH
 #define DUNE_POLYGONGRID_ENTITY_HH
 
-#include <type_traits>
-
 #include <dune/grid/common/entity.hh>
 
+#include <dune/geometry/dimension.hh>
+
 #include <dune/polygongrid/entityseed.hh>
+#include <dune/polygongrid/geometry.hh>
 
 
 namespace Dune
@@ -17,7 +18,7 @@ namespace Dune
     // Internal Forward Declarations
     // -----------------------------
 
-    template< dim_t codim, class Grid >
+    template< class, dim_t codim >
     class Entity;
 
 
@@ -25,32 +26,32 @@ namespace Dune
     // BasicEntity
     // -----------
 
-    template< dim_t codim, class Grid >
+    template< class MeshObject, dim_t codim >
     class BasicEntity
     {
-      typedef typename std::remove_const< Grid >::type::Traits Traits;
+      typedef BasicEntity< MeshObject, codim > This;
+
+      typedef __PolygonGrid::Geometry< MeshObject, codim > GeometryImpl;
 
     public:
       static const dim_t codimension = codim;
       static const dim_t dimension = 2;
       static const dim_t mydimension = dimension - codimension;
 
-      typedef typename Traits::ctype ctype;
-      typedef typename Traits::Index Index;
+      // typedef typename Grid::template Codim< codimension >::EntitySeed EntitySeed;
+      typedef Dune::Geometry< GeometryImpl > Geometry;
 
-      typedef typename Grid::template Codim< codimension >::EntitySeed EntitySeed;
-      typedef typename Traits::template Codim< codimension >::Geometry Geometry;
-
-      Entity ( const Grid &grid, Index index ) : grid_( &grid ), index_( index ) {}
+      explicit Entity ( const MeshObject &meshObject ) : meshObject_( meshObject ) {}
 
       GeometryType type () const { return GeometryType( GeometryType::None(), mydimension ); }
 
-      PartitionType partitionType () const { return grid().partitionType( index(), Dune::Codim< codimension >() ); }
+      PartitionType partitionType () const { return InteriorEntity; }
 
-      Geometry geometry () const { return Geometry( grid(), index() ); }
+      Geometry geometry () const { return GeometryImpl( meshObject_ ); }
 
-      EntitySeed seed () const { return typename EntitySeed::Implementation( index() ); }
+      // EntitySeed seed () const { return typename EntitySeed::Implementation( index() ); }
 
+#if 0
       unsigned int subEntities ( dim_t codim ) const
       {
         // use a helper, here
@@ -64,18 +65,16 @@ namespace Dune
         return EntityImpl( grid(), subIndex( i, codim ) );
       }
 
-      const Grid &grid () const { return *grid_; }
-
       Index index () const { return index_; }
 
       Index subIndex ( int i, dim_t codim ) const
       {
         // use a helper, here
       }
+#endif
 
     private:
-      const Grid *grid_;
-      Index index_;
+      MeshObject meshObject_;
     };
 
 

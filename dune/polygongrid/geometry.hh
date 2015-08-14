@@ -6,7 +6,7 @@
 #include <dune/common/fvector.hh>
 #include <dune/common/math.hh>
 
-#include <dune/polygongrid/mesh.hh>
+#include <dune/geometry/dimension.hh>
 
 namespace Dune
 {
@@ -17,7 +17,7 @@ namespace Dune
     // Internal Forward Declarations
     // -----------------------------
 
-    template< class ct, MeshType meshtype, int codim >
+    template< class, dim_t codim >
     class Geometry;
 
 
@@ -25,7 +25,7 @@ namespace Dune
     // BasicGeometry
     // -------------
 
-    template< class ct, int codim >
+    template< class ct, dim_t codim >
     class BasicGeometry
     {
       typedef BasicGeometry< ct, codim > This;
@@ -80,29 +80,26 @@ namespace Dune
     // Geometry for Codimension 0
     // --------------------------
 
-    template< class ct, MeshType meshtype >
-    class Geometry< ct, meshtype, 0 >
-      : public BasicGeometry< ct, 0 >
+    template< class Cell >
+    class Geometry< Cell, 0 >
+      : public BasicGeometry< typename Cell::ctype, 0 >
     {
-      typedef Geometry< ct, meshtype, 0 > This;
-      typedef BasicGeometry< ct, 0 > Base;
+      typedef Geometry< Cell, 0 > This;
+      typedef BasicGeometry< typename Cell::ctype, 0 > Base;
 
     public:
       typedef typename Base::ctype ctype;
       typedef typename Base::GlobalCoordinate GlobalCoordinate;
 
-      typedef __PolygonGrid::Mesh< ct > Mesh;
-      typedef __PolygonGrid::NodeIndex< type > NodeIndex;
-
       Geometry () = default;
 
-      Geometry ( const Mesh &mesh, NodeIndex index ) : mesh_( &mesh ), index_( index ) {}
+      explicit Geometry ( const Cell &cell ) : cell_( cell ) {}
 
-      DUNE_INLINE int corners () const noexcept { return mesh().size( index_ ); }
+      DUNE_INLINE int corners () const noexcept { return cell.halfEdges().size(); }
 
       DUNE_INLINE const GlobalCoordinate &corner ( int i ) const noexcept
       {
-        return mesh().position( mesh().begin( index_ ) + static_cast< std::size_t >( i ) );
+        cell.halfEdges().begin()[ i ].target().position();
       }
 
       GlobalCoordinate center () const noexcept
@@ -132,11 +129,8 @@ namespace Dune
         return volume / ctype( 2 );
       }
 
-      const Mesh &mesh () const noexcept { assert( mesh_ ); return *mesh_; }
-
     private:
-      const Mesh *mesh_ = nullptr;
-      NodeIndex index_;
+      Cell cell_;
     };
 
 
@@ -144,12 +138,12 @@ namespace Dune
     // Geometry for Codimension 1
     // --------------------------
 
-    template< class ct, MeshType meshtype >
-    class Geometry< ct, meshtype, 1 >
-      : public BasicGeometry< ct, 1 >
+    template< class HalfEdge >
+    class Geometry< HalfEdge, 1 >
+      : public BasicGeometry< typename HalfEdge::ctype, 1 >
     {
-      typedef Geometry< ct, meshtype, 1 > This;
-      typedef BasicGeometry< ct, 1 > Base;
+      typedef Geometry< HalfEdge, 1 > This;
+      typedef BasicGeometry< typename HalfEdge::ctype, 1 > Base;
 
     public:
       typedef typename Base::ctype ctype;
@@ -157,13 +151,16 @@ namespace Dune
 
       Geometry () = default;
 
-      Geometry ( const Grid &grid, std::size_t index ) : grid_( &grid ), index_( index ) {}
+      Geometry ( const HalfEdge &halfEdge ) : halfEdge_( halfEdge ) {}
 
       DUNE_INLINE int corners () const { return 2; }
 
-      GlobalCoordinate corner ( int i ) const
+      const GlobalCoordinate &corner ( int i ) const
       {
-        // ...
+        if( i == 1 )
+          return halfEdge_.target().position();
+        else
+          return halfEdge_.flip().target().position();
       }
 
       GlobalCoordinate center () const
@@ -175,8 +172,7 @@ namespace Dune
       ctype volume () const noexcept { return (corner( 1 ) - corner( 0 )).two_norm(); }
 
     private:
-      const Grid *grid_;
-      std::size_t index_;
+      HalfEdge halfEdge_;
     };
 
 
@@ -184,12 +180,12 @@ namespace Dune
     // Geometry for Codimension 2
     // --------------------------
 
-    template< class ct, MeshType meshtype >
-    class Geometry< ct, meshtype, 2 >
-      : public BasicGeometry< ct, 2 >
+    template< class Node >
+    class Geometry< Node, 2 >
+      : public BasicGeometry< typename Node::ctype, 2 >
     {
-      typedef Geometry< ct, meshtype, 2 > This;
-      typedef BasicGeometry< ct, 2 > Base;
+      typedef Geometry< Node, 2 > This;
+      typedef BasicGeometry< typename Node::ctype, 2 > Base;
 
     public:
       typedef typename Base::ctype ctype;
@@ -197,22 +193,17 @@ namespace Dune
 
       Geometry () = default;
 
-      Geometry ( const Grid &grid, std::size_t index ) : grid_( &grid ), index_( index ) {}
+      explicit Geometry ( const Node &node ) : node_( node ) {}
 
       DUNE_INLINE int corners () const { return 1; }
 
-      GlobalCoordinate corner ( int i ) const
-      {
-        // ...
-      }
-
-      GlobalCoordinate center () const { return corner( 0 ); }
+      const GlobalCoordinate &corner ( int i ) const { return center(); }
+      const GlobalCoordinate &center () const { return node_.position(); }
 
       ctype volume () const noexcept { return Math::one; }
 
     private:
-      const Grid *grid_;
-      std::size_t index_;
+      Node node_;
     };
 
   } // namespace __PolygonGrid

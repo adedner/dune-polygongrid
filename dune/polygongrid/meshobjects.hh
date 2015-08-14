@@ -18,9 +18,6 @@ namespace Dune
     class HalfEdge;
 
     template< class ct, MeshType type >
-    class HalfEdgeIterator;
-
-    template< class ct, MeshType type >
     class HalfEdges;
 
     template< class ct, MeshType type >
@@ -43,8 +40,10 @@ namespace Dune
       typedef Node< ct, type > This;
 
     public:
-      typedef __PolygonGrid::Mesh< ct > Mesh;
-      typedef __PolygonGrid::HalfEdges< ct, dual( type ) > HalfEdges;
+      typedef ct ctype;
+
+      typedef __PolygonGrid::Mesh< ctype > Mesh;
+      typedef __PolygonGrid::HalfEdges< ctype, dual( type ) > HalfEdges;
 
       typedef typename Mesh::GlobalCoordinate GlobalCoordinate;
 
@@ -82,15 +81,17 @@ namespace Dune
      * A half edge knows the element, whose boundary traverses it in the same
      * direction.
      */
-    template< class ct, MeshType type = Primal >
+    template< class ct, MeshType type >
     class HalfEdge
     {
       typedef HalfEdge< ct, type > This;
 
     public:
-      typedef __PolygonGrid::Mesh< ct > Mesh;
-      typedef __PolygonGrid::Node< ct, type > Node;
-      typedef __PolygonGrid::Node< ct, dual( type ) > Cell;
+      typedef ct ctype;
+
+      typedef __PolygonGrid::Mesh< ctype > Mesh;
+      typedef __PolygonGrid::Node< ctype, type > Node;
+      typedef __PolygonGrid::Node< ctypet, dual( type ) > Cell;
 
       typedef HalfEdgeIndex< type > Index;
 
@@ -223,6 +224,8 @@ namespace Dune
 
       Iterator begin () const noexcept { return Iterator( mesh(), mesh().begin( index_ ) ); }
       Iterator end () const noexcept { return Iterator( mesh(), mesh().end( index_ ) ); }
+
+      std::size_t size () const { return mesh().size( index_ ); }
 
       const Mesh &mesh () const noexcept { return *mesh_; }
 
