@@ -55,6 +55,8 @@ namespace Dune
 
       HalfEdges halfEdges () const noexcept;
 
+      std::size_t index () const noexcept { return index_; }
+
       const Mesh &mesh () const noexcept { return *mesh_; }
 
     private:
@@ -91,14 +93,14 @@ namespace Dune
 
       typedef __PolygonGrid::Mesh< ctype > Mesh;
       typedef __PolygonGrid::Node< ctype, type > Node;
-      typedef __PolygonGrid::Node< ctypet, dual( type ) > Cell;
+      typedef __PolygonGrid::Node< ctype, dual( type ) > Cell;
 
       typedef HalfEdgeIndex< type > Index;
 
       HalfEdge ( const Mesh &mesh, Index index ) : mesh_( &mesh ), index_( index ) {}
 
       /** \brief flip the direction of the half edge */
-      This flip () const noexcept { return This( mesh(), mesh().flip( index ) ); }
+      This flip () const noexcept { return This( mesh(), mesh().flip( index_ ) ); }
 
       /** \brief obtain node, the half edge points to */
       Node target () const noexcept { return Node( mesh(), mesh().target( index_ ) ); }
@@ -108,6 +110,8 @@ namespace Dune
 
       /** \brief obtain cell whose boundary contains this half edge */
       Cell cell () const noexcept { return flip().neighbor(); }
+
+      std::size_t index () const noexcept { return mesh().edgeIndex( index_ ); }
 
       const Mesh &mesh () const noexcept { return *mesh_; }
 

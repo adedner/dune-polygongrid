@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <array>
 #include <iostream>
+#include <limits>
 #include <utility>
 #include <vector>
 
@@ -127,6 +128,8 @@ namespace Dune
     bool checkStructure ( const MeshStructure &structure, MeshType type, std::ostream &out = std::cout );
     bool checkStructure ( const MeshStructure &structure, std::ostream &out = std::cout );
 
+    std::vector< std::size_t > edgeIndices ( const MeshStructure &structure, MeshType type );
+
 
 
     // vertexPositions
@@ -204,12 +207,20 @@ namespace Dune
         MultiVector< std::size_t > boundaries = __PolygonGrid::boundaries( regularSize_[ Primal ], polygons );
         structure_ = __PolygonGrid::meshStructure( regularSize_[ Primal ], polygons, boundaries );
         positions_ = __PolygonGrid::positions( structure_, vertices );
+        edgeIndices_ = __PolygonGrid::edgeIndices( structure_, Primal );
       }
 
       template< MeshType type >
       NodeIndex< type > target ( HalfEdgeIndex< type > index ) const noexcept
       {
         return NodeIndex< type >( indexPair( index ).first );
+      }
+
+      template< MeshType type >
+      std::size_t edgeIndex ( HalfEdgeIndex< type > index ) const noexcept
+      {
+        // We only store edge indices for the primal mesh.
+        return edgeIndices_[ type == Primal ? index : dual( index ) ];
       }
 
       template< MeshType type >
@@ -278,6 +289,7 @@ namespace Dune
       std::array< std::size_t, 2 > regularSize_;
       MeshStructure structure_;
       std::array< std::vector< GlobalCoordinate >, 2 > positions_;
+      std::vector< std::size_t > edgeIndices_;
     };
 
   } // namespace __PolygonGrid

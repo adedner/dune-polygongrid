@@ -232,6 +232,40 @@ namespace Dune
       return checkStructure( structure, Primal ) && checkStructure( structure, Dual );
     }
 
+
+
+    // edgeIndices
+    // -----------
+
+    std::vector< std::size_t > edgeIndices ( const MeshStructure &structure, MeshType type )
+    {
+      const MultiVector< IndexPair > &nodes = structure[ type ];
+      const MultiVector< IndexPair > &cells = structure[ dual( type ) ];
+
+      const std::size_t size = cells.values().size();
+      std::vector< std::size_t > edgeIndices( size, std::numeric_limits< std::size_t >::max() );
+
+      std::size_t numEdges = 0;
+      const std::size_t numCells = cells.size();
+      for( std::size_t i = 0; i < numCells; ++i )
+      {
+        const std::size_t n = cells[ i ].size();
+        for( std::size_t j = 0u; j < n; ++j )
+        {
+          const std::size_t k = cells.position_of( i, j );
+          if( edgeIndices[ k ] < std::numeric_limits< std::size_t >::max() )
+            continue;
+
+          const IndexPair p = nodes[ cells[ i ][ j ] ];
+          assert( edgeIndices[ cells.position_of( p ) ] == std::numeric_limits< std::size_t >::max() );
+          edgeIndices[ k ] = edgeIndices[ cells.position_of( p ) ] = numEdges++;
+        }
+      }
+
+      assert( 2u*numEdges == size );
+      return std::move( edgeIndices );
+    }
+
   } // namespace __PolygonGrid
 
 } // namespace Dune
