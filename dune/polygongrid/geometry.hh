@@ -6,6 +6,8 @@
 #include <dune/common/fvector.hh>
 #include <dune/common/math.hh>
 
+#include <dune/polygongrid/mesh.hh>
+
 namespace Dune
 {
 
@@ -15,7 +17,7 @@ namespace Dune
     // Internal Forward Declarations
     // -----------------------------
 
-    template< int codim, class Grid >
+    template< class ct, MeshType meshtype, int codim >
     class Geometry;
 
 
@@ -23,15 +25,13 @@ namespace Dune
     // BasicGeometry
     // -------------
 
-    template< int codim, class Grid >
+    template< class ct, int codim >
     class BasicGeometry
     {
-      typedef Geometry< codim, Grid > This;
-
-      typedef typename std::remove_const< Grid >::type::Traits Traits;
+      typedef BasicGeometry< ct, codim > This;
 
     public:
-      typedef typename Traits::ctype ctype;
+      typedef ct ctype;
 
       static const dim_t mydimension = 2 - codim;
       static const dim_t coorddimension = 2;
@@ -80,32 +80,32 @@ namespace Dune
     // Geometry for Codimension 0
     // --------------------------
 
-    template< class Grid >
-    class Geometry< 0, Grid >
-      : public BasicGeometry< 0, Grid >
+    template< class ct, MeshType meshtype >
+    class Geometry< ct, meshtype, 0 >
+      : public BasicGeometry< ct, 0 >
     {
-      typedef Geometry< 0, Grid > This;
-      typedef BasicGeometry< 0, Grid > Base;
+      typedef Geometry< ct, meshtype, 0 > This;
+      typedef BasicGeometry< ct, 0 > Base;
 
     public:
       typedef typename Base::ctype ctype;
       typedef typename Base::GlobalCoordinate GlobalCoordinate;
 
+      typedef __PolygonGrid::Mesh< ct > Mesh;
+      typedef __PolygonGrid::NodeIndex< type > NodeIndex;
+
       Geometry () = default;
 
-      Geometry ( const Grid &grid, std::size_t index ) : grid_( &grid ), index_( index ) {}
+      Geometry ( const Mesh &mesh, NodeIndex index ) : mesh_( &mesh ), index_( index ) {}
 
-      DUNE_INLINE int corners () const
+      DUNE_INLINE int corners () const noexcept { return mesh().size( index_ ); }
+
+      DUNE_INLINE const GlobalCoordinate &corner ( int i ) const noexcept
       {
-        // ...
+        return mesh().position( mesh().begin( index_ ) + static_cast< std::size_t >( i ) );
       }
 
-      GlobalCoordinate corner ( int i ) const
-      {
-        // ...
-      }
-
-      GlobalCoordinate center () const
+      GlobalCoordinate center () const noexcept
       {
         GlobalCoordinate center( Math::zero );
         ctype volume = Math::zero;
@@ -132,9 +132,11 @@ namespace Dune
         return volume / ctype( 2 );
       }
 
+      const Mesh &mesh () const noexcept { assert( mesh_ ); return *mesh_; }
+
     private:
-      const Grid *grid_;
-      std::size_t index_;
+      const Mesh *mesh_ = nullptr;
+      NodeIndex index_;
     };
 
 
@@ -142,12 +144,12 @@ namespace Dune
     // Geometry for Codimension 1
     // --------------------------
 
-    template< class Grid >
-    class Geometry< 1, Grid >
-      : public BasicGeometry< 1, Grid >
+    template< class ct, MeshType meshtype >
+    class Geometry< ct, meshtype, 1 >
+      : public BasicGeometry< ct, 1 >
     {
-      typedef Geometry< 1, Grid > This;
-      typedef BasicGeometry< 1, Grid > Base;
+      typedef Geometry< ct, meshtype, 1 > This;
+      typedef BasicGeometry< ct, 1 > Base;
 
     public:
       typedef typename Base::ctype ctype;
@@ -182,12 +184,12 @@ namespace Dune
     // Geometry for Codimension 2
     // --------------------------
 
-    template< class Grid >
-    class Geometry< 2, Grid >
-      : public BasicGeometry< 2, Grid >
+    template< class ct, MeshType meshtype >
+    class Geometry< ct, meshtype, 2 >
+      : public BasicGeometry< ct, 2 >
     {
-      typedef Geometry< 2, Grid > This;
-      typedef BasicGeometry< 2, Grid > Base;
+      typedef Geometry< ct, meshtype, 2 > This;
+      typedef BasicGeometry< ct, 2 > Base;
 
     public:
       typedef typename Base::ctype ctype;
