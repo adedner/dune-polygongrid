@@ -85,18 +85,22 @@ namespace Dune
 
     public:
       typedef __PolygonGrid::Mesh< ct > Mesh;
-      typedef __PolygonGrid::Node< ct, type > Vertex;
-      typedef __PolygonGrid::Node< ct, dual( type ) > Polygon;
+      typedef __PolygonGrid::Node< ct, type > Node;
+      typedef __PolygonGrid::Node< ct, dual( type ) > Cell;
 
       HalfEdge ( const Mesh &mesh, HalfEdgeIndex< type > index ) : mesh_( &mesh ), index_( index ) {}
 
-      bool boundary () const noexcept { return flip().polygon().boundary(); }
-
+      /** \brief flip the direction of the half edge */
       This flip () const noexcept { return This( mesh(), mesh().flip( index ) );
 
-      Vertex target () const noexcept { return Vertex( mesh(), mesh().target( index_ ) ); }
+      /** \brief obtain node, the half edge points to */
+      Node target () const noexcept { return Node( mesh(), mesh().target( index_ ) ); }
 
-      Polygon polygon () const noexcept { return Polygon( mesh(), mesh().target( mesh().dual( index_ ) ) ); }
+      /** \brief obtain neighboring cell (whose boundary contains the flipped half edge) */
+      Cell neighbor () const noexcept { return Cell( mesh(), mesh().target( mesh().dual( index_ ) ) ); }
+
+      /** \brief obtain cell whose boundary contains this half edge */
+      Cell cell () const noexcept { return flip().neighbor(); }
 
       const Mesh &mesh () const noexcept { return *mesh_; }
 

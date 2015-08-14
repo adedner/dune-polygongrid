@@ -229,13 +229,13 @@ namespace Dune
       template< MeshType type >
       HalfEdgeIndex< dual( type ) > begin ( NodeIndex< type > index ) const noexcept
       {
-        return HalfEdgeIndex< dual( type ) >( structure_[ dual( type ) ].begin_of( index ) );
+        return HalfEdgeIndex< dual( type ) >( structure_[ type ].begin_of( index ) );
       }
 
       template< MeshType type >
       HalfEdgeIndex< dual( type ) > end ( NodeIndex< type > index ) const noexcept
       {
-        return HalfEdgeIndex< dual( type ) >( structure_[ dual( type ) ].end_of( index ) );
+        return HalfEdgeIndex< dual( type ) >( structure_[ type ].end_of( index ) );
       }
 
     private:
@@ -248,8 +248,8 @@ namespace Dune
       template< MeshType type >
       const IndexPair &indexPair ( HalfEdgeIndex< type > index ) const noexcept
       {
-        assert( index < structure_[ type ].values().size() );
-        return structure_[ type ].values()[ index ];
+        assert( index < structure_[ dual( type ) ].values().size() );
+        return structure_[ dual( type ) ].values()[ index ];
       }
 
       std::array< std::size_t, 2 > numRegular_;
