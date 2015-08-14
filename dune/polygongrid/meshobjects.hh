@@ -48,6 +48,10 @@ namespace Dune
 
       typedef typename Mesh::GlobalCoordinate GlobalCoordinate;
 
+      typedef NodeIndex< type > Index;
+
+      Node ( const Mesh &mesh, Index index ) : mesh_( &mesh ), index_( index ) {}
+
       const GlobalCoordinate &position () const noexcept { return mesh().position( index_ ); }
 
       HalfEdges halfEdges () const noexcept;
@@ -56,7 +60,7 @@ namespace Dune
 
     private:
       const Mesh *mesh_;
-      NodeIndex< type > index_;
+      Index index_;
     };
 
 
@@ -88,10 +92,12 @@ namespace Dune
       typedef __PolygonGrid::Node< ct, type > Node;
       typedef __PolygonGrid::Node< ct, dual( type ) > Cell;
 
-      HalfEdge ( const Mesh &mesh, HalfEdgeIndex< type > index ) : mesh_( &mesh ), index_( index ) {}
+      typedef HalfEdgeIndex< type > Index;
+
+      HalfEdge ( const Mesh &mesh, Index index ) : mesh_( &mesh ), index_( index ) {}
 
       /** \brief flip the direction of the half edge */
-      This flip () const noexcept { return This( mesh(), mesh().flip( index ) );
+      This flip () const noexcept { return This( mesh(), mesh().flip( index ) ); }
 
       /** \brief obtain node, the half edge points to */
       Node target () const noexcept { return Node( mesh(), mesh().target( index_ ) ); }
@@ -106,28 +112,31 @@ namespace Dune
 
     private:
       const Mesh *mesh_;
-      HalfEdgeIndex< type > index_;
+      Index index_;
     };
 
 
 
-    // HalfEdgeIterator
-    // ----------------
+    // IndexIterator
+    // -------------
 
-    template< class ct, MeshType type >
-    class HalfEdgeIterator
-      : public VirtualIterator< std::random_access_iterator_tag, HalfEdge< ct, type > >
+    template< class V >
+    class IndexIterator
+      : public VirtualIterator< std::random_access_iterator_tag, V >
     {
-      typedef HalfEdgeIterator< ct, type > This;
-      typedef VirtualIterator< std::random_access_iterator_tag, HalfEdge< ct, type > > Base;
+      typedef IndexIterator< V > This;
+      typedef VirtualIterator< std::random_access_iterator_tag, V > Base;
 
     public:
       typedef typename Base::value_type value_type;
       typedef typename Base::pointer pointer;
       typedef typename Base::reference reference;
 
-      HalfEdgeIterator () = default;
-      HalfEdgeIterator ( const Mesh &mesh, HalfEdgeIndex< type > index ) : mesh_( &mesh ), index_( index ) {}
+      typedef typename V::Mesh Mesh;
+      typedef typename V::Index Index;
+
+      IndexIterator () = default;
+      IndexIterator ( const Mesh &mesh, Index index ) : mesh_( &mesh ), index_( index ) {}
 
       reference operator* () const noexcept { return value_type( mesh(), index_ ); }
       pointer operator-> () const noexcept { return value_type( mesh(), index_ ); }
@@ -151,9 +160,9 @@ namespace Dune
       This &operator+= ( std::ptrdiff_t n ) noexcept { index_ += n; return *this; }
       This &operator-= ( std::ptrdiff_t n ) noexcept { index_ -= n; return *this; }
 
-      friend This operator+ ( const This &a, std::ptrdiff_t n ) noexcept { return This( mesh(), a.index_ + n ); }
-      friend This operator+ ( std::ptrdiff_t n, const This &a ) noexcept { return This( mesh(), a.index_ + n ); }
-      friend This operator- ( const This &a, std::ptrdiff_t n ) const noexcept { return This( mesh(), a.index_ - n ); }
+      friend This operator+ ( const This &a, std::ptrdiff_t n ) noexcept { return This( a.mesh(), a.index_ + n ); }
+      friend This operator+ ( std::ptrdiff_t n, const This &a ) noexcept { return This( a.mesh(), a.index_ + n ); }
+      friend This operator- ( const This &a, std::ptrdiff_t n ) noexcept { return This( a.mesh(), a.index_ - n ); }
 
       std::ptrdiff_t operator- ( const This &other ) const noexcept { return (index_ - other.index_); }
 
@@ -161,8 +170,40 @@ namespace Dune
 
     private:
       const Mesh *mesh_ = nullptr;
-      HalfEdgeIndex< type > index_;
+      Index index_;
     };
+
+
+
+    // Nodes
+    // -----
+
+    template< class ct, MeshType type >
+    class Nodes
+    {
+      typedef Nodes< ct, type > This;
+
+    public:
+      typedef __PolygonGrid::Mesh< ct > Mesh;
+      typedef IndexIterator< Node< ct, type > > Iterator;
+
+      explicit Nodes ( const Mesh &mesh ) noexcept : mesh_( &mesh ) {}
+
+      Iterator begin () const noexcept { return Iterator( mesh(), mesh().template begin< type >() ); }
+      Iterator end () const noexcept { return Iterator( mesh(), mesh().template end< type >() ); }
+
+      const Mesh &mesh () const noexcept { return *mesh_; }
+
+    private:
+      const Mesh *mesh_;
+    };
+
+    template< MeshType type, class ct >
+    inline static Nodes< ct, type >
+    nodes ( const Mesh< ct > &mesh, std::integral_constant< MeshType, type > = std::integral_constant< MeshType, type >() ) noexcept
+    {
+      return Nodes< ct, type >( mesh );
+    }
 
 
 
@@ -175,7 +216,8 @@ namespace Dune
       typedef HalfEdges< ct, type > This;
 
     public:
-      typedef HalfEdgeIterator< ct. type > Iterator;
+      typedef __PolygonGrid::Mesh< ct > Mesh;
+      typedef IndexIterator< HalfEdge< ct, type > > Iterator;
 
       HalfEdges ( const Mesh &mesh, NodeIndex< dual( type ) > index ) : mesh_( &mesh ), index_( index ) {}
 

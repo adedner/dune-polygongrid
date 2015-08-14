@@ -29,6 +29,17 @@ namespace Dune
 
     inline std::ostream &operator<< ( std::ostream &out, MeshType type ) { return out << (type == Primal ? "primal" : "dual"); }
 
+    typedef std::integral_constant< MeshType, Primal > PrimalType;
+    typedef std::integral_constant< MeshType, Dual > DualType;
+
+    namespace
+    {
+
+      PrimalType primalMesh = {};
+      DualType dualMesh = {};
+
+    } // anonymous namespace
+
 
 
     // Index
@@ -149,12 +160,12 @@ namespace Dune
       for( std::size_t i = numPolygons; i < numPolygons + numBoundaries; ++i )
       {
         for( std::size_t j = 0u; j < 2u; ++j )
-          axpy( Math::one / ctype( 2 ), positions[ Primal ][ structure[ Dual ][ i ][ j ] ], positions[ Dual ][ i ] );
+          axpy( Math::one / ctype( 2 ), positions[ Primal ][ structure[ Dual ][ i ][ j ].first ], positions[ Dual ][ i ] );
       }
 
       // positions for boundary vertex cells
       for( std::size_t i = numPolygons + numBoundaries; i < numPolygons + 2u*numBoundaries; ++i )
-        positions[ Dual ][ i ] = positions[ Primal ][ structure[ Dual ][ i ][ 0 ] ];
+        positions[ Dual ][ i ] = positions[ Primal ][ structure[ Dual ][ i ][ 0 ].first ];
 
       // positions for dual boundaries
       for( std::size_t i = 0u; i < numBoundaries; ++i )
@@ -188,10 +199,10 @@ namespace Dune
       typedef FieldVector< ct, 2 > GlobalCoordinate;
 
       Mesh ( const std::vector< GlobalCoordinate > &vertices, const MultiVector< std::size_t > &polygons )
-        : numRegular_{{ vertices.size(), polygons.size() }}
+        : regularSize_{{ vertices.size(), polygons.size() }}
       {
-        MultiVector< std::size_t > boundaries = __PolygonGrid::boundaries( numRegular_[ Primal ], polygons );
-        structure_ = __PolygonGrid::meshStructure( numRegular_[ Primal ], polygons, boundaries );
+        MultiVector< std::size_t > boundaries = __PolygonGrid::boundaries( regularSize_[ Primal ], polygons );
+        structure_ = __PolygonGrid::meshStructure( regularSize_[ Primal ], polygons, boundaries );
         positions_ = __PolygonGrid::positions( structure_, vertices );
       }
 
@@ -238,6 +249,18 @@ namespace Dune
         return HalfEdgeIndex< dual( type ) >( structure_[ type ].end_of( index ) );
       }
 
+      template< MeshType type >
+      NodeIndex< type > begin ( std::integral_constant< MeshType, type > = std::integral_constant< MeshType, type >() ) const noexcept
+      {
+        return NodeIndex< type >( 0u );
+      }
+
+      template< MeshType type >
+      NodeIndex< type > end ( std::integral_constant< MeshType, type > = std::integral_constant< MeshType, type >() ) const noexcept
+      {
+        return NodeIndex< type >( regularSize_[ type ] );
+      }
+
     private:
       template< MeshType type >
       HalfEdgeIndex< type > halfEdgeIndex ( const IndexPair &indexPair ) const noexcept
@@ -252,7 +275,7 @@ namespace Dune
         return structure_[ dual( type ) ].values()[ index ];
       }
 
-      std::array< std::size_t, 2 > numRegular_;
+      std::array< std::size_t, 2 > regularSize_;
       MeshStructure structure_;
       std::array< std::vector< GlobalCoordinate >, 2 > positions_;
     };
