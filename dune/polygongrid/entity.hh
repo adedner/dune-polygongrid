@@ -65,7 +65,7 @@ namespace Dune
         return EntityImpl( __PolygonGrid::subEntity( item_, Dune::Codim< cd - codimension >(), i ) );
       }
 
-      Index index () const { return item_.index(); }
+      std::size_t index () const { return item_.index(); }
 
     private:
       Item item_;
@@ -86,7 +86,13 @@ namespace Dune
     public:
       explicit Entity ( const Item &item ) : Base( item ) {}
 
-      unsigned int subEntities ( dim_t codim ) const noexcept { return (codim == 2 ? 1u : 0u); }
+      std::size_t subEntities ( dim_t codim ) const noexcept { return (codim == 2 ? 1u : 0u); }
+
+      std::size_t subIndex ( dim_t codim, std::size_t i ) const noexcept
+      {
+        assert( i < subEntities( codim ) );
+        return __PolygonGrid::subEntity( item_, Dune::Codim< 0 >(), i ).index();
+      }
     };
 
 
@@ -104,7 +110,16 @@ namespace Dune
     public:
       explicit Entity ( const Item &item ) : Base( item ) {}
 
-      unsigned int subEntities ( dim_t codim ) const noexcept { return (codim == 2 ? 2u : (codim == 1 ? 1u : 0u)); }
+      std::size_t subEntities ( dim_t codim ) const noexcept { return (codim == 2 ? 2u : (codim == 1 ? 1u : 0u)); }
+
+      std::size_t subIndex ( dim_t codim, std::size_t i ) const noexcept
+      {
+        assert( i < subEntities( codim ) );
+        if( codim == 2 )
+          return __PolygonGrid::subEntity( item_, Dune::Codim< 0 >(), i ).index();
+        else
+          return __PolygonGrid::subEntity( item_, Dune::Codim< 1 >(), i ).index();
+      }
     };
 
 
@@ -129,6 +144,22 @@ namespace Dune
       unsigned int subEntities ( dim_t codim ) const noexcept
       {
         return ((codim == 1) || (codim == 2) ? item_.halfEdges().size() : (codim == 0u ? 1u : 0u));
+      }
+
+      std::size_t subIndex ( dim_t codim, std::size_t i ) const noexcept
+      {
+        assert( i < subEntities( codim ) );
+        switch( codim )
+        {
+        case 0:
+          return __PolygonGrid::subEntity( item_, Dune::Codim< 0 >(), i ).index();
+
+        case 1:
+          return __PolygonGrid::subEntity( item_, Dune::Codim< 1 >(), i ).index();
+
+        case 2:
+          return __PolygonGrid::subEntity( item_, Dune::Codim< 2 >(), i ).index();
+        {
       }
 
       bool isLeaf () const { return true; }
