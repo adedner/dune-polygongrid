@@ -14,13 +14,13 @@ namespace Dune
     // Internal Forward Declarations
     // -----------------------------
 
-    template< class ct, MeshType type >
+    template< class ct >
     class HalfEdge;
 
-    template< class ct, MeshType type >
+    template< class ct >
     class HalfEdges;
 
-    template< class ct, MeshType type >
+    template< class ct >
     class Node;
 
 
@@ -34,20 +34,20 @@ namespace Dune
      * A node corresponds to the vertices of a mesh.
      * Consequently, it also corresponds to an element in the dual mesh.
      */
-    template< class ct, MeshType type >
+    template< class ct >
     class Node
     {
-      typedef Node< ct, type > This;
+      typedef Node< ct > This;
 
     public:
       typedef ct ctype;
 
       typedef __PolygonGrid::Mesh< ctype > Mesh;
-      typedef __PolygonGrid::HalfEdges< ctype, dual( type ) > HalfEdges;
+      typedef __PolygonGrid::HalfEdges< ctype > HalfEdges;
 
       typedef typename Mesh::GlobalCoordinate GlobalCoordinate;
 
-      typedef NodeIndex< type > Index;
+      typedef NodeIndex Index;
 
       Node ( const Mesh &mesh, Index index ) : mesh_( &mesh ), index_( index ) {}
 
@@ -84,19 +84,19 @@ namespace Dune
      * A half edge knows the element, whose boundary traverses it in the same
      * direction.
      */
-    template< class ct, MeshType type >
+    template< class ct >
     class HalfEdge
     {
-      typedef HalfEdge< ct, type > This;
+      typedef HalfEdge< ct > This;
 
     public:
       typedef ct ctype;
 
       typedef __PolygonGrid::Mesh< ctype > Mesh;
-      typedef __PolygonGrid::Node< ctype, type > Node;
-      typedef __PolygonGrid::Node< ctype, dual( type ) > Cell;
+      typedef __PolygonGrid::Node< ctype > Node;
+      typedef __PolygonGrid::Node< ctype > Cell;
 
-      typedef HalfEdgeIndex< type > Index;
+      typedef HalfEdgeIndex Index;
 
       HalfEdge ( const Mesh &mesh, Index index ) : mesh_( &mesh ), index_( index ) {}
 
@@ -116,6 +116,7 @@ namespace Dune
 
       const Mesh &mesh () const noexcept { return *mesh_; }
       Index index () const noexcept { return index_; }
+      const MeshType type () const noexcept { return index_.type(); }
 
     private:
       const Mesh *mesh_;
@@ -185,31 +186,32 @@ namespace Dune
     // Nodes
     // -----
 
-    template< class ct, MeshType type >
+    template< class ct >
     class Nodes
     {
-      typedef Nodes< ct, type > This;
+      typedef Nodes< ct > This;
 
     public:
       typedef __PolygonGrid::Mesh< ct > Mesh;
-      typedef IndexIterator< Node< ct, type > > Iterator;
+      typedef IndexIterator< Node< ct > > Iterator;
 
-      explicit Nodes ( const Mesh &mesh ) noexcept : mesh_( &mesh ) {}
+      Nodes ( const Mesh &mesh, MeshType type ) noexcept : mesh_( &mesh ), type_( type ) {}
 
-      Iterator begin () const noexcept { return Iterator( mesh(), mesh().template begin< type >() ); }
-      Iterator end () const noexcept { return Iterator( mesh(), mesh().template end< type >() ); }
+      Iterator begin () const noexcept { return Iterator( mesh(), mesh().template begin( type_ ) ); }
+      Iterator end () const noexcept { return Iterator( mesh(), mesh().template end( type_ ) ); }
 
       const Mesh &mesh () const noexcept { return *mesh_; }
+      MeshType type () const noexcept { return type_; }
 
     private:
       const Mesh *mesh_;
+      MeshType type_;
     };
 
-    template< MeshType type, class ct >
-    inline static Nodes< ct, type >
-    nodes ( const Mesh< ct > &mesh, std::integral_constant< MeshType, type > = std::integral_constant< MeshType, type >() ) noexcept
+    template< class ct >
+    inline static Nodes< ct > nodes ( const Mesh< ct > &mesh, MeshType type ) noexcept
     {
-      return Nodes< ct, type >( mesh );
+      return Nodes< ct >( mesh, type );
     }
 
 
@@ -217,16 +219,16 @@ namespace Dune
     // HalfEdges
     // ---------
 
-    template< class ct, MeshType type >
+    template< class ct >
     class HalfEdges
     {
-      typedef HalfEdges< ct, type > This;
+      typedef HalfEdges< ct > This;
 
     public:
       typedef __PolygonGrid::Mesh< ct > Mesh;
-      typedef IndexIterator< HalfEdge< ct, type > > Iterator;
+      typedef IndexIterator< HalfEdge< ct > > Iterator;
 
-      HalfEdges ( const Mesh &mesh, NodeIndex< dual( type ) > index ) : mesh_( &mesh ), index_( index ) {}
+      HalfEdges ( const Mesh &mesh, NodeIndex index ) : mesh_( &mesh ), index_( index ) {}
 
       Iterator begin () const noexcept { return Iterator( mesh(), mesh().begin( index_ ) ); }
       Iterator end () const noexcept { return Iterator( mesh(), mesh().end( index_ ) ); }
@@ -234,10 +236,11 @@ namespace Dune
       std::size_t size () const { return mesh().size( index_ ); }
 
       const Mesh &mesh () const noexcept { return *mesh_; }
+      MeshType type () const noexcept { return dual( index_.type() ); }
 
     private:
       const Mesh *mesh_;
-      NodeIndex< dual( type ) > index_;
+      NodeIndex index_;
     };
 
 
@@ -245,8 +248,8 @@ namespace Dune
     // Implementation of Node
     // ----------------------
 
-    template< class ct, MeshType type >
-    inline typename Node< ct, type >::HalfEdges Node< ct, type >::halfEdges () const noexcept
+    template< class ct >
+    inline typename Node< ct >::HalfEdges Node< ct >::halfEdges () const noexcept
     {
       return HalfEdges( mesh(), index_ );
     }

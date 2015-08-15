@@ -52,9 +52,10 @@ namespace Dune
       typedef Index< Tag > This;
 
     public:
-      explicit Index ( std::size_t index = std::numeric_limits< std::size_t >::max() ) : index_( index ) {}
+      Index () noexcept : index_( std::numeric_limits< std::size_t >::max() ) {}
+      constexpr Index ( std::size_t index, MeshType type ) : index_( 2u*index + type ) {}
 
-      operator std::size_t () const noexcept { return index_; }
+      operator std::size_t () const noexcept { return (index_ / 2u); }
 
       explicit operator bool () const noexcept { return (index_ < std::numeric_limits< std::size_t >::max()); }
 
@@ -65,45 +66,52 @@ namespace Dune
       bool operator> ( const This &other ) const noexcept { return (index_ > other.index_); }
       bool operator>= ( const This &other ) const noexcept { return (index_ >= other.index_); }
 
-      This &operator++ () noexcept { ++index_; return *this; }
-      This &operator-- () noexcept { --index_; return *this; }
+      This &operator++ () noexcept { index_ += 2u; return *this; }
+      This &operator-- () noexcept { index_ -= 2u; return *this; }
 
-      This &operator+= ( std::ptrdiff_t n ) noexcept { index_ += n; return *this; }
-      This &operator-= ( std::ptrdiff_t n ) noexcept { index_ += n; return *this; }
+      This &operator+= ( std::ptrdiff_t n ) noexcept { index_ += 2u*n; return *this; }
+      This &operator-= ( std::ptrdiff_t n ) noexcept { index_ += 2u*n; return *this; }
 
       friend This operator+ ( This a, std::ptrdiff_t b ) noexcept { return a += b; }
       friend This operator+ ( std::ptrdiff_t a, This b ) noexcept { return b += a; }
       friend This operator- ( This a, std::ptrdiff_t b ) noexcept { return a -= b; }
 
-      friend std::ptrdiff_t operator- ( This a, This b ) noexcept { return (a.index_ - b.index_); }
+      friend std::ptrdiff_t operator- ( This a, This b ) noexcept { return ((a.index_ - b.index_) / 2u); }
+
+      constexpr MeshType type () const noexcept { return MeshType( index_ & 1u ); }
+      // constexpr This dual () const noexcept { This copy( *this ); copy.index_ ^= 1u; return copy; }
 
     private:
       std::size_t index_;
     };
+
+#if 0
+    template< class Tag >
+    inline static constexpr Index< Tag > dual ( Index< Tag > index ) noexcept
+    {
+      return index.dual();
+    }
+#endif
 
 
 
     // NodeIndex
     // ---------
 
-    template< MeshType type >
     struct NodeTag
     {};
 
-    template< MeshType type >
-    using NodeIndex = Index< NodeTag< type > >;
+    typedef Index< NodeTag > NodeIndex;
 
 
 
     // HalfEdgeIndex
     // -------------
 
-    template< MeshType type >
     struct HalfEdgeTag
     {};
 
-    template< MeshType type >
-    using HalfEdgeIndex = Index< HalfEdgeTag< type > >;
+    typedef Index< HalfEdgeTag > HalfEdgeIndex;
 
 
 
@@ -210,80 +218,58 @@ namespace Dune
         edgeIndices_ = __PolygonGrid::edgeIndices( structure_, Primal );
       }
 
-      template< MeshType type >
-      NodeIndex< type > target ( HalfEdgeIndex< type > index ) const noexcept
+      NodeIndex target ( HalfEdgeIndex index ) const noexcept
       {
-        return NodeIndex< type >( indexPair( index ).first );
+        return NodeIndex( indexPair( index ).first, index.type() );
       }
 
-      template< MeshType type >
-      std::size_t edgeIndex ( HalfEdgeIndex< type > index ) const noexcept
+      std::size_t edgeIndex ( HalfEdgeIndex index ) const noexcept
       {
         // We only store edge indices for the primal mesh.
-        return edgeIndices_[ type == Primal ? index : dual( index ) ];
+        return edgeIndices_[ index.type() == Primal ? index : dual( index ) ];
       }
 
-      template< MeshType type >
-      const GlobalCoordinate &position ( NodeIndex< type > index ) const noexcept
+      const GlobalCoordinate &position ( NodeIndex index ) const noexcept
       {
-        assert( index < positions_[ type ].size() );
-        return positions_[ type ][ index ];
+        assert( index < positions_[ index.type() ].size() );
+        return positions_[ index.type() ][ index ];
       }
 
-      template< MeshType type >
-      HalfEdgeIndex< dual( type ) > dual ( HalfEdgeIndex< type > index ) const noexcept
+      HalfEdgeIndex dual ( HalfEdgeIndex index ) const noexcept
       {
-        return halfEdgeIndex< dual( type ) >( indexPair( index ) );
+        return halfEdgeIndex( indexPair( index ), dual( index.type() ) );
       }
 
-      template< MeshType type >
-      HalfEdgeIndex< type > flip ( HalfEdgeIndex< type > index ) const noexcept
+      HalfEdgeIndex flip ( HalfEdgeIndex index ) const noexcept { return dual( dual( index ) ); }
+
+      std::size_t size ( NodeIndex index ) const noexcept
       {
-        return dual( dual( index ) );
+        return structure_[ index.type() ].size();
       }
 
-      template< MeshType type >
-      std::size_t size ( NodeIndex< type > index ) const noexcept
+      HalfEdgeIndex begin ( NodeIndex index ) const noexcept
       {
-        return structure_[ type ].size();
+        return HalfEdgeIndex( structure_[ index.type() ].begin_of( index ), dual( index.type() ) );
       }
 
-      template< MeshType type >
-      HalfEdgeIndex< dual( type ) > begin ( NodeIndex< type > index ) const noexcept
+      HalfEdgeIndex end ( NodeIndex index ) const noexcept
       {
-        return HalfEdgeIndex< dual( type ) >( structure_[ type ].begin_of( index ) );
+        return HalfEdgeIndex( structure_[ index.type() ].end_of( index ), dual( index.type() ) );
       }
 
-      template< MeshType type >
-      HalfEdgeIndex< dual( type ) > end ( NodeIndex< type > index ) const noexcept
-      {
-        return HalfEdgeIndex< dual( type ) >( structure_[ type ].end_of( index ) );
-      }
-
-      template< MeshType type >
-      NodeIndex< type > begin ( std::integral_constant< MeshType, type > = std::integral_constant< MeshType, type >() ) const noexcept
-      {
-        return NodeIndex< type >( 0u );
-      }
-
-      template< MeshType type >
-      NodeIndex< type > end ( std::integral_constant< MeshType, type > = std::integral_constant< MeshType, type >() ) const noexcept
-      {
-        return NodeIndex< type >( regularSize_[ type ] );
-      }
+      NodeIndex begin ( MeshType type ) const noexcept { return NodeIndex( 0u, type ); }
+      NodeIndex end ( MeshType type ) const noexcept { return NodeIndex( regularSize_[ type ], type ); }
 
     private:
-      template< MeshType type >
-      HalfEdgeIndex< type > halfEdgeIndex ( const IndexPair &indexPair ) const noexcept
+      HalfEdgeIndex halfEdgeIndex ( const IndexPair &indexPair, MeshType type ) const noexcept
       {
-        return HalfEdgeIndex< type >( structure_[ type ].position_of( indexPair ) );
+        return HalfEdgeIndex( structure_[ type ].position_of( indexPair ), type );
       }
 
-      template< MeshType type >
-      const IndexPair &indexPair ( HalfEdgeIndex< type > index ) const noexcept
+      const IndexPair &indexPair ( HalfEdgeIndex index ) const noexcept
       {
-        assert( index < structure_[ dual( type ) ].values().size() );
-        return structure_[ dual( type ) ].values()[ index ];
+        assert( index < structure_[ dual( index.type() ) ].values().size() );
+        return structure_[ dual( index.type() ) ].values()[ index ];
       }
 
       std::array< std::size_t, 2 > regularSize_;
