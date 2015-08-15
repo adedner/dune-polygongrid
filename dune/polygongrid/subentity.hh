@@ -13,6 +13,35 @@ namespace Dune
   namespace __PolygonGrid
   {
 
+    // Item
+    // ----
+
+    template< dim_t codim, MeshType type >
+    struct __Item;
+
+    template< MeshType type >
+    struct __Item< 0, type >
+    {
+      typedef Node< dual< type > > Type;
+    };
+
+    template< MeshType type >
+    struct __Item< 1, type >
+    {
+      typedef HalfEdge< type > Type;
+    };
+
+    template< MeshType type >
+    struct __Item< 2, type >
+    {
+      typedef Node< type > Type;
+    };
+
+    template< dim_t codim, MeshType type >
+    using Item = typename __Item< codim, type >::Type;
+
+
+
     // subEntities
     // -----------
 
