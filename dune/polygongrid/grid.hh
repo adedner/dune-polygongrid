@@ -10,32 +10,18 @@
 namespace Dune
 {
 
-  // Internal Forward Declarations
-  // -----------------------------
-
-  template< class ct, __PolygonGrid::MeshType type >
-  class PolygonGrid;
-
-  template< class ct, class Comm = MPI_Comm >
-  using PrimalPolygonGrid = PolygonGrid< ct, __PolygonGrid::Primal >;
-
-  template< class ct, class Comm = MPI_Comm >
-  using DualPolygonGrid = PolygonGrid< ct, __PolygonGrid::Dual >;
-
-
-
   // PolygonGrid
   // -----------
 
-  template< class ct, __PolygonGrid::MeshType type >
+  template< class ct >
   class PolygonGrid
-    : public GridDefaultImplementation< 2, 2, ct, __PolygonGrid::GridFamily< ct, type > >
+    : public GridDefaultImplementation< 2, 2, ct, __PolygonGrid::GridFamily< ct > >
   {
-    typedef PolygonGrid< ct, type > This;
-    typedef GridDefaultImplementation< 2, 2, ct, __PolygonGrid::GridFamily< ct, type > > Base;
+    typedef PolygonGrid< ct > This;
+    typedef GridDefaultImplementation< 2, 2, ct, __PolygonGrid::GridFamily< ct > > Base;
 
   public:
-    typedef __PolygonGrid::GridFamily< ct, type > GridFamily;
+    typedef __PolygonGrid::GridFamily< ct > GridFamily;
 
     typedef typename GridFamily::Traits Traits;
 
@@ -46,9 +32,16 @@ namespace Dune
     typename Traits::template Codim< Seed::codimension >::Entity entity ( const Seed &seed ) const noexcept
     {
       typedef typename Traits::template Codim< Seed::codimension >::Entity::Implementation EntityImpl;
-      typedef __PolygonGrid::Item< Seed::codimension, type > Item;
+      typedef std::conditional( Seed::codimension == 1, __PolygonGrid::HalfEdge< ctype > : __PolygonGrid::Node< ctype > )::type Item;
       return EntityImpl( Item( mesh(), seed.index() ) );
     }
+
+  private:
+    typedef __PolygonGrid::Mesh< ctype > Mesh;
+
+    const Mesh &mesh () const { return *mesh_; }
+
+    std::shared_ptr< Mesh > mesh_;
   };
 
 
@@ -56,11 +49,11 @@ namespace Dune
   // Implementation of PolygonGrid
   // -----------------------------
 
-  template< class ct, __PolygonGrid::MeshType type >
-  const dim_t PolygonGrid< ct, type >::dimension;
+  template< class ct >
+  const dim_t PolygonGrid< ct >::dimension;
 
-  template< class ct, __PolygonGrid::MeshType type >
-  const dim_t PolygonGrid< ct, type >::dimensionworld;
+  template< class ct >
+  const dim_t PolygonGrid< ct >::dimensionworld;
 
 } // namespace Dune
 
