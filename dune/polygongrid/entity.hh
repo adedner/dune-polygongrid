@@ -31,6 +31,7 @@ namespace Dune
     {
       typedef BasicEntity< Item, codim > This;
 
+      typedef __PolygonGrid::EntitySeed< typename Item::Index, codim > EntitySeedImpl;
       typedef __PolygonGrid::Geometry< Item, codim > GeometryImpl;
 
     public:
@@ -45,7 +46,7 @@ namespace Dune
         typedef Dune::Entity< __PolygonGrid::Entity< SubItem, cd > > Entity;
       };
 
-      // typedef typename Grid::template Codim< codimension >::EntitySeed EntitySeed;
+      typedef Dune::EntitySeed< EntitySeedImpl > EntitySeed;
       typedef Dune::Geometry< GeometryImpl > Geometry;
 
       explicit Entity ( const Item &item ) : item_( item ) {}
@@ -56,7 +57,7 @@ namespace Dune
 
       Geometry geometry () const { return GeometryImpl( item_ ); }
 
-      // EntitySeed seed () const { return typename EntitySeed::Implementation( index() ); }
+      EntitySeed seed () const { return EntitySeedImpl( item_.index() ); }
 
       template< dim_t cd >
       typename Codim< cd >::Entity subEntity ( int i ) const
@@ -65,7 +66,7 @@ namespace Dune
         return EntityImpl( __PolygonGrid::subEntity( item_, Dune::Codim< cd - codimension >(), i ) );
       }
 
-      std::size_t index () const { return item_.index(); }
+      std::size_t index () const { return item_.uniqueIndex(); }
 
     private:
       Item item_;
@@ -91,7 +92,7 @@ namespace Dune
       std::size_t subIndex ( dim_t codim, std::size_t i ) const noexcept
       {
         assert( i < subEntities( codim ) );
-        return __PolygonGrid::subEntity( item_, Dune::Codim< 0 >(), i ).index();
+        return __PolygonGrid::subEntity( item_, Dune::Codim< 0 >(), i ).uniqueIndex();
       }
     };
 
@@ -116,9 +117,9 @@ namespace Dune
       {
         assert( i < subEntities( codim ) );
         if( codim == 2 )
-          return __PolygonGrid::subEntity( item_, Dune::Codim< 0 >(), i ).index();
+          return __PolygonGrid::subEntity( item_, Dune::Codim< 0 >(), i ).uniqueIndex();
         else
-          return __PolygonGrid::subEntity( item_, Dune::Codim< 1 >(), i ).index();
+          return __PolygonGrid::subEntity( item_, Dune::Codim< 1 >(), i ).uniqueIndex();
       }
     };
 
@@ -152,14 +153,14 @@ namespace Dune
         switch( codim )
         {
         case 0:
-          return __PolygonGrid::subEntity( item_, Dune::Codim< 0 >(), i ).index();
+          return __PolygonGrid::subEntity( item_, Dune::Codim< 0 >(), i ).uniqueIndex();
 
         case 1:
-          return __PolygonGrid::subEntity( item_, Dune::Codim< 1 >(), i ).index();
+          return __PolygonGrid::subEntity( item_, Dune::Codim< 1 >(), i ).uniqueIndex();
 
         case 2:
-          return __PolygonGrid::subEntity( item_, Dune::Codim< 2 >(), i ).index();
-        {
+          return __PolygonGrid::subEntity( item_, Dune::Codim< 2 >(), i ).uniqueIndex();
+        }
       }
 
       bool isLeaf () const { return true; }

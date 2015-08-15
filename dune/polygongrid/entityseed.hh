@@ -19,17 +19,18 @@ namespace Dune
     // EntitySeed
     // ----------
 
-    template< dim_t codim >
+    template< class Index, dim_t codim >
     class EntitySeed
     {
-      typedef EntitySeed< codim > This;
+      typedef EntitySeed< Item, codim > This;
 
     public:
       static const dim_t codimension = codim;
 
-      explicit EntitySeed ( std::size_t index = std::numeric_limits< std::size_t >::max() ) : index_( index ) {}
+      EntitySeed () = default;
+      explicit EntitySeed ( const Index &index ) : index_( index ) {}
 
-      DUNE_INLINE bool isValid () const noexcept { return (index() < std::numeric_limits< std::size_t >::max()); }
+      DUNE_INLINE bool isValid () const noexcept { return static_cast< bool >( index() ); }
 
       DUNE_INLINE bool operator== ( const This &other ) const noexcept { return (index() == other.index()); }
       DUNE_INLINE bool operator!= ( const This &other ) const noexcept { return (index() != other.index()); }
@@ -37,7 +38,7 @@ namespace Dune
       DUNE_INLINE std::size_t index () const noexcept { return index_; }
 
     private:
-      std::size_t index_;
+      Index index_;
     };
 
 } // namespace Dune

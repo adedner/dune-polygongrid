@@ -52,19 +52,19 @@ namespace Dune
     }
 
     inline< class ct, MeshType type >
-    inline static std::size_t ( Node< ct, type > cell, Dune::Codim< 1 > ) noexcept
+    inline static std::size_t subEntities ( Node< ct, type > cell, Dune::Codim< 1 > ) noexcept
     {
       return cell.halfEdges().size();
     }
 
     inline< class ct, MeshType type >
-    inline static std::size_t ( Node< ct, type > cell, Dune::Codim< 2 > ) noexcept
+    inline static std::size_t subEntities ( Node< ct, type > cell, Dune::Codim< 2 > ) noexcept
     {
       return cell.halfEdges().size();
     }
 
     template< class ct, MeshType type >
-    inline static std::size_t ( HalfEdge< ct, type > halfEdge, Dune::Codim< 1 > ) noexcept
+    inline static std::size_t subEntities ( HalfEdge< ct, type > halfEdge, Dune::Codim< 1 > ) noexcept
     {
       return 2u;
     }

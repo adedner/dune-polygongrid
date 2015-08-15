@@ -51,13 +51,14 @@ namespace Dune
 
       Node ( const Mesh &mesh, Index index ) : mesh_( &mesh ), index_( index ) {}
 
-      const GlobalCoordinate &position () const noexcept { return mesh().position( index_ ); }
+      const GlobalCoordinate &position () const noexcept { return mesh().position( index() ); }
 
       HalfEdges halfEdges () const noexcept;
 
-      std::size_t index () const noexcept { return index_; }
+      std::size_t uniqueIndex () const noexcept { return index(); }
 
       const Mesh &mesh () const noexcept { return *mesh_; }
+      Index index () const noexcept { return index_; }
 
     private:
       const Mesh *mesh_;
@@ -100,20 +101,21 @@ namespace Dune
       HalfEdge ( const Mesh &mesh, Index index ) : mesh_( &mesh ), index_( index ) {}
 
       /** \brief flip the direction of the half edge */
-      This flip () const noexcept { return This( mesh(), mesh().flip( index_ ) ); }
+      This flip () const noexcept { return This( mesh(), mesh().flip( index() ) ); }
 
       /** \brief obtain node, the half edge points to */
-      Node target () const noexcept { return Node( mesh(), mesh().target( index_ ) ); }
+      Node target () const noexcept { return Node( mesh(), mesh().target( index() ) ); }
 
       /** \brief obtain neighboring cell (whose boundary contains the flipped half edge) */
-      Cell neighbor () const noexcept { return Cell( mesh(), mesh().target( mesh().dual( index_ ) ) ); }
+      Cell neighbor () const noexcept { return Cell( mesh(), mesh().target( mesh().dual( index() ) ) ); }
 
       /** \brief obtain cell whose boundary contains this half edge */
       Cell cell () const noexcept { return flip().neighbor(); }
 
-      std::size_t index () const noexcept { return mesh().edgeIndex( index_ ); }
+      std::size_t uniqueIndex () const noexcept { return mesh().edgeIndex( index() ); }
 
       const Mesh &mesh () const noexcept { return *mesh_; }
+      Index index () const noexcept { return index_; }
 
     private:
       const Mesh *mesh_;
