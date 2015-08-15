@@ -1,7 +1,7 @@
 #ifndef DUNE_POLYGONGRID_GRID_HH
 #define DUNE_POLYGONGRID_GRID_HH
 
-#include <dune/common/parallel/mpicollectivecommunication.hh>
+#include <dune/geometry/dimension.hh>
 
 #include <dune/grid/common/grid.hh>
 
@@ -13,33 +13,42 @@ namespace Dune
   // Internal Forward Declarations
   // -----------------------------
 
-#if HAVE_MPI
-  template< class ct, class idx = unsigned int, class Comm = MPI_Comm >
+  template< class ct, __PolygonGrid::MeshType type >
   class PolygonGrid;
-#else
-  template< class ct, class idx = unsigned int, class Comm = No_Comm >
-  class PolygonGrid;
-#endif // #if !HAVE_MPI
+
+  template< class ct, class Comm = MPI_Comm >
+  using PrimalPolygonGrid = PolygonGrid< ct, __PolygonGrid::Primal >;
+
+  template< class ct, class Comm = MPI_Comm >
+  using DualPolygonGrid = PolygonGrid< ct, __PolygonGrid::Dual >;
 
 
 
   // PolygonGrid
   // -----------
 
-  template< class ct, class idx, class Comm >
+  template< class ct, __PolygonGrid::MeshType type >
   class PolygonGrid
-    : public GridDefaultImplementation< 2, 2, ct, __PolygonGrid::GridFamily< ct, idx, Comm > >
+    : public GridDefaultImplementation< 2, 2, ct, __PolygonGrid::GridFamily< ct, type > >
   {
-    typedef PolygonGrid< ct, idx, Comm > This;
-    typedef GridDefaultImplementation< 2, 2, ct, __PolygonGrid::GridFamily< ct, idx, Comm > > Base;
+    typedef PolygonGrid< ct, type > This;
+    typedef GridDefaultImplementation< 2, 2, ct, __PolygonGrid::GridFamily< ct, type > > Base;
 
   public:
-    typedef __PolygonGrid::GridFamily< ct, idx, Comm > GridFamily;
+    typedef __PolygonGrid::GridFamily< ct, type > GridFamily;
 
     typedef typename GridFamily::Traits Traits;
 
-    static const int dimension = 2;
-    static const int dimensionworld = 2;
+    static const dim_t dimension = 2;
+    static const dim_t dimensionworld = 2;
+
+    template< dim_t codim >
+    typename Traits::template Codim< Seed::codimension >::Entity entity ( const Seed &seed ) const noexcept
+    {
+      typedef typename Traits::template Codim< Seed::codimension >::Entity::Implementation EntityImpl;
+      typedef __PolygonGrid::Item< Seed::codimension, type > Item;
+      return EntityImpl( Item( mesh(), seed.index() ) );
+    }
   };
 
 
@@ -47,11 +56,11 @@ namespace Dune
   // Implementation of PolygonGrid
   // -----------------------------
 
-  template< class ct, class idx, class Comm >
-  const int PolygonGrid< ct, idx, Comm >::dimension;
+  template< class ct, __PolygonGrid::MeshType type >
+  const dim_t PolygonGrid< ct, type >::dimension;
 
-  template< class ct, class idx, class Comm >
-  const int PolygonGrid< ct, idx, Comm >::dimensionworld;
+  template< class ct, __PolygonGrid::MeshType type >
+  const dim_t PolygonGrid< ct, type >::dimensionworld;
 
 } // namespace Dune
 
