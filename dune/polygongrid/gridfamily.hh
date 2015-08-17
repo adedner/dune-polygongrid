@@ -19,20 +19,23 @@ namespace Dune
     // GridFamily
     // ----------
 
-    template< class ct, class idx, class Comm >
+    template< class ct >
     struct GridFamily
     {
       struct Traits
       {
         typedef ct ctype;
-        typedef idx Index;
 
-        typedef Dune::PolygonGrid< ct, idx, Comm > Grid;
+        typedef Dune::PolygonGrid< ct > Grid;
 
         template< dim_t codim >
         struct Codim
         {
-          typedef Dune::EntitySeed< __PolygonGrid::EntitySeed< codim > > EntitySeed;
+          typedef typename std::conditional< codim == 1 ? HalfEdge< ctype > : Node< ctype > >::type Item;
+
+          typedef Dune::Entity< codim, __PolygonGrid::Entity< Item, codim > > Entity;
+
+          typedef Dune::EntitySeed< __PolygonGrid::EntitySeed< Item::Index, codim > > EntitySeed;
         };
       };
     };

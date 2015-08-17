@@ -43,7 +43,7 @@ namespace Dune
       struct Codim
       {
         typedef decltype( __PolygonGrid::subEntity( std::declval< Item >(), Dune::Codim< cd - codimension >(), std::size_t() ) ) SubItem;
-        typedef Dune::Entity< __PolygonGrid::Entity< SubItem, cd > > Entity;
+        typedef Dune::Entity< cd, __PolygonGrid::Entity< SubItem, cd > > Entity;
       };
 
       typedef Dune::EntitySeed< EntitySeedImpl > EntitySeed;
