@@ -30,7 +30,7 @@ namespace Dune
 
       static const dim_t dimension = 2;
 
-      template< int codim >
+      template< dim_t codim >
       struct Codim
       {
         typedef typename Traits::template Codim< codim >::Entity Entity;
@@ -43,23 +43,26 @@ namespace Dune
         return id< Entity::codimension >( entity );
       }
 
-      template< int codim >
+      template< dim_t codim >
       Id id ( const typename Codim< codim >::Entity &entity ) const
       {
-        return entity.impl().index();
+        return id( entity.impl().index(), codim );
       }
 
       template< class Entity >
-      Id subId ( const Entity &entity, int i, unsigned int codim ) const
+      Id subId ( const Entity &entity, int i, dim_t codim ) const
       {
         return subId< Entity::codimension >( entity, i, codim );
       }
 
-      template< int cd >
-      Id subId ( const typename Codim< cd >::Entity &entity, int i, unsigned int codim ) const
+      template< dim_t cd >
+      Id subId ( const typename Codim< cd >::Entity &entity, int i, dim_t codim ) const
       {
-        return entity.impl().subIndex( i, codim );
+        return id( entity.impl().subIndex( i, codim ), codim );
       }
+
+    private:
+      static constexpr Id id ( std::size_t index, std::size_t codim ) noexcept { return (id << 2) | codim; }
     };
 
   } // namespace __PolygonGrid
