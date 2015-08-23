@@ -57,20 +57,22 @@ namespace Dune
 
       PartitionType partitionType () const { return InteriorEntity; }
 
-      Geometry geometry () const { return GeometryImpl( item_ ); }
+      Geometry geometry () const { return GeometryImpl( item() ); }
 
-      EntitySeed seed () const { return EntitySeedImpl( item_.index() ); }
+      EntitySeed seed () const { return EntitySeedImpl( item().index() ); }
 
       template< dim_t cd >
       typename Codim< cd >::Entity subEntity ( int i ) const
       {
         typedef typename Codim< cd >::Entity::Implementation EntityImpl;
-        return EntityImpl( __PolygonGrid::subEntity( item_, Dune::Codim< cd - codimension >(), i ) );
+        return EntityImpl( __PolygonGrid::subEntity( item(), Dune::Codim< cd - codimension >(), i ) );
       }
 
-      std::size_t index () const { return item_.uniqueIndex(); }
+      std::size_t index () const { return item().uniqueIndex(); }
 
-    private:
+      const Item &item () const { return item_; }
+
+    protected:
       Item item_;
     };
 
@@ -87,6 +89,8 @@ namespace Dune
       typedef BasicEntity< Item, 2 > Base;
 
     public:
+      using Base::item;
+
       explicit Entity ( const Item &item ) : Base( item ) {}
 
       std::size_t subEntities ( dim_t codim ) const noexcept { return (codim == 2 ? 1u : 0u); }
@@ -94,7 +98,7 @@ namespace Dune
       std::size_t subIndex ( dim_t codim, std::size_t i ) const noexcept
       {
         assert( i < subEntities( codim ) );
-        return __PolygonGrid::subEntity( item_, Dune::Codim< 0 >(), i ).uniqueIndex();
+        return __PolygonGrid::subEntity( item(), Dune::Codim< 0 >(), i ).uniqueIndex();
       }
     };
 
@@ -111,6 +115,8 @@ namespace Dune
       typedef BasicEntity< Item, 1 > Base;
 
     public:
+      using Base::item;
+
       explicit Entity ( const Item &item ) : Base( item ) {}
 
       std::size_t subEntities ( dim_t codim ) const noexcept { return (codim == 2 ? 2u : (codim == 1 ? 1u : 0u)); }
@@ -119,9 +125,9 @@ namespace Dune
       {
         assert( i < subEntities( codim ) );
         if( codim == 2 )
-          return __PolygonGrid::subEntity( item_, Dune::Codim< 0 >(), i ).uniqueIndex();
+          return __PolygonGrid::subEntity( item(), Dune::Codim< 0 >(), i ).uniqueIndex();
         else
-          return __PolygonGrid::subEntity( item_, Dune::Codim< 1 >(), i ).uniqueIndex();
+          return __PolygonGrid::subEntity( item(), Dune::Codim< 1 >(), i ).uniqueIndex();
       }
     };
 
@@ -142,11 +148,13 @@ namespace Dune
 
       typedef typename Traits::HierarchicIterator HierarchicIterator;
 
+      using Base::item;
+
       explicit Entity ( const Item &item ) : Base( item ) {}
 
       unsigned int subEntities ( dim_t codim ) const noexcept
       {
-        return ((codim == 1) || (codim == 2) ? item_.halfEdges().size() : (codim == 0u ? 1u : 0u));
+        return ((codim == 1) || (codim == 2) ? item().halfEdges().size() : (codim == 0u ? 1u : 0u));
       }
 
       std::size_t subIndex ( dim_t codim, std::size_t i ) const noexcept
@@ -155,13 +163,13 @@ namespace Dune
         switch( codim )
         {
         case 0:
-          return __PolygonGrid::subEntity( item_, Dune::Codim< 0 >(), i ).uniqueIndex();
+          return __PolygonGrid::subEntity( item(), Dune::Codim< 0 >(), i ).uniqueIndex();
 
         case 1:
-          return __PolygonGrid::subEntity( item_, Dune::Codim< 1 >(), i ).uniqueIndex();
+          return __PolygonGrid::subEntity( item(), Dune::Codim< 1 >(), i ).uniqueIndex();
 
         case 2:
-          return __PolygonGrid::subEntity( item_, Dune::Codim< 2 >(), i ).uniqueIndex();
+          return __PolygonGrid::subEntity( item(), Dune::Codim< 2 >(), i ).uniqueIndex();
         }
       }
 

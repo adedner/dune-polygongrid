@@ -8,7 +8,7 @@
 #include <dune/grid/common/entityseed.hh>
 #include <dune/grid/common/grid.hh>
 
-#include <dune/polygongrid/declaration.hh>
+#include <dune/polygongrid/gridview.hh>
 
 namespace Dune
 {
@@ -54,15 +54,16 @@ namespace Dune
 
         typedef Dune::PolygonGrid< ct > Grid;
 
+        typedef Dune::GridView< GridViewTraits< ct > > GridView;
+
         template< dim_t codim >
         struct Codim
         {
-          typedef typename std::conditional< codim == 1 ? HalfEdge< ctype > : Node< ctype > >::type Item;
+          typedef typename GridView::template Codim< codim >::Entity Entity;
+          typedef typename GridView::template Codim< codim >::EntitySeed EntitySeed;
 
-          typedef Dune::Entity< codim, __PolygonGrid::Entity< Item, codim > > Entity;
-
-          typedef typename Entity::EntitySeed EntitySeed;
-          typedef typename Entity::Geometry Geometry;
+          typedef typename GridView::template Codim< codim >::Geometry Geometry;
+          typedef typename GridView::template Codim< codim >::LocalGeometry LocalGeometry;
         };
       };
     };

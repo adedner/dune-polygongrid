@@ -92,13 +92,13 @@ namespace Dune
       IntersectionIterator ibegin ( const typename Codim< 0 >::Entity &entity ) const
       {
         typedef typename IntersectionIterator::Implementation IntersectionIteratorImpl;
-        return IntersectionIteratorImpl( entity, 0 );
+        return IntersectionIteratorImpl( entity.impl().item().halfEdges().begin() );
       }
 
       IntersectionIterator iend ( const typename Codim< 0 >::Entity &entity ) const
       {
         typedef typename IntersectionIterator::Implementation IntersectionIteratorImpl;
-        return IntersectionIteratorImpl( entity, 3 );
+        return IntersectionIteratorImpl( entity.impl().item().halfEdges().end() );
       }
 
       template< class DataHandle, class DataType >
