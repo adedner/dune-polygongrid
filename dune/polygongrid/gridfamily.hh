@@ -35,7 +35,8 @@ namespace Dune
 
           typedef Dune::Entity< codim, __PolygonGrid::Entity< Item, codim > > Entity;
 
-          typedef Dune::EntitySeed< __PolygonGrid::EntitySeed< Item::Index, codim > > EntitySeed;
+          typedef typename Entity::EntitySeed EntitySeed;
+          typedef typename Entity::Geometry Geometry;
         };
       };
     };
