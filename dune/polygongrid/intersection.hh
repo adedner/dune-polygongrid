@@ -51,16 +51,16 @@ namespace Dune
 
       bool conforming () const { return true; }
 
-      bool boundary () const { return item_.boundary(); }
+      bool boundary () const { return item().boundary(); }
 
       bool neighbor () const { return !boundary(); }
 
       int boundaryId () const { return 1; }
 
-      std::size_t boundarySegmentIndex () const { assert( item_.boundary() ); return item_.index(); }
+      std::size_t boundarySegmentIndex () const { assert( item().boundary() ); return item().index(); }
 
-      Entity inside () const { return EntityImpl( grid(), item_.flip().cell() ); }
-      Entity outside () const { return EntityImpl( grid(), item_.cell() ); }
+      Entity inside () const { return EntityImpl( item().flip().cell() ); }
+      Entity outside () const { return EntityImpl( item().cell() ); }
 
       int indexInInside () const
       {
@@ -74,7 +74,7 @@ namespace Dune
 
       DUNE_INLINE constexpr GeometryType type () const noexcept { return GeometryType( GeometryType::None(), mydimension ); }
 
-      Geometry geometry () const { return GeometryImpl( item_ ); } }
+      Geometry geometry () const { return GeometryImpl( item() ); } }
 
       LocalGeometry geometryInInside () const
       {
@@ -96,10 +96,12 @@ namespace Dune
         return OuterNormals( type(), normal *= Math::one / normal.two_norm() );
       }
 
+      const Item &item () const { return item_; }
+
     private:
       GlobalCoordinate outerNormal () const
       {
-        const GlobalCoordinate tangent = (item_.target().position() - item_.flip().target().position());
+        const GlobalCoordinate tangent = (item().target().position() - item().flip().target().position());
         return GlobalCoordinate( -tangent[ 1 ], tangent[ 0 ] );
       }
 

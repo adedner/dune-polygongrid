@@ -251,7 +251,7 @@ namespace Dune
     template< class ct >
     inline typename Node< ct >::HalfEdges Node< ct >::halfEdges () const noexcept
     {
-      return HalfEdges( mesh(), index_ );
+      return HalfEdges( mesh(), index() );
     }
 
   } // namespace __PolygonGrid
