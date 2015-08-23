@@ -17,41 +17,32 @@ namespace Dune
     // EntityIterator
     // --------------
 
-    template< dim_t codim, class Grid >
+    template< class Item, dim_t codim >
     class EntityIterator
     {
-      typedef EntityIterator< codim, Grid > This;
+      typedef EntityIterator< Item, codim > This;
 
-      typedef typename std::remove_const< Grid >::type::Traits Traits;
+      typedef __PolygonGrid::Entity< Item, codim > EntityImpl;
 
     public:
       static const dim_t codimension = codim;
-      static const dim_t dimension = Traits::dimension;
+      static const dim_t dimension = 2;
       static const dim_t mydimension = dimension - codimension;
 
-      typedef typename Traits::template Codim< codimension >::Entity Entity;
+      typedef Dune::Entity< codim, EntityImpl > Entity;
 
-    protected:
-      typedef typename Entity::Implementation EntityImpl;
-
-    public:
       EntityIterator () = default;
 
-      EntityIterator ( const Grid &grid, std::size_t index )
-        : grid_( &grid ), index_( index )
-      {}
+      explicit EntityIterator ( IndexIterator< Item > iterator ) : iterator_( iterator ) {}
 
-      Entity dereference () const { return EntityImpl( grid(), index_ ); }
+      Entity dereference () const { return EntityImpl( *iterator_ ); }
 
-      bool equals ( const This &other ) const noexcept { return (index_ == other.index_); }
+      bool equals ( const This &other ) const noexcept { return (iterator_ == other.iterator_); }
 
-      void increment () noexcept { ++index_; }
-
-      const Grid &grid () const noexcept { assert( grid_ ); return *grid_; }
+      void increment () noexcept { ++iterator_; }
 
     protected:
-      const Grid *grid_ = nullptr;
-      std::size_t index_;
+      IndexIterator< Item > iterator_;
     };
 
   } // namespace __PolygonGrid
