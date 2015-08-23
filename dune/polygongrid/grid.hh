@@ -15,45 +15,83 @@ namespace Dune
 
   template< class ct >
   class PolygonGrid
-    : public GridDefaultImplementation< 2, 2, ct, __PolygonGrid::GridFamily< ct > >
+    : public Dune::Grid< 2, 2, ct, __PolygonGrid::GridFamily< ct > >
   {
     typedef PolygonGrid< ct > This;
-    typedef GridDefaultImplementation< 2, 2, ct, __PolygonGrid::GridFamily< ct > > Base;
+    typedef Dune::Grid< 2, 2, ct, __PolygonGrid::GridFamily< ct > > Base;
 
   public:
     typedef __PolygonGrid::GridFamily< ct > GridFamily;
 
     typedef typename GridFamily::Traits Traits;
 
-    static const dim_t dimension = 2;
-    static const dim_t dimensionworld = 2;
+    using Base::dimension;
+
+    typedef __PolygonGrid::Mesh< ctype > Mesh;
+    typedef __PolygonGrid::MeshType MeshType;
+
+    PolygonGrid ( std::shared_ptr< Mesh > mesh, __PolygonGrid::MeshType type )
+      : mesh_( mesh ), type_( type )
+    {}
+
+    int maxLevel () const { return 0; }
+
+    std::size_t numBoundarySegments () const { return mesh().numBoundaries(); }
+
+    MacroGridView macroGridView () const
+    {
+      typedef typename MacroGridView::Implementation GridViewImpl;
+      return GridViewImpl( *this );
+    }
+
+    LevelGridView levelGridView ( int level ) const { assert( level == 0 ); return macroGridView; }
+    LeafGridView leafGridView () const { return macroGridView(); }
+
+    const GlobalIdSet &globalIdSet () const { return idSet_; }
+    const LocalIdSet &localIdSet () const { return idSet_; }
+
+    bool globalRefine ( int refCount ) {}
+
+    bool mark ( int refCount, const typename Traits::template Codim< 0 >::Entity &entity ) const { return false; }
+    int getMark ( const typename Traits::template Codim< 0 >::Entity &entity ) const { return 0; }
+
+    bool preAdapt () { return false; }
+    bool adapt () { return false; }
+    void postAdapt () {}
+
+    const CollectiveCommunication &comm () const { return comm_; }
+
+    bool loadBalance () { return false; }
+
+    template< class DataHandle >
+    bool loadBalance ( DataHandle &data )
+    {
+      return false;
+    }
 
     template< dim_t codim >
     typename Traits::template Codim< Seed::codimension >::Entity entity ( const Seed &seed ) const noexcept
     {
       typedef typename Traits::template Codim< Seed::codimension >::Entity::Implementation EntityImpl;
-      typedef std::conditional( Seed::codimension == 1, __PolygonGrid::HalfEdge< ctype > : __PolygonGrid::Node< ctype > )::type Item;
+      typedef std::conditional( Seed::codimension == 1, __PolygonGrid::HalfEdge< ctype > : __PolygonGrid::Node< ct > )::type Item;
       return EntityImpl( Item( mesh(), seed.index() ) );
     }
 
-  private:
-    typedef __PolygonGrid::Mesh< ctype > Mesh;
+    template< class Entity >
+    int level ( const Entity &entity ) const
+    {
+      return 0;
+    }
 
     const Mesh &mesh () const { return *mesh_; }
+    MeshType meshType () const { return meshType_; }
 
+  private:
     std::shared_ptr< Mesh > mesh_;
+    __PolygonGrid::MeshType type_:
+    CollectiveCommunication comm_;
+    IdSet idSet_;
   };
-
-
-
-  // Implementation of PolygonGrid
-  // -----------------------------
-
-  template< class ct >
-  const dim_t PolygonGrid< ct >::dimension;
-
-  template< class ct >
-  const dim_t PolygonGrid< ct >::dimensionworld;
 
 } // namespace Dune
 

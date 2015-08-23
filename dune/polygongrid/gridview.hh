@@ -111,6 +111,7 @@ namespace Dune
 
     private:
       std::reference_wrapper< const Grid > grid_;
+      IndexSet indexSet_;
     };
 
   } // namespace __PolygonGrid
