@@ -6,6 +6,7 @@ set( HEADERS
   geometry.hh
   grid.hh
   gridfamily.hh
+  gridfactory.hh
   gridview.hh
   idset.hh
   indexset.hh
