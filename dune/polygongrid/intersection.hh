@@ -9,6 +9,7 @@
 
 #include <dune/geometry/type.hh>
 
+#include <dune/grid/common/entity.hh>
 #include <dune/grid/common/normals.hh>
 
 namespace Dune
@@ -20,18 +21,15 @@ namespace Dune
     // Intersection
     // ------------
 
-    template< class Grid >
+    template< class ct >
     class Intersection
     {
-      typedef Intersection< Grid > This;
-
-      typedef typename std::remove_const< Grid >::type::Traits Traits;
+      typedef Intersection< ct > This;
 
     public:
-      typedef typename Traits::template Codim< 0 >::Entity Entity;
-
-      typedef typename Traits::template Codim< 1 >::Geometry Geometry;
-      typedef typename Traits::template Codim< 1 >::LocalGeometry LocalGeometry;
+      typedef Dune::Entity< 0, EntityImpl > Entity;
+      typedef Dune::Geometry< GeometryImpl > Geometry;
+      typedef Dune::Geometry< LocalGeometryImpl > LocalGeometry;
 
       typedef typename Geometry::GlobalCoordinate GlobalCoordinate;
       typedef typename Geometry::LocalCoordinate LocalCoordinate;
