@@ -16,6 +16,32 @@ namespace Dune
   namespace __PolygonGrid
   {
 
+    // GridViewTraits
+    // --------------
+
+    template< class ct >
+    struct GridViewTraits
+    {
+      typedef __PolygonGrid::GridView< ct > GridViewImp;
+
+      typedef ct ctype;
+
+      typedef typename GridViewImp::Grid Grid;
+      typedef typename GridViewImp::IndexSet IndexSet;
+
+      template< dim_t codim >
+      using Codim = GridViewImp::Codim;
+
+      typedef typename GridViewImp::IntersetionIterator IntersectionIterator;
+      typedef typename IntersectionIterator::Intersection Intersection;
+
+      typedef typename GridView::CollectiveCommunication CollectiveCommunication;
+
+      static const bool conforming = true;
+    };
+
+
+
     // GridFamily
     // ----------
 
