@@ -9,8 +9,12 @@
 
 #include <dune/geometry/type.hh>
 
-#include <dune/grid/common/entity.hh>
+#include <dune/grid/common/intersection.hh>
+#include <dune/grid/common/intersectioniterator.hh>
 #include <dune/grid/common/normals.hh>
+
+#include <dune/polygongrid/entity.hh>
+#include <dune/polygongrid/geometry.hh>
 
 namespace Dune
 {
@@ -26,6 +30,11 @@ namespace Dune
     {
       typedef Intersection< ct > This;
 
+      typedef HalfEdge< ct > Item;
+
+      typedef __PolygonGrid::Entiy< Node< ct >, 0 > EntityImpl;
+      typedef __PolygonGrid::Geometry< Item, codim > GeometryImpl;
+
     public:
       typedef Dune::Entity< 0, EntityImpl > Entity;
       typedef Dune::Geometry< GeometryImpl > Geometry;
@@ -38,20 +47,20 @@ namespace Dune
       typedef ConstantLocalFunction< LocalCoordinate, GlobalCoordinate > OuterNormals;
 
     public:
-      Intersection ( HalfEdge< Grid > halfEdge ) : halfEdge_( halfEdge ) {}
+      Intersection ( Item item ) : item_( item ) {}
 
       bool conforming () const { return true; }
 
-      bool boundary () const { return halfEdge_.boundary(); }
+      bool boundary () const { return item_.boundary(); }
 
       bool neighbor () const { return !boundary(); }
 
       int boundaryId () const { return 1; }
 
-      std::size_t boundarySegmentIndex () const { assert( halfEdge_.boundary() ); return halfEdge_.index(); }
+      std::size_t boundarySegmentIndex () const { assert( item_.boundary() ); return item_.index(); }
 
-      Entity inside () const { return EntityImpl( grid(), halfEdge_.polygon() ); }
-      Entity outside () const { return EntityImpl( grid(), halfEdge_.flip().polygon() ); }
+      Entity inside () const { return EntityImpl( grid(), item_.flip().cell() ); }
+      Entity outside () const { return EntityImpl( grid(), item_.cell() ); }
 
       int indexInInside () const
       {
@@ -65,10 +74,7 @@ namespace Dune
 
       DUNE_INLINE constexpr GeometryType type () const noexcept { return GeometryType( GeometryType::None(), mydimension ); }
 
-      Geometry geometry () const
-      {
-        // return inside().subEntity( indexInInside(), Codim< 1 >() ).geometry();
-      }
+      Geometry geometry () const { return GeometryImpl( item_ ); } }
 
       LocalGeometry geometryInInside () const
       {
@@ -90,16 +96,14 @@ namespace Dune
         return OuterNormals( type(), normal *= Math::one / normal.two_norm() );
       }
 
-      const Grid &grid () const { return halfEdge_.grid(); }
-
     private:
       GlobalCoordinate outerNormal () const
       {
-        const GlobalCoordinate tangent = (halfEdge_.target().position() - halfEdge_.flip().target().position());
+        const GlobalCoordinate tangent = (item_.target().position() - item_.flip().target().position());
         return GlobalCoordinate( -tangent[ 1 ], tangent[ 0 ] );
       }
 
-      HalfEdge< Grid > halfEdge_;
+      Item item_;
     };
 
 
@@ -107,19 +111,19 @@ namespace Dune
     // IntersectionIterator
     // --------------------
 
-    template< class Grid >
+    template< class ct >
     class IntersectionIterator
     {
-      typedef IntersectionIterator< Grid > This;
+      typedef IntersectionIterator< ct > This;
 
-      typedef __PolygonGrid::Intersection< Grid > IntersectionImpl;
+      typedef __PolygonGrid::Intersection< ct > IntersectionImpl;
 
     public:
       typedef Dune::Intersection< IntersectionImpl > Intersection:
 
       IntersectionIterator () = default;
 
-      IntersectionIterator ( const HalfEdgeIterator< Grid > halfEdgeIterator ) : halfEdgeIterator_( halfEdgeIterator ) {}
+      IntersectionIterator ( const HalfEdgeIterator< ct > halfEdgeIterator ) : halfEdgeIterator_( halfEdgeIterator ) {}
 
       DUNE_INLINE void increment () { ++halfEdgeIterator_; }
 
@@ -128,7 +132,7 @@ namespace Dune
       DUNE_INLINE bool equals ( const This &other ) const { return (halfEdgeIterator_ == other.halfEdgeIterator_); }
 
     private:
-      HalfEdgeIterator< Grid > halfEdgeIterator_;
+      HalfEdgeIterator< ct > halfEdgeIterator_;
     };
 
   } // namespace __PolygonGrid

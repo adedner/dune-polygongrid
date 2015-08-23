@@ -36,6 +36,12 @@ namespace Dune
 
       typedef typename Base::Index Index;
 
+      template< int codim >
+      struct Codim
+      {
+        typedef typename Traits::template Codim< codim >::Entity Entity;
+      };
+
       IndexSet () : size_{{ 0u, 0u, 0u }} {}
 
       template< class Entity >
@@ -45,7 +51,7 @@ namespace Dune
       }
 
       template< dim_t cd >
-      Index index ( const typename Traits::template Codim< cd >::Entity &entity ) const
+      Index index ( const typename Codim< cd >::Entity &entity ) const
       {
         return entity.impl().index();
       }
@@ -57,7 +63,7 @@ namespace Dune
       }
 
       template< dim_t cd >
-      Index subIndex ( const typename Traits::template Codim< cd >::Entity &entity, int i, dim_t codim ) const
+      Index subIndex ( const typename Codim< cd >::Entity &entity, int i, dim_t codim ) const
       {
         return entity.impl().subIndex( i, codim );
       }

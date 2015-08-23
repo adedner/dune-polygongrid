@@ -10,6 +10,8 @@
 
 #include <dune/geometry/dimension.hh>
 
+#include <dune/grid/common/entityseed.hh>
+
 namespace Dune
 {
 

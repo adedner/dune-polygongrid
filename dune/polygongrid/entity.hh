@@ -5,6 +5,8 @@
 
 #include <dune/geometry/dimension.hh>
 
+#include <dune/grid/common/entity.hh>
+
 #include <dune/polygongrid/entityseed.hh>
 #include <dune/polygongrid/geometry.hh>
 #include <dune/polygongrid/subentitiy.hh>
