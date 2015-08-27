@@ -1,5 +1,6 @@
 set( HEADERS
   declaration.hh
+  dgf.hh
   entity.hh
   entityiterator.hh
   entityseed.hh
