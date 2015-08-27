@@ -6,6 +6,8 @@
 
 #include <type_traits>
 
+#include <dune/common/iterator/tags.hh>
+
 #include <dune/geometry/dimension.hh>
 
 #include <dune/polygongrid/entity.hh>
@@ -45,7 +47,8 @@ namespace Dune
 
       EntityIterator () = default;
 
-      explicit EntityIterator ( Iterator iterator ) : iterator_( iterator ) {}
+      EntityIterator ( Tag::Begin, const Mesh< ct > &mesh, MeshType type ) : iterator_( mesh, mesh.begin( codim == 0 ? type : dual( type ) ) ) {}
+      EntityIterator ( Tag::End, const Mesh< ct > &mesh, MeshType type ) : iterator_( mesh, mesh.end( codim == 0 ? type : dual( type ) ) ) {}
 
       Entity dereference () const { return EntityImpl( *iterator_ ); }
 
@@ -75,20 +78,33 @@ namespace Dune
       static const dim_t dimension = 2;
       static const dim_t mydimension = dimension - codimension;
 
-      typedef Dune::Entity< codim, EntityImpl > Entity;
+      typedef Dune::Entity< codimension, EntityImpl > Entity;
 
       EntityIterator () = default;
 
-      explicit EntityIterator ( Iterator iterator ) : iterator_( iterator ) {}
+      EntityIterator ( Tag::Begin, const Mesh< ct > &mesh, MeshType type ) : iterator_( begin( mesh, type ) ) { advance(); }
+      EntityIterator ( Tag::End, const Mesh< ct > &mesh, MeshType type ) : iterator_( end( mesh, type ) ) {}
 
       Entity dereference () const { return EntityImpl( *iterator_ ); }
 
       bool equals ( const This &other ) const noexcept { return (iterator_ == other.iterator_); }
 
-      // todo: only stop once on each half edge
-      void increment () noexcept { ++iterator_; }
+      void increment () noexcept { ++iterator_; advance(); }
 
     protected:
+      // todo: Implement begin / end
+      static Iterator begin ( const Mesh< ct > &mesh, MeshType type ) { return Iterator(); }
+      static Iterator end ( const Mesh< ct > &mesh, MeshType type ) { return Iterator(); }
+
+      Iterator begin () const { return begin( iterator_->mesh(), iterator_->type() ); }
+      Iterator end () const { return end( iterator_->mesh(), iterator_->type() ); }
+
+      void advance ()
+      {
+        for( ; (iterator_ != end()) && (iterator_->cell().index() > iterator_->neighbor().index()); ++iterator_ )
+          continue;
+      }
+
       Iterator iterator_;
     };
 

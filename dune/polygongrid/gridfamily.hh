@@ -9,6 +9,7 @@
 #include <dune/grid/common/grid.hh>
 
 #include <dune/polygongrid/gridview.hh>
+#include <dune/polygongrid/idset.hh>
 
 namespace Dune
 {
@@ -30,12 +31,12 @@ namespace Dune
       typedef typename GridViewImp::IndexSet IndexSet;
 
       template< dim_t codim >
-      using Codim = GridViewImp::Codim;
+      using Codim = typename GridViewImp::template Codim< codim >;
 
       typedef typename GridViewImp::IntersetionIterator IntersectionIterator;
       typedef typename IntersectionIterator::Intersection Intersection;
 
-      typedef typename GridView::CollectiveCommunication CollectiveCommunication;
+      typedef typename GridViewImp::CollectiveCommunication CollectiveCommunication;
 
       static const bool conforming = true;
     };
@@ -54,16 +55,21 @@ namespace Dune
 
         typedef Dune::PolygonGrid< ct > Grid;
 
-        typedef Dune::GridView< GridViewTraits< ct > > GridView;
+        typedef Dune::GridView< GridViewTraits< ct > > MacroGridView;
+        typedef MacroGridView LeafGridView;
+        typedef MacroGridView LevelGridView;
+
+        typedef __PolygonGrid::IdSet< ct > LocalIdSet;
+        typedef LocalIdSet GlobalIdSet;
 
         template< dim_t codim >
         struct Codim
         {
-          typedef typename GridView::template Codim< codim >::Entity Entity;
-          typedef typename GridView::template Codim< codim >::EntitySeed EntitySeed;
+          typedef typename MacroGridView::template Codim< codim >::Entity Entity;
+          typedef typename MacroGridView::template Codim< codim >::EntitySeed EntitySeed;
 
-          typedef typename GridView::template Codim< codim >::Geometry Geometry;
-          typedef typename GridView::template Codim< codim >::LocalGeometry LocalGeometry;
+          typedef typename MacroGridView::template Codim< codim >::Geometry Geometry;
+          typedef typename MacroGridView::template Codim< codim >::LocalGeometry LocalGeometry;
         };
       };
     };

@@ -78,15 +78,17 @@ namespace Dune
       typename Codim< codim >::template Partition< pitype >::Iterator begin () const
       {
         typedef typename Codim< codim >::template Partition< pitype >::Iterator::Implementation IteratorImpl;
-        return IteratorImpl( hierarchy(), level(), 0 );
+        if( pitype != Ghost_Partition )
+          return IteratorImpl( Tag::begin, grid().mesh(), grid().type() );
+        else
+          return IteratorImpl( Tag::end, grid().mesh(), grid().type() );
       }
 
       template< int codim, PartitionIteratorType pitype >
       typename Codim< codim >::template Partition< pitype >::Iterator end () const
       {
         typedef typename Codim< codim >::template Partition< pitype >::Iterator::Implementation IteratorImpl;
-        const int size = (pitype == Ghost_Partition) ? 0 : this->size( codim );
-        return IteratorImpl( hierarchy(), level(), size );
+        return IteratorImpl( Tag::end, grid().mesh(), grid().type() );
       }
 
       IntersectionIterator ibegin ( const typename Codim< 0 >::Entity &entity ) const

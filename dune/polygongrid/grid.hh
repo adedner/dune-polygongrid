@@ -5,7 +5,7 @@
 
 #include <dune/grid/common/grid.hh>
 
-#include <dune/grid/polygongrid/gridfamily.hh>
+#include <dune/polygongrid/gridfamily.hh>
 
 namespace Dune
 {
@@ -27,7 +27,17 @@ namespace Dune
 
     using Base::dimension;
 
-    typedef __PolygonGrid::Mesh< ctype > Mesh;
+    typedef typename Traits::MacroGridView MacroGridView;
+
+    typedef typename Base::LeafGridView LeafGridView;
+    typedef typename Base::LevelGridView LevelGridView;
+
+    typedef typename Base::GlobalIdSet GlobalIdSet;
+    typedef typename Base::LocalIdSet LocalIdSet;
+
+    typedef typename Base::CollectiveCommunication CollectiveCommunication;
+
+    typedef __PolygonGrid::Mesh< ct > Mesh;
     typedef __PolygonGrid::MeshType MeshType;
 
     PolygonGrid ( std::shared_ptr< Mesh > mesh, __PolygonGrid::MeshType type )
@@ -69,11 +79,11 @@ namespace Dune
       return false;
     }
 
-    template< dim_t codim >
+    template< class Seed >
     typename Traits::template Codim< Seed::codimension >::Entity entity ( const Seed &seed ) const noexcept
     {
       typedef typename Traits::template Codim< Seed::codimension >::Entity::Implementation EntityImpl;
-      typedef std::conditional( Seed::codimension == 1, __PolygonGrid::HalfEdge< ctype > : __PolygonGrid::Node< ct > )::type Item;
+      typedef typename std::conditional< Seed::codimension == 1, __PolygonGrid::HalfEdge< ct >, __PolygonGrid::Node< ct > >::type Item;
       return EntityImpl( Item( mesh(), seed.index() ) );
     }
 
@@ -84,13 +94,13 @@ namespace Dune
     }
 
     const Mesh &mesh () const { return *mesh_; }
-    MeshType meshType () const { return meshType_; }
+    MeshType type () const { return type_; }
 
   private:
     std::shared_ptr< Mesh > mesh_;
-    __PolygonGrid::MeshType type_:
+    __PolygonGrid::MeshType type_;
     CollectiveCommunication comm_;
-    IdSet idSet_;
+    LocalIdSet idSet_;
   };
 
 } // namespace Dune

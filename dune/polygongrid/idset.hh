@@ -7,6 +7,10 @@
 
 #include <dune/grid/common/indexidset.hh>
 
+#include <dune/polygongrid/declaration.hh>
+#include <dune/polygongrid/entity.hh>
+#include <dune/polygongrid/meshobjects.hh>
+
 namespace Dune
 {
 
@@ -16,14 +20,12 @@ namespace Dune
     // IdSet
     // -----
 
-    template< class Grid >
+    template< class ct >
     class IdSet
-      : public Dune::IdSet< Grid, IdSet< Grid >, std::size_t >
+      : public Dune::IdSet< const PolygonGrid< ct >, IdSet< ct >, std::size_t >
     {
-      typedef IdSet< Grid > This;
-      typedef Dune::IdSet< Grid, This, std::size_t > Base;
-
-      typedef typename std::remove_const< Grid >::type::Traits Traits;
+      typedef IdSet< ct > This;
+      typedef Dune::IdSet< const PolygonGrid< ct >, This, std::size_t > Base;
 
     public:
       typedef typename Base::Id Id;
@@ -33,7 +35,9 @@ namespace Dune
       template< dim_t codim >
       struct Codim
       {
-        typedef typename Traits::template Codim< codim >::Entity Entity;
+        typedef typename std::conditional< codim == 1, HalfEdge< ct >, Node< ct > >::type Item;
+
+        typedef Dune::Entity< codim, __PolygonGrid::Entity< Item, codim > > Entity;
       };
 
     public:
