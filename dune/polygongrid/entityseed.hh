@@ -24,7 +24,7 @@ namespace Dune
     template< class Index, dim_t codim >
     class EntitySeed
     {
-      typedef EntitySeed< Item, codim > This;
+      typedef EntitySeed< Index, codim > This;
 
     public:
       static const dim_t codimension = codim;
@@ -42,6 +42,8 @@ namespace Dune
     private:
       Index index_;
     };
+
+  } // namespace __PolygonGrid
 
 } // namespace Dune
 

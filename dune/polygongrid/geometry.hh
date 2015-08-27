@@ -7,6 +7,9 @@
 #include <dune/common/math.hh>
 
 #include <dune/geometry/dimension.hh>
+#include <dune/geometry/type.hh>
+
+#include <dune/grid/common/geometry.hh>
 
 #include <dune/polygongrid/subentity.hh>
 
@@ -101,14 +104,14 @@ namespace Dune
 
       DUNE_INLINE const GlobalCoordinate &corner ( int i ) const noexcept
       {
-        return subEntity( cell_, Dune::Codim< 2 >, i ).position();
+        return subEntity( cell_, Dune::Codim< 2 >(), i ).position();
       }
 
       GlobalCoordinate center () const noexcept
       {
         GlobalCoordinate center( Math::zero );
         ctype volume = Math::zero;
-        for( int i = 0; i < corneres(); ++i )
+        for( int i = 0; i < corners(); ++i )
         {
           const GlobalCoordinate &x = corner( i );
           const GlobalCoordinate &y = corner( (i+1) % corners() );
@@ -159,7 +162,7 @@ namespace Dune
 
       const GlobalCoordinate &corner ( int i ) const
       {
-        return subEntity( halfEdge_, Dune::Codim< 1 >, i ).position();
+        return subEntity( halfEdge_, Dune::Codim< 1 >(), i ).position();
       }
 
       GlobalCoordinate center () const

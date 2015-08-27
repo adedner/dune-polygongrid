@@ -8,6 +8,9 @@
 
 #include <dune/geometry/dimension.hh>
 
+#include <dune/polygongrid/entity.hh>
+#include <dune/polygongrid/meshobjects.hh>
+
 namespace Dune
 {
 

@@ -11,7 +11,7 @@
 #include <dune/grid/common/gridenums.hh>
 #include <dune/grid/common/indexidset.hh>
 
-#include <dune/polynomgrid/declaration.hh>
+#include <dune/polygongrid/declaration.hh>
 
 namespace Dune
 {
@@ -24,17 +24,18 @@ namespace Dune
 
     template< class Grid >
     class IndexSet
-      : public Dune::IndexSet< Grid, IndexSet< Grid >, std::size_t, std::array< GeometryType > >
+      : public Dune::IndexSet< Grid, IndexSet< Grid >, std::size_t, std::array< GeometryType, 1 > >
     {
       typedef IndexSet< Grid > This;
-      typedef Dune::IndexSet< Grid, IndexSet< Grid >, std::size_t, std::array< GeometryType > > Base;
+      typedef Dune::IndexSet< Grid, IndexSet< Grid >, std::size_t, std::array< GeometryType, 1 > > Base;
 
-      typedef typename remove_const< Grid >::type::Traits Traits;
+      typedef typename std::remove_const< Grid >::type::Traits Traits;
 
     public:
       static const dim_t dimension = 2;
 
       typedef typename Base::Index Index;
+      typedef typename Base::Types Types;
 
       template< int codim >
       struct Codim
@@ -77,7 +78,7 @@ namespace Dune
         return true;
       }
 
-      Types types ( int codim ) const noexcept { return {{ GeometryType( GeometryType::None(), dimension - codim ); }}; }
+      Types types ( int codim ) const noexcept { return {{ GeometryType( GeometryType::None(), dimension - codim ) }}; }
 
       void update ( Index numPolygons, Index numEdges, Index numVertices ) { size_ = {{ numPolygons, numEdges, numVertices }}; }
 

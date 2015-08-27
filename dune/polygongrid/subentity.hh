@@ -22,13 +22,13 @@ namespace Dune
       return 1u;
     }
 
-    inline< class ct >
+    template< class ct >
     inline static std::size_t subEntities ( Node< ct > cell, Dune::Codim< 1 > ) noexcept
     {
       return cell.halfEdges().size();
     }
 
-    inline< class ct >
+    template< class ct >
     inline static std::size_t subEntities ( Node< ct > cell, Dune::Codim< 2 > ) noexcept
     {
       return cell.halfEdges().size();
@@ -52,8 +52,8 @@ namespace Dune
       return item;
     }
 
-    inline< class ct >
-    inline static HalfEdge< ct > ( Node< ct > cell, Dune::Codim< 1 >, std::size_t i ) noexcept
+    template< class ct >
+    inline static HalfEdge< ct > subEntity ( Node< ct > cell, Dune::Codim< 1 >, std::size_t i ) noexcept
     {
       assert( i < cell.halfEdges().size() );
       return cell.halfEdges().begin()[ i ];
@@ -67,7 +67,7 @@ namespace Dune
     }
 
     template< class ct >
-    inline static Node< ct > ( HalfEdge< ct > halfEdge, Dune::Codim< 1 >, std::size_t i ) noexcept
+    inline static Node< ct > subEntity ( HalfEdge< ct > halfEdge, Dune::Codim< 1 >, std::size_t i ) noexcept
     {
       assert( i < 2u );
       return (i == 1u ? halfEdge.target() : halfEdge.flip().target());

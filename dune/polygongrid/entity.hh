@@ -6,10 +6,12 @@
 #include <dune/geometry/dimension.hh>
 
 #include <dune/grid/common/entity.hh>
+#include <dune/grid/common/entityiterator.hh>
+#include <dune/grid/common/exceptions.hh>
 
 #include <dune/polygongrid/entityseed.hh>
 #include <dune/polygongrid/geometry.hh>
-#include <dune/polygongrid/subentitiy.hh>
+#include <dune/polygongrid/subentity.hh>
 
 namespace Dune
 {
@@ -22,6 +24,14 @@ namespace Dune
 
     template< class, dim_t codim >
     class Entity;
+
+
+
+    // External Forward Declarations
+    // -----------------------------
+
+    template< class, dim_t codim >
+    class EntityIterator;
 
 
 
@@ -51,7 +61,7 @@ namespace Dune
       typedef Dune::EntitySeed< EntitySeedImpl > EntitySeed;
       typedef Dune::Geometry< GeometryImpl > Geometry;
 
-      explicit Entity ( const Item &item ) : item_( item ) {}
+      explicit BasicEntity ( const Item &item ) : item_( item ) {}
 
       GeometryType type () const { return GeometryType( GeometryType::None(), mydimension ); }
 
@@ -143,10 +153,12 @@ namespace Dune
       typedef Entity< Item, 0 > This;
       typedef BasicEntity< Item, 0 > Base;
 
-    public:
-      typedef typename Traits::template Codim< 0 >::LocalGeometry LocalGeometry;
+      typedef __PolygonGrid::EntityIterator< Item, 0 > HierarchicIteratorImpl;
 
-      typedef typename Traits::HierarchicIterator HierarchicIterator;
+    public:
+      typedef typename Base::Geometry LocalGeometry;
+
+      typedef Dune::EntityIterator< HierarchicIteratorImpl > HierarchicIterator;
 
       using Base::item;
 
@@ -181,15 +193,8 @@ namespace Dune
 
       LocalGeometry geometryInFather () const { DUNE_THROW( GridError, "Father does not exist." ); }
 
-      HierarchicIterator hbegin ( int maxLevel ) const
-      {
-        // ...
-      }
-
-      HierarchicIterator hend ( int maxLevel ) const
-      {
-        // ...
-      }
+      HierarchicIterator hbegin ( int maxLevel ) const { return HierarchicIteratorImpl(); }
+      HierarchicIterator hend ( int maxLevel ) const { return HierarchicIteratorImpl(); }
 
       bool isRegular () const { return true; }
       bool isNew () const { return false; }

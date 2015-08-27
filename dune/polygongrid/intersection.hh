@@ -13,8 +13,10 @@
 #include <dune/grid/common/intersectioniterator.hh>
 #include <dune/grid/common/normals.hh>
 
+#include <dune/polygongrid/declaration.hh>
 #include <dune/polygongrid/entity.hh>
 #include <dune/polygongrid/geometry.hh>
+#include <dune/polygongrid/meshobjects.hh>
 
 namespace Dune
 {
@@ -32,13 +34,17 @@ namespace Dune
 
       typedef HalfEdge< ct > Item;
 
-      typedef __PolygonGrid::Entiy< Node< ct >, 0 > EntityImpl;
-      typedef __PolygonGrid::Geometry< Item, codim > GeometryImpl;
+      typedef __PolygonGrid::Entity< Node< ct >, 0 > EntityImpl;
+      typedef __PolygonGrid::Geometry< Item, 1 > GeometryImpl;
 
     public:
+      static const dim_t dimension = 2;
+      static const dim_t codimension = 1;
+      static const dim_t mydimension = dimension - codimension;
+
       typedef Dune::Entity< 0, EntityImpl > Entity;
       typedef Dune::Geometry< GeometryImpl > Geometry;
-      typedef Dune::Geometry< LocalGeometryImpl > LocalGeometry;
+      typedef Geometry LocalGeometry;
 
       typedef typename Geometry::GlobalCoordinate GlobalCoordinate;
       typedef typename Geometry::LocalCoordinate LocalCoordinate;
@@ -47,7 +53,7 @@ namespace Dune
       typedef ConstantLocalFunction< LocalCoordinate, GlobalCoordinate > OuterNormals;
 
     public:
-      Intersection ( Item item ) : item_( item ) {}
+      explicit Intersection ( Item item ) : item_( item ) {}
 
       bool conforming () const { return true; }
 
@@ -74,7 +80,7 @@ namespace Dune
 
       DUNE_INLINE constexpr GeometryType type () const noexcept { return GeometryType( GeometryType::None(), mydimension ); }
 
-      Geometry geometry () const { return GeometryImpl( item() ); } }
+      Geometry geometry () const { return GeometryImpl( item() ); }
 
       LocalGeometry geometryInInside () const
       {
@@ -92,7 +98,7 @@ namespace Dune
 
       OuterNormals unitOuterNormals () const
       {
-        GlobalCoordinate normal = outerNormal< false >();
+        GlobalCoordinate normal = outerNormal();
         return OuterNormals( type(), normal *= Math::one / normal.two_norm() );
       }
 
@@ -121,11 +127,13 @@ namespace Dune
       typedef __PolygonGrid::Intersection< ct > IntersectionImpl;
 
     public:
-      typedef Dune::Intersection< IntersectionImpl > Intersection:
+      typedef typename HalfEdges< ct >::Iterator HalfEdgeIterator;
+
+      typedef Dune::Intersection< const PolygonGrid< ct >, IntersectionImpl > Intersection;
 
       IntersectionIterator () = default;
 
-      IntersectionIterator ( const HalfEdgeIterator< ct > halfEdgeIterator ) : halfEdgeIterator_( halfEdgeIterator ) {}
+      explicit IntersectionIterator ( const HalfEdgeIterator halfEdgeIterator ) : halfEdgeIterator_( halfEdgeIterator ) {}
 
       DUNE_INLINE void increment () { ++halfEdgeIterator_; }
 
@@ -134,7 +142,7 @@ namespace Dune
       DUNE_INLINE bool equals ( const This &other ) const { return (halfEdgeIterator_ == other.halfEdgeIterator_); }
 
     private:
-      HalfEdgeIterator< ct > halfEdgeIterator_;
+      HalfEdgeIterator halfEdgeIterator_;
     };
 
   } // namespace __PolygonGrid

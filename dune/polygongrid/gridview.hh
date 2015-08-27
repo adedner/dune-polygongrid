@@ -39,7 +39,7 @@ namespace Dune
       template< dim_t codim >
       struct Codim
       {
-        typedef typename std::conditional< codim == 1 ? HalfEdge< ctype > : Node< ctype > >::type Item;
+        typedef typename std::conditional< codim == 1, HalfEdge< ct >, Node< ct > >::type Item;
 
         typedef Dune::Entity< codim, __PolygonGrid::Entity< Item, codim > > Entity;
 
@@ -58,7 +58,7 @@ namespace Dune
 
       typedef Dune::IntersectionIterator< __PolygonGrid::IntersectionIterator< ct > > IntersectionIterator;
 
-      typedef Dune::CollectiveCommunication< NoComm > CollectiveCommunication;
+      typedef Dune::CollectiveCommunication< No_Comm > CollectiveCommunication;
 
       GridView ( const Grid &grid ) : grid_( grid ) {}
 
