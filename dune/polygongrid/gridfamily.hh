@@ -62,6 +62,9 @@ namespace Dune
         typedef __PolygonGrid::IdSet< ct > LocalIdSet;
         typedef LocalIdSet GlobalIdSet;
 
+        typedef typename LeafGridView::IndexSet LeafIndexSet;
+        typedef typename LevelGridView::IndexSet LevelIndexSet;
+
         template< dim_t codim >
         struct Codim
         {
