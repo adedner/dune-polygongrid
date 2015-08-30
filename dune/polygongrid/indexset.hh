@@ -7,6 +7,7 @@
 #include <type_traits>
 
 #include <dune/geometry/dimension.hh>
+#include <dune/geometry/type.hh>
 
 #include <dune/grid/common/gridenums.hh>
 #include <dune/grid/common/indexidset.hh>
@@ -22,14 +23,12 @@ namespace Dune
     // IndexSet
     // --------
 
-    template< class Grid >
+    template< class ct >
     class IndexSet
-      : public Dune::IndexSet< Grid, IndexSet< Grid >, std::size_t, std::array< GeometryType, 1 > >
+      : public Dune::IndexSet< const PolygonGrid< ct >, IndexSet< ct >, std::size_t, std::array< GeometryType,1 > >
     {
-      typedef IndexSet< Grid > This;
-      typedef Dune::IndexSet< Grid, IndexSet< Grid >, std::size_t, std::array< GeometryType, 1 > > Base;
-
-      typedef typename std::remove_const< Grid >::type::Traits Traits;
+      typedef IndexSet< ct > This;
+      typedef Dune::IndexSet< const PolygonGrid< ct >, This, std::size_t, std::array< GeometryType,1 > > Base;
 
     public:
       static const dim_t dimension = 2;
@@ -37,10 +36,12 @@ namespace Dune
       typedef typename Base::Index Index;
       typedef typename Base::Types Types;
 
-      template< int codim >
+      template< dim_t codim >
       struct Codim
       {
-        typedef typename Traits::template Codim< codim >::Entity Entity;
+        typedef typename std::conditional< codim == 1, HalfEdge< ct >, Node< ct > >::type Item;
+
+        typedef Dune::Entity< codim, __PolygonGrid::Entity< Item, codim > > Entity;
       };
 
       IndexSet () : size_{{ 0u, 0u, 0u }} {}

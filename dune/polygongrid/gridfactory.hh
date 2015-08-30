@@ -79,7 +79,7 @@ namespace Dune
 
     Grid *createGrid ()
     {
-      return new Grid( std::make_shared< __PolygonGrid::Mesh >( vertices_, polygons_ ), __PolygonGrid::Primal );
+      return new Grid( std::make_shared< typename Grid::Mesh >( vertices_, polygons_ ), __PolygonGrid::Primal );
     }
 
   private:

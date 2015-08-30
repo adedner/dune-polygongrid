@@ -34,7 +34,7 @@ namespace Dune
     public:
       typedef PolygonGrid< ct > Grid;
 
-      typedef __PolygonGrid::IndexSet< const Grid > IndexSet;
+      typedef __PolygonGrid::IndexSet< ct > IndexSet;
 
       template< dim_t codim >
       struct Codim

@@ -173,7 +173,7 @@ namespace Dune
         std::swap( polygons[ i ][ 2u ], polygons[ i ][ 3u ] );
     }
 
-    grid_.reset( new Grid( std::make_shared< __PolygonGrid::Mesh >( vertices, polygons ), __PolygonGrid::Primal ) );
+    grid_.reset( new Grid( std::make_shared< typename Grid::Mesh >( vertices, polygons ), __PolygonGrid::Primal ) );
   }
 
 } // namespace Dune

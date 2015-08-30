@@ -62,17 +62,25 @@ namespace Dune
         typedef __PolygonGrid::IdSet< ct > LocalIdSet;
         typedef LocalIdSet GlobalIdSet;
 
-        typedef typename LeafGridView::IndexSet LeafIndexSet;
-        typedef typename LevelGridView::IndexSet LevelIndexSet;
+        typedef __PolygonGrid::IndexSet< ct > LeafIndexSet;
+        typedef __PolygonGrid::IndexSet< ct > LevelIndexSet;
+
+        typedef Dune::CollectiveCommunication< No_Comm > CollectiveCommunication;
 
         template< dim_t codim >
         struct Codim
         {
-          typedef typename MacroGridView::template Codim< codim >::Entity Entity;
-          typedef typename MacroGridView::template Codim< codim >::EntitySeed EntitySeed;
+          typedef typename std::conditional< codim == 1, HalfEdge< ct >, Node< ct > >::type Item;
 
-          typedef typename MacroGridView::template Codim< codim >::Geometry Geometry;
-          typedef typename MacroGridView::template Codim< codim >::LocalGeometry LocalGeometry;
+          typedef LocalNoneGeometryTypeIndexSet< 2 - codim > GeometryTypeIndexSet;
+
+          typedef Dune::Entity< codim, __PolygonGrid::Entity< Item, codim > > Entity;
+
+          typedef typename Entity::EntitySeed EntitySeed;
+          typedef typename Entity::Geometry Geometry;
+
+          // local geometry does not make sense; add a phony typedef
+          typedef Geometry LocalGeometry;
         };
       };
     };
