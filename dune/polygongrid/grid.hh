@@ -5,6 +5,7 @@
 
 #include <dune/grid/common/grid.hh>
 
+#include <dune/polygongrid/capabilities.hh>
 #include <dune/polygongrid/gridfamily.hh>
 
 namespace Dune

@@ -1,4 +1,5 @@
 set( HEADERS
+  capabilities.hh
   declaration.hh
   dgf.hh
   entity.hh
