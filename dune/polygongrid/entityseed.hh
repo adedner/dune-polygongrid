@@ -37,7 +37,7 @@ namespace Dune
       DUNE_INLINE bool operator== ( const This &other ) const noexcept { return (index() == other.index()); }
       DUNE_INLINE bool operator!= ( const This &other ) const noexcept { return (index() != other.index()); }
 
-      DUNE_INLINE std::size_t index () const noexcept { return index_; }
+      DUNE_INLINE Index index () const noexcept { return index_; }
 
     private:
       Index index_;

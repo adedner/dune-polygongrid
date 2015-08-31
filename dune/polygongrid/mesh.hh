@@ -210,10 +210,10 @@ namespace Dune
       typedef FieldVector< ct, 2 > GlobalCoordinate;
 
       Mesh ( const std::vector< GlobalCoordinate > &vertices, const MultiVector< std::size_t > &polygons )
-        : regularSize_{{ vertices.size(), polygons.size() }}
+        : numNodes_{{ vertices.size(), polygons.size() }}
       {
-        MultiVector< std::size_t > boundaries = __PolygonGrid::boundaries( regularSize_[ Primal ], polygons );
-        structure_ = __PolygonGrid::meshStructure( regularSize_[ Primal ], polygons, boundaries );
+        MultiVector< std::size_t > boundaries = __PolygonGrid::boundaries( numNodes_[ Primal ], polygons );
+        structure_ = __PolygonGrid::meshStructure( numNodes_[ Primal ], polygons, boundaries );
         positions_ = __PolygonGrid::positions( structure_, vertices );
         edgeIndices_ = __PolygonGrid::edgeIndices( structure_, Primal );
       }
@@ -242,10 +242,16 @@ namespace Dune
 
       HalfEdgeIndex flip ( HalfEdgeIndex index ) const noexcept { return dual( dual( index ) ); }
 
+#if 0
       std::size_t size ( NodeIndex index ) const noexcept
       {
         return structure_[ index.type() ].size();
       }
+#endif
+
+      std::size_t numNodes ( MeshType type ) const noexcept { return numNodes_[ type ]; }
+
+      std::size_t numBoundaries () const noexcept { return (structure_[ Primal ].size() - numNodes( Primal )) / 2u; }
 
       HalfEdgeIndex begin ( NodeIndex index ) const noexcept
       {
@@ -258,7 +264,7 @@ namespace Dune
       }
 
       NodeIndex begin ( MeshType type ) const noexcept { return NodeIndex( 0u, type ); }
-      NodeIndex end ( MeshType type ) const noexcept { return NodeIndex( regularSize_[ type ], type ); }
+      NodeIndex end ( MeshType type ) const noexcept { return NodeIndex( numNodes( type ), type ); }
 
     private:
       HalfEdgeIndex halfEdgeIndex ( const IndexPair &indexPair, MeshType type ) const noexcept
@@ -272,7 +278,7 @@ namespace Dune
         return structure_[ dual( index.type() ) ].values()[ index ];
       }
 
-      std::array< std::size_t, 2 > regularSize_;
+      std::array< std::size_t, 2 > numNodes_;
       MeshStructure structure_;
       std::array< std::vector< GlobalCoordinate >, 2 > positions_;
       std::vector< std::size_t > edgeIndices_;

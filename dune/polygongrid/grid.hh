@@ -55,13 +55,13 @@ namespace Dune
       return GridViewImpl( *this );
     }
 
-    LevelGridView levelGridView ( int level ) const { assert( level == 0 ); return macroGridView; }
+    LevelGridView levelGridView ( int level ) const { assert( level == 0 ); return macroGridView(); }
     LeafGridView leafGridView () const { return macroGridView(); }
 
     const GlobalIdSet &globalIdSet () const { return idSet_; }
     const LocalIdSet &localIdSet () const { return idSet_; }
 
-    bool globalRefine ( int refCount ) {}
+    bool globalRefine ( int refCount ) { return false; }
 
     bool mark ( int refCount, const typename Traits::template Codim< 0 >::Entity &entity ) const { return false; }
     int getMark ( const typename Traits::template Codim< 0 >::Entity &entity ) const { return 0; }
@@ -85,7 +85,7 @@ namespace Dune
     {
       typedef typename Traits::template Codim< Seed::codimension >::Entity::Implementation EntityImpl;
       typedef typename std::conditional< Seed::codimension == 1, __PolygonGrid::HalfEdge< ct >, __PolygonGrid::Node< ct > >::type Item;
-      return EntityImpl( Item( mesh(), seed.index() ) );
+      return EntityImpl( Item( mesh(), seed.impl().index() ) );
     }
 
     template< class Entity >

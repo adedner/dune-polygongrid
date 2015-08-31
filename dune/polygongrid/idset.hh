@@ -66,7 +66,7 @@ namespace Dune
       }
 
     private:
-      static constexpr Id id ( std::size_t index, std::size_t codim ) noexcept { return (id << 2) | codim; }
+      static constexpr Id id ( std::size_t index, std::size_t codim ) noexcept { return (index << 2) | codim; }
     };
 
   } // namespace __PolygonGrid
