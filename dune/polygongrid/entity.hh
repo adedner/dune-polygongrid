@@ -182,6 +182,9 @@ namespace Dune
 
         case 2:
           return __PolygonGrid::subEntity( item(), Dune::Codim< 2 >(), i ).uniqueIndex();
+
+        default:
+          DUNE_THROW( GridError, "Requesting subIndex for invalid codimension: " << codim << "." );
         }
       }
 

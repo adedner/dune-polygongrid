@@ -63,7 +63,7 @@ namespace Dune
     inline static Node< ct > subEntity ( Node< ct > cell, Dune::Codim< 2 >, std::size_t i ) noexcept
     {
       assert( i < cell.halfEdges().size() );
-      cell.halfEdges().begin()[ i ].target();
+      return cell.halfEdges().begin()[ i ].target();
     }
 
     template< class ct >
