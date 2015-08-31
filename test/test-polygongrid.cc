@@ -41,6 +41,7 @@ try
   Dune::MPIHelper::instance( argc, argv );
 
   std::unique_ptr< Grid > grid = createArbitraryGrid();
+  gridcheck( *grid );
 
   return 0;
 }

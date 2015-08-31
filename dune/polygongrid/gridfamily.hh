@@ -33,7 +33,7 @@ namespace Dune
       template< dim_t codim >
       using Codim = typename GridViewImp::template Codim< codim >;
 
-      typedef typename GridViewImp::IntersetionIterator IntersectionIterator;
+      typedef typename GridViewImp::IntersectionIterator IntersectionIterator;
       typedef typename IntersectionIterator::Intersection Intersection;
 
       typedef typename GridViewImp::CollectiveCommunication CollectiveCommunication;
