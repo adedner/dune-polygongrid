@@ -70,6 +70,21 @@ try
     std::cout << node.position() << std::endl;
   std::cout << std::endl;
 
+  for( auto node : nodes( mesh, dualMesh ) )
+  {
+    for( auto halfEdge : node.halfEdges() )
+    {
+      if( halfEdge.cell().index() != node.index() )
+      {
+        std::cerr << "Error: halfEdge.flip().target() does not return original node." << std::endl;
+        std::cerr << "       (halfEdge.index() = " << static_cast< std::size_t >( halfEdge.index() )
+                  << ", halfEdge.cell().index() = " << static_cast< std::size_t >( halfEdge.cell().index() )
+                  << ", node.index() = " << static_cast< std::size_t >( node.index() ) << ")" << std::endl;
+        std::abort();
+      }
+    }
+  }
+
   return 0;
 }
 catch( const Dune::Exception &e )

@@ -237,7 +237,7 @@ namespace Dune
 
       HalfEdgeIndex dual ( HalfEdgeIndex index ) const noexcept
       {
-        return halfEdgeIndex( indexPair( index ), dual( index.type() ) );
+        return HalfEdgeIndex( nodes_[ index.type() ].position_of( indexPair( index ) ), dual( index.type() ) );
       }
 
       HalfEdgeIndex flip ( HalfEdgeIndex index ) const noexcept { return dual( dual( index ) ); }
@@ -269,11 +269,6 @@ namespace Dune
       NodeIndex end ( MeshType type ) const noexcept { return NodeIndex( numRegularNodes( type ), type ); }
 
     private:
-      HalfEdgeIndex halfEdgeIndex ( const IndexPair &indexPair, MeshType type ) const noexcept
-      {
-        return HalfEdgeIndex( nodes_[ type ].position_of( indexPair ), type );
-      }
-
       const IndexPair &indexPair ( HalfEdgeIndex index ) const noexcept
       {
         assert( index < nodes_[ dual( index.type() ) ].values().size() );
