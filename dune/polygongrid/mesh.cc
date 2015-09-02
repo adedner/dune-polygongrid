@@ -53,12 +53,12 @@ namespace Dune
     // printStructure
     // --------------
 
-    void printStructure ( const MultiVector< IndexPair > &structure, std::ostream &out )
+    void printStructure ( const MultiVector< IndexPair > &nodes, std::ostream &out )
     {
       out << std::endl;
-      for( std::size_t i = 0u; i < structure.size(); ++i )
+      for( std::size_t i = 0u; i < nodes.size(); ++i )
       {
-        auto node = structure[ i ];
+        auto node = nodes[ i ];
         out << "node " << i << ": ";
         for( IndexPair p : node )
         {
@@ -81,7 +81,7 @@ namespace Dune
       const std::size_t numPolygons = polygons.size();
       const std::size_t numBoundaries = boundaries.size();
 
-      MeshStructure structure;
+      MeshStructure nodes;
       std::vector< std::size_t > count;
 
       // number of halfedges for primal grid:
@@ -92,15 +92,15 @@ namespace Dune
       count.insert( count.end(), numBoundaries, 3u );
       count.insert( count.end(), numBoundaries, 2u );
 
-      // initialize primal structure (without target position)
-      structure[ Dual ].resize( count );
+      // initialize primal nodes (without target position)
+      nodes[ Dual ].resize( count );
       auto makeIndexPair = [] ( std::size_t i ) { return IndexPair( i, std::numeric_limits< std::size_t >::max() ); };
       for( std::size_t i = 0; i < numPolygons; ++i )
-        std::transform( polygons[ i ].begin(), polygons[ i ].end(), structure[ Dual ][ i ].begin(), makeIndexPair );
+        std::transform( polygons[ i ].begin(), polygons[ i ].end(), nodes[ Dual ][ i ].begin(), makeIndexPair );
       for( std::size_t i = 0; i < numBoundaries; ++i )
       {
         // create boundary edge node
-        auto item = structure[ Dual ][ numPolygons + i ];
+        auto item = nodes[ Dual ][ numPolygons + i ];
         item[ 0 ] = IndexPair( boundaries[ i ][ 0 ], 1 );
         item[ 1 ] = makeIndexPair( boundaries[ i ][ 1 ] );
         item[ 2 ] = IndexPair( numVertices + 2*i+1, 0 );
@@ -108,7 +108,7 @@ namespace Dune
       for( std::size_t i = 0; i < numBoundaries; ++i )
       {
         // create boundary vertex node
-        auto item = structure[ Dual ][ numPolygons + numBoundaries + i ];
+        auto item = nodes[ Dual ][ numPolygons + numBoundaries + i ];
         item[ 0 ] = IndexPair( boundaries[ i ][ 0 ], 2 );
         item[ 1 ] = IndexPair( numVertices + 2*i, 0 );
       }
@@ -134,23 +134,23 @@ namespace Dune
       // - the succeeding position in a polygon
       // - the second position in a boundary edge node
       // - the second position in a boundary vertex node
-      structure[ Primal ].resize( count );
+      nodes[ Primal ].resize( count );
       std::fill( count.begin(), count.end(), 0u );
       for( std::size_t i = 0; i < numBoundaries; ++i )
       {
         // boundary vertices automatically get 3 connections
         const std::size_t v0 = boundaries[ i ][ 0 ];
         count[ v0 ] = 3;
-        structure[ Primal ][ v0 ][ 0 ] = IndexPair( numPolygons + i, 1 );
-        structure[ Primal ][ v0 ][ 1 ] = IndexPair( numPolygons + numBoundaries + i, 1 );
+        nodes[ Primal ][ v0 ][ 0 ] = IndexPair( numPolygons + i, 1 );
+        nodes[ Primal ][ v0 ][ 1 ] = IndexPair( numPolygons + numBoundaries + i, 1 );
         const std::size_t v1 = boundaries[ i ][ 1 ];
-        structure[ Primal ][ v1 ][ 2 ] = IndexPair( numPolygons + i, 2 );
+        nodes[ Primal ][ v1 ][ 2 ] = IndexPair( numPolygons + i, 2 );
       }
       for( std::size_t i = 0; i < numBoundaries; ++i )
       {
-        structure[ Primal ][ numVertices + 2*i ][ 0 ] = IndexPair( numPolygons + i, 0 );
-        const std::size_t j = structure[ Primal ][ boundaries[ i ][ 1 ] ][ 0 ].first;
-        structure[ Primal ][ numVertices + 2*i+1 ][ 0 ] = IndexPair( j + numBoundaries, 0 );
+        nodes[ Primal ][ numVertices + 2*i ][ 0 ] = IndexPair( numPolygons + i, 0 );
+        const std::size_t j = nodes[ Primal ][ boundaries[ i ][ 1 ] ][ 0 ].first;
+        nodes[ Primal ][ numVertices + 2*i+1 ][ 0 ] = IndexPair( j + numBoundaries, 0 );
       }
       for( std::size_t i = 0; i < numPolygons; ++i )
       {
@@ -158,21 +158,21 @@ namespace Dune
         for( std::size_t j = 0u; j < n; ++j )
         {
           const std::size_t vtx = polygons[ i ][ j ];
-          structure[ Primal ][ vtx ][ count[ vtx ]++ ] = IndexPair( i, (j+1)%n );
+          nodes[ Primal ][ vtx ][ count[ vtx ]++ ] = IndexPair( i, (j+1)%n );
         }
       }
 
       // sort regular primal nodes
       for( std::size_t i = 0; i < numVertices; ++i )
       {
-        auto node1 = structure[ Primal ][ i ];
+        auto node1 = nodes[ Primal ][ i ];
         const std::size_t n1 = node1.size();
         std::size_t k1 = (node1[ 0 ].first >= numPolygons ? 2u : 0u);
         while( true )
         {
           assert( k1 < n1 );
           // look at preceeding half edge
-          auto node2 = structure[ Dual ][ node1[ k1 ].first ];
+          auto node2 = nodes[ Dual ][ node1[ k1 ].first ];
           const std::size_t n2 = node2.size();
           const std::size_t k2 = node1[ k1 ].second;
           ++k1;
@@ -183,7 +183,7 @@ namespace Dune
 
           // now find the next half edge
           std::size_t nbvtx = node2[ (k2+n2-2)%n2 ].first;
-          auto pos = std::find_if( node1.begin()+k1, node1.end(), [ &structure, nbvtx ] ( IndexPair p ) { return (structure[ Dual ][ p ].first == nbvtx); } );
+          auto pos = std::find_if( node1.begin()+k1, node1.end(), [ &nodes, nbvtx ] ( IndexPair p ) { return (nodes[ Dual ][ p ].first == nbvtx); } );
           assert( (k1 == n1) || (pos != node1.end()) );
           if( pos == node1.end() )
             break;
@@ -191,7 +191,7 @@ namespace Dune
         }
       }
 
-      return std::move( structure );
+      return std::move( nodes );
     }
 
 
@@ -199,19 +199,19 @@ namespace Dune
     // checkStructure
     // --------------
 
-    bool checkStructure ( const MeshStructure &structure, MeshType type, std::ostream &out )
+    bool checkStructure ( const MeshStructure &nodes, MeshType type, std::ostream &out )
     {
-      const std::size_t size1 = structure[ type ].size();
+      const std::size_t size1 = nodes[ type ].size();
       const std::array< MeshType, 4 > types = {{ type, dual( type ), type, dual( type ) }};
       for( std::size_t i = 0; i < size1; ++i )
       {
-        const std::size_t n = structure[ type ][ i ].size();
+        const std::size_t n = nodes[ type ][ i ].size();
         for( std::size_t j = 0u; j < n; ++j )
         {
           std::array< IndexPair, 5 > p;
           p[ 0 ] = IndexPair( i, j );
           for( std::size_t k = 0u; k < 4u; ++k )
-            p[ k+1 ] = structure[ types[ k ] ].at( p[ k ] );
+            p[ k+1 ] = nodes[ types[ k ] ].at( p[ k ] );
           if( p[ 4 ] == p[ 0 ] )
             continue;
 
@@ -227,9 +227,9 @@ namespace Dune
       return true;
     }
 
-    bool checkStructure ( const MeshStructure &structure, std::ostream &out )
+    bool checkStructure ( const MeshStructure &nodes, std::ostream &out )
     {
-      return checkStructure( structure, Primal ) && checkStructure( structure, Dual );
+      return checkStructure( nodes, Primal ) && checkStructure( nodes, Dual );
     }
 
 
@@ -237,10 +237,10 @@ namespace Dune
     // edgeIndices
     // -----------
 
-    std::vector< std::size_t > edgeIndices ( const MeshStructure &structure, MeshType type )
+    std::vector< std::size_t > edgeIndices ( const MeshStructure &nodes, MeshType type )
     {
-      const MultiVector< IndexPair > &nodes = structure[ type ];
-      const MultiVector< IndexPair > &cells = structure[ dual( type ) ];
+      const MultiVector< IndexPair > &vertices = nodes[ type ];
+      const MultiVector< IndexPair > &cells = nodes[ dual( type ) ];
 
       const std::size_t size = cells.values().size();
       std::vector< std::size_t > edgeIndices( size, std::numeric_limits< std::size_t >::max() );
@@ -256,7 +256,7 @@ namespace Dune
           if( edgeIndices[ k ] < std::numeric_limits< std::size_t >::max() )
             continue;
 
-          const IndexPair p = nodes[ cells[ i ][ j ] ];
+          const IndexPair p = vertices[ cells[ i ][ j ] ];
           assert( edgeIndices[ cells.position_of( p ) ] == std::numeric_limits< std::size_t >::max() );
           edgeIndices[ k ] = edgeIndices[ cells.position_of( p ) ] = numEdges++;
         }

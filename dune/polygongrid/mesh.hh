@@ -129,14 +129,14 @@ namespace Dune
 
     MultiVector< std::size_t > boundaries ( std::size_t numVertices, const MultiVector< std::size_t > &polygons );
 
-    void printStructure ( const MultiVector< IndexPair > &structure, std::ostream &out = std::cout );
+    void printStructure ( const MultiVector< IndexPair > &nodes, std::ostream &out = std::cout );
 
     MeshStructure meshStructure ( std::size_t numVertices, const MultiVector< std::size_t > &polygons, const MultiVector< std::size_t > &boundaries );
 
-    bool checkStructure ( const MeshStructure &structure, MeshType type, std::ostream &out = std::cout );
-    bool checkStructure ( const MeshStructure &structure, std::ostream &out = std::cout );
+    bool checkStructure ( const MeshStructure &nodes, MeshType type, std::ostream &out = std::cout );
+    bool checkStructure ( const MeshStructure &nodes, std::ostream &out = std::cout );
 
-    std::vector< std::size_t > edgeIndices ( const MeshStructure &structure, MeshType type );
+    std::vector< std::size_t > edgeIndices ( const MeshStructure &nodes, MeshType type );
 
 
 
@@ -144,17 +144,17 @@ namespace Dune
     // ---------------
 
     template< class V >
-    inline std::array< std::vector< V >, 2 > positions ( const MeshStructure &structure, const std::vector< V > &vertices )
+    inline std::array< std::vector< V >, 2 > positions ( const MeshStructure &nodes, const std::vector< V > &vertices )
     {
       typedef typename FieldTraits< V >::field_type ctype;
 
       const std::size_t numVertices = vertices.size();
-      const std::size_t numBoundaries = (structure[ Primal ].size() - numVertices) / 2u;
-      const std::size_t numPolygons = (structure[ Dual ].size() - 2u*numBoundaries);
+      const std::size_t numBoundaries = (nodes[ Primal ].size() - numVertices) / 2u;
+      const std::size_t numPolygons = (nodes[ Dual ].size() - 2u*numBoundaries);
 
       std::array< std::vector< V >, 2 > positions;
-      positions[ Primal ].resize( structure[ Primal ].size(), Math::zero );
-      positions[ Dual ].resize( structure[ Dual ].size(), Math::zero );
+      positions[ Primal ].resize( nodes[ Primal ].size(), Math::zero );
+      positions[ Dual ].resize( nodes[ Dual ].size(), Math::zero );
 
       // copy given vertex positions
       std::copy( vertices.begin(), vertices.end(), positions[ Primal ].begin() );
@@ -162,28 +162,28 @@ namespace Dune
       // for now, use the average of polygon vertices as center position
       for( std::size_t i = 0u; i < numPolygons; ++i )
       {
-        for( IndexPair j : structure[ Dual ][ i ] )
+        for( IndexPair j : nodes[ Dual ][ i ] )
           positions[ Dual ][ i ] += positions[ Primal ][ j.first ];
-        positions[ Dual ][ i ] *= Math::one / ctype( structure[ Dual ][ i ].size() );
+        positions[ Dual ][ i ] *= Math::one / ctype( nodes[ Dual ][ i ].size() );
       }
 
       // positions for boundary edge cells
       for( std::size_t i = numPolygons; i < numPolygons + numBoundaries; ++i )
       {
         for( std::size_t j = 0u; j < 2u; ++j )
-          axpy( Math::one / ctype( 2 ), positions[ Primal ][ structure[ Dual ][ i ][ j ].first ], positions[ Dual ][ i ] );
+          axpy( Math::one / ctype( 2 ), positions[ Primal ][ nodes[ Dual ][ i ][ j ].first ], positions[ Dual ][ i ] );
       }
 
       // positions for boundary vertex cells
       for( std::size_t i = numPolygons + numBoundaries; i < numPolygons + 2u*numBoundaries; ++i )
-        positions[ Dual ][ i ] = positions[ Primal ][ structure[ Dual ][ i ][ 0 ].first ];
+        positions[ Dual ][ i ] = positions[ Primal ][ nodes[ Dual ][ i ][ 0 ].first ];
 
       // positions for dual boundaries
       for( std::size_t i = 0u; i < numBoundaries; ++i )
       {
         for( std::size_t j = 0u; j < 2u; ++j )
         {
-          const std::size_t v = structure[ Dual ][ numPolygons + i ][ j ].first;
+          const std::size_t v = nodes[ Dual ][ numPolygons + i ][ j ].first;
           axpy( Math::one / ctype( 2 ), positions[ Primal ][ v ], positions[ Primal ][ numVertices + 2*i+j ] );
           axpy( Math::one / ctype( 2 ), positions[ Dual ][ numPolygons + i ], positions[ Primal ][ numVertices + 2*i+j ] );
         }
@@ -210,12 +210,12 @@ namespace Dune
       typedef FieldVector< ct, 2 > GlobalCoordinate;
 
       Mesh ( const std::vector< GlobalCoordinate > &vertices, const MultiVector< std::size_t > &polygons )
-        : numNodes_{{ vertices.size(), polygons.size() }}
+        : numRegularNodes_{{ vertices.size(), polygons.size() }}
       {
-        MultiVector< std::size_t > boundaries = __PolygonGrid::boundaries( numNodes_[ Primal ], polygons );
-        structure_ = __PolygonGrid::meshStructure( numNodes_[ Primal ], polygons, boundaries );
-        positions_ = __PolygonGrid::positions( structure_, vertices );
-        edgeIndices_ = __PolygonGrid::edgeIndices( structure_, Primal );
+        MultiVector< std::size_t > boundaries = __PolygonGrid::boundaries( numRegularNodes_[ Primal ], polygons );
+        nodes_ = __PolygonGrid::meshStructure( numRegularNodes_[ Primal ], polygons, boundaries );
+        positions_ = __PolygonGrid::positions( nodes_, vertices );
+        edgeIndices_ = __PolygonGrid::edgeIndices( nodes_, Primal );
       }
 
       NodeIndex target ( HalfEdgeIndex index ) const noexcept
@@ -242,44 +242,46 @@ namespace Dune
 
       HalfEdgeIndex flip ( HalfEdgeIndex index ) const noexcept { return dual( dual( index ) ); }
 
-#if 0
-      std::size_t size ( NodeIndex index ) const noexcept
+      std::size_t size ( NodeIndex index ) const noexcept { return nodes_[ index.type() ].size( index ); }
+
+      std::size_t numNodes ( MeshType type ) const noexcept { return nodes_[ type ].size(); }
+
+      std::size_t numRegularNodes ( MeshType type ) const noexcept { return numRegularNodes_[ type ]; }
+
+      std::size_t numBoundaries () const noexcept { return (numNodes( Primal ) - numRegularNodes( Primal )) / 2u; }
+
+      bool regular ( NodeIndex index ) const noexcept
       {
-        return structure_[ index.type() ].size();
+        return (static_cast< std::size_t >( index ) < nodes_[ index.type() ].position_of( numRegularNodes( index.type() ) ));
       }
-#endif
-
-      std::size_t numNodes ( MeshType type ) const noexcept { return numNodes_[ type ]; }
-
-      std::size_t numBoundaries () const noexcept { return (structure_[ Primal ].size() - numNodes( Primal )) / 2u; }
 
       HalfEdgeIndex begin ( NodeIndex index ) const noexcept
       {
-        return HalfEdgeIndex( structure_[ index.type() ].begin_of( index ), dual( index.type() ) );
+        return HalfEdgeIndex( nodes_[ index.type() ].begin_of( index ), dual( index.type() ) );
       }
 
       HalfEdgeIndex end ( NodeIndex index ) const noexcept
       {
-        return HalfEdgeIndex( structure_[ index.type() ].end_of( index ), dual( index.type() ) );
+        return HalfEdgeIndex( nodes_[ index.type() ].end_of( index ), dual( index.type() ) );
       }
 
       NodeIndex begin ( MeshType type ) const noexcept { return NodeIndex( 0u, type ); }
-      NodeIndex end ( MeshType type ) const noexcept { return NodeIndex( numNodes( type ), type ); }
+      NodeIndex end ( MeshType type ) const noexcept { return NodeIndex( numRegularNodes( type ), type ); }
 
     private:
       HalfEdgeIndex halfEdgeIndex ( const IndexPair &indexPair, MeshType type ) const noexcept
       {
-        return HalfEdgeIndex( structure_[ type ].position_of( indexPair ), type );
+        return HalfEdgeIndex( nodes_[ type ].position_of( indexPair ), type );
       }
 
       const IndexPair &indexPair ( HalfEdgeIndex index ) const noexcept
       {
-        assert( index < structure_[ dual( index.type() ) ].values().size() );
-        return structure_[ dual( index.type() ) ].values()[ index ];
+        assert( index < nodes_[ dual( index.type() ) ].values().size() );
+        return nodes_[ dual( index.type() ) ].values()[ index ];
       }
 
-      std::array< std::size_t, 2 > numNodes_;
-      MeshStructure structure_;
+      std::array< std::size_t, 2 > numRegularNodes_;
+      MeshStructure nodes_;
       std::array< std::vector< GlobalCoordinate >, 2 > positions_;
       std::vector< std::size_t > edgeIndices_;
     };

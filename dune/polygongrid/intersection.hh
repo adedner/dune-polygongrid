@@ -1,6 +1,7 @@
 #ifndef DUNE_POLYGONGRID_INTERSECTION_HH
 #define DUNE_POLYGONGRID_INTERSECTION_HH
 
+#include <cassert>
 #include <cstddef>
 
 #include <type_traits>
@@ -57,16 +58,16 @@ namespace Dune
 
       bool conforming () const { return true; }
 
-      bool boundary () const { return item().boundary(); }
+      bool boundary () const { return !neighbor(); }
 
-      bool neighbor () const { return !boundary(); }
+      bool neighbor () const { return item().neighbor().regular(); }
 
       int boundaryId () const { return 1; }
 
-      std::size_t boundarySegmentIndex () const { assert( item().boundary() ); return item().index(); }
+      std::size_t boundarySegmentIndex () const { assert( boundary() ); return item().index(); }
 
-      Entity inside () const { return EntityImpl( item().flip().cell() ); }
-      Entity outside () const { return EntityImpl( item().cell() ); }
+      Entity inside () const { return EntityImpl( item().cell() ); }
+      Entity outside () const { return EntityImpl( item().neighbor() ); }
 
       int indexInInside () const
       {

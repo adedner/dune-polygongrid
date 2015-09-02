@@ -55,6 +55,8 @@ namespace Dune
 
       HalfEdges halfEdges () const noexcept;
 
+      bool regular () const { return mesh().regular( index() ); }
+
       std::size_t uniqueIndex () const noexcept { return index(); }
 
       const Mesh &mesh () const noexcept { return *mesh_; }
