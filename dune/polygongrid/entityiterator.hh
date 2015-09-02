@@ -47,8 +47,8 @@ namespace Dune
 
       EntityIterator () = default;
 
-      EntityIterator ( Tag::Begin, const Mesh< ct > &mesh, MeshType type ) : iterator_( mesh, mesh.begin( codim == 0 ? type : dual( type ) ) ) {}
-      EntityIterator ( Tag::End, const Mesh< ct > &mesh, MeshType type ) : iterator_( mesh, mesh.end( codim == 0 ? type : dual( type ) ) ) {}
+      EntityIterator ( Tag::Begin, const Mesh< ct > &mesh, MeshType type ) : iterator_( mesh, mesh.begin( codim == 0 ? dual( type ) : type ) ) {}
+      EntityIterator ( Tag::End, const Mesh< ct > &mesh, MeshType type ) : iterator_( mesh, mesh.end( codim == 0 ? dual( type ) : type ) ) {}
 
       Entity dereference () const { return EntityImpl( *iterator_ ); }
 
