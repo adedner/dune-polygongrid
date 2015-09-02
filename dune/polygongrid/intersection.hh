@@ -56,15 +56,15 @@ namespace Dune
     public:
       explicit Intersection ( Item item ) : item_( item ) {}
 
-      bool conforming () const { return true; }
+      bool conforming () const noexcept { return true; }
 
-      bool boundary () const { return !neighbor(); }
+      bool boundary () const noexcept { return !neighbor(); }
 
-      bool neighbor () const { return item().neighbor().regular(); }
+      bool neighbor () const noexcept { return item().neighbor().regular(); }
 
-      int boundaryId () const { return 1; }
+      int boundaryId () const noexcept { return 1; }
 
-      std::size_t boundarySegmentIndex () const { assert( boundary() ); return item().index(); }
+      std::size_t boundarySegmentIndex () const noexcept { assert( boundary() ); return item().index(); }
 
       Entity inside () const { return EntityImpl( item().cell() ); }
       Entity outside () const { return EntityImpl( item().neighbor() ); }
@@ -109,7 +109,7 @@ namespace Dune
       GlobalCoordinate outerNormal () const
       {
         const GlobalCoordinate tangent = (item().target().position() - item().flip().target().position());
-        return GlobalCoordinate( -tangent[ 1 ], tangent[ 0 ] );
+        return GlobalCoordinate{ -tangent[ 1 ], tangent[ 0 ] };
       }
 
       Item item_;

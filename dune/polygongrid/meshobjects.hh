@@ -49,7 +49,9 @@ namespace Dune
 
       typedef NodeIndex Index;
 
-      Node ( const Mesh &mesh, Index index ) : mesh_( &mesh ), index_( index ) {}
+      Node () noexcept = default;
+
+      Node ( const Mesh &mesh, Index index ) noexcept : mesh_( &mesh ), index_( index ) {}
 
       const GlobalCoordinate &position () const noexcept { return mesh().position( index() ); }
 
@@ -63,7 +65,7 @@ namespace Dune
       Index index () const noexcept { return index_; }
 
     private:
-      const Mesh *mesh_;
+      const Mesh *mesh_ = nullptr;
       Index index_;
     };
 
@@ -100,7 +102,9 @@ namespace Dune
 
       typedef HalfEdgeIndex Index;
 
-      HalfEdge ( const Mesh &mesh, Index index ) : mesh_( &mesh ), index_( index ) {}
+      HalfEdge () noexcept = default;
+
+      HalfEdge ( const Mesh &mesh, Index index ) noexcept : mesh_( &mesh ), index_( index ) {}
 
       /** \brief flip the direction of the half edge */
       This flip () const noexcept { return This( mesh(), mesh().flip( index() ) ); }
@@ -121,7 +125,7 @@ namespace Dune
       const MeshType type () const noexcept { return index_.type(); }
 
     private:
-      const Mesh *mesh_;
+      const Mesh *mesh_ = nullptr;
       Index index_;
     };
 
@@ -149,7 +153,7 @@ namespace Dune
       IndexIterator ( const Mesh &mesh, Index index ) : mesh_( &mesh ), index_( index ) {}
 
       reference operator* () const noexcept { return value_type( mesh(), index_ ); }
-      pointer operator-> () const noexcept { return value_type( mesh(), index_ ); }
+      pointer operator-> () const noexcept { return pointer( mesh(), index_ ); }
 
       reference operator[] ( std::ptrdiff_t n ) const noexcept { return value_type( mesh(), index_ + n ); }
 

@@ -13,29 +13,29 @@ namespace Dune
   namespace __PolygonGrid
   {
 
-    // subEntities
-    // -----------
+    // numSubEntities
+    // --------------
 
     template< class Item >
-    inline static std::size_t subEntities ( Item item, Dune::Codim< 0 > ) noexcept
+    inline static std::size_t numSubEntities ( Item item, Dune::Codim< 0 > ) noexcept
     {
       return 1u;
     }
 
     template< class ct >
-    inline static std::size_t subEntities ( Node< ct > cell, Dune::Codim< 1 > ) noexcept
+    inline static std::size_t numSubEntities ( Node< ct > cell, Dune::Codim< 1 > ) noexcept
     {
       return cell.halfEdges().size();
     }
 
     template< class ct >
-    inline static std::size_t subEntities ( Node< ct > cell, Dune::Codim< 2 > ) noexcept
+    inline static std::size_t numSubEntities ( Node< ct > cell, Dune::Codim< 2 > ) noexcept
     {
       return cell.halfEdges().size();
     }
 
     template< class ct >
-    inline static std::size_t subEntities ( HalfEdge< ct > halfEdge, Dune::Codim< 1 > ) noexcept
+    inline static std::size_t numSubEntities ( HalfEdge< ct > halfEdge, Dune::Codim< 1 > ) noexcept
     {
       return 2u;
     }

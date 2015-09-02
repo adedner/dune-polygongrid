@@ -100,7 +100,7 @@ namespace Dune
 
       explicit Geometry ( const Cell &cell ) : cell_( cell ) {}
 
-      DUNE_INLINE int corners () const noexcept { return subEntities( cell_, Dune::Codim< 2 >() ); }
+      DUNE_INLINE int corners () const noexcept { return numSubEntities( cell_, Dune::Codim< 2 >() ); }
 
       DUNE_INLINE const GlobalCoordinate &corner ( int i ) const noexcept
       {
@@ -158,7 +158,7 @@ namespace Dune
 
       Geometry ( const HalfEdge &halfEdge ) : halfEdge_( halfEdge ) {}
 
-      DUNE_INLINE int corners () const { return subEntities( halfEdge_, Dune::Codim< 1 >() ); }
+      DUNE_INLINE int corners () const { return numSubEntities( halfEdge_, Dune::Codim< 1 >() ); }
 
       const GlobalCoordinate &corner ( int i ) const
       {

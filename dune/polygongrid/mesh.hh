@@ -252,7 +252,7 @@ namespace Dune
 
       bool regular ( NodeIndex index ) const noexcept
       {
-        return (static_cast< std::size_t >( index ) < nodes_[ index.type() ].position_of( numRegularNodes( index.type() ) ));
+        return (static_cast< std::size_t >( index ) < nodes_[ index.type() ].begin_of( numRegularNodes( index.type() ) ));
       }
 
       HalfEdgeIndex begin ( NodeIndex index ) const noexcept

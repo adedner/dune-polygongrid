@@ -188,7 +188,9 @@ namespace Dune
         }
       }
 
-      bool isLeaf () const { return true; }
+      int level () const noexcept { return 0; }
+
+      bool isLeaf () const noexcept { return true; }
 
       Entity father () const { DUNE_THROW( GridError, "Father does not exist." ); }
 
