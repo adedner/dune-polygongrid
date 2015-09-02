@@ -64,7 +64,7 @@ namespace Dune
       // insert polygon oriented counter-clockwise
       const GlobalCoordinate a = vertices_[ polygon[ 1 ] ] - vertices_[ polygon[ 0 ] ];
       const GlobalCoordinate b = vertices_[ polygon[ 2 ] ] - vertices_[ polygon[ 0 ] ];
-      if( a[ 0 ]*b[ 1 ] - a[ 1 ]*b[ 0 ] > Math::zero )
+      if( a[ 0 ]*b[ 1 ] - a[ 1 ]*b[ 0 ] < Math::zero )
         std::reverse( polygon.begin(), polygon.end() );
 
       // todo: improve to take convex hull of inserted vertices
