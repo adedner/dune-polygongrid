@@ -69,15 +69,8 @@ namespace Dune
       Entity inside () const { return EntityImpl( item().cell() ); }
       Entity outside () const { return EntityImpl( item().neighbor() ); }
 
-      int indexInInside () const
-      {
-        DUNE_THROW( InvalidStateException, "Intersection::indexInInside does not make for arbitrary polytopes." );
-      }
-
-      int indexInOutside () const
-      {
-        DUNE_THROW( InvalidStateException, "Intersection::indexInOutside does not make for arbitrary polytopes." );
-      }
+      int indexInInside () const { return item().indexInCell(); }
+      int indexInOutside () const { return item().indexInNeighbor(); }
 
       DUNE_INLINE constexpr GeometryType type () const noexcept { return GeometryType( GeometryType::None(), mydimension ); }
 

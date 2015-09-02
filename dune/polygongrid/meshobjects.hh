@@ -118,6 +118,11 @@ namespace Dune
       /** \brief obtain cell whose boundary contains this half edge */
       Cell cell () const noexcept { return flip().neighbor(); }
 
+      /** \brief obtain index of half edge in cell whose boundary contains this half edge */
+      std::size_t indexInCell () const noexcept { return (index() - mesh().begin( cell().index() )); }
+      /** \brief obtain index of half edge in neighboring cell */
+      std::size_t indexInNeighbor () const noexcept { return (flip().index() - mesh().begin( neighbor().index() )); }
+
       std::size_t uniqueIndex () const noexcept { return mesh().edgeIndex( index() ); }
 
       const Mesh &mesh () const noexcept { return *mesh_; }
