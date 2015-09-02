@@ -62,7 +62,7 @@ namespace Dune
       template< dim_t cd >
       Id subId ( const typename Codim< cd >::Entity &entity, int i, dim_t codim ) const
       {
-        return id( entity.impl().subIndex( i, codim ), codim );
+        return id( entity.impl().subIndex( codim, i ), codim );
       }
 
     private:

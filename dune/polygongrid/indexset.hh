@@ -67,7 +67,7 @@ namespace Dune
       template< dim_t cd >
       Index subIndex ( const typename Codim< cd >::Entity &entity, int i, dim_t codim ) const
       {
-        return entity.impl().subIndex( i, codim );
+        return entity.impl().subIndex( codim, i );
       }
 
       Index size ( GeometryType type ) const { return (type.isNone() ? size( dimension - type.dimension() ) : 0u); }
