@@ -41,6 +41,17 @@ try
   Dune::MPIHelper::instance( argc, argv );
 
   std::unique_ptr< Grid > grid = createArbitraryGrid();
+
+  std::cout << std::endl << std::endl;
+  std::cout << "Primal Structure:" << std::endl;
+  Dune::__PolygonGrid::printStructure( grid->mesh().nodes( Dune::__PolygonGrid::Primal ) );
+  std::cout << std::endl;
+
+  std::cout << std::endl << std::endl;
+  std::cout << "Dual Structure:" << std::endl;
+  Dune::__PolygonGrid::printStructure( grid->mesh().nodes( Dune::__PolygonGrid::Dual ) );
+  std::cout << std::endl;
+
   gridcheck( *grid );
 
   return 0;

@@ -218,10 +218,7 @@ namespace Dune
         edgeIndices_ = __PolygonGrid::edgeIndices( nodes_, Primal );
       }
 
-      NodeIndex target ( HalfEdgeIndex index ) const noexcept
-      {
-        return NodeIndex( indexPair( index ).first, index.type() );
-      }
+      NodeIndex target ( HalfEdgeIndex index ) const noexcept { return NodeIndex( indexPair( index ).first, index.type() ); }
 
       std::size_t edgeIndex ( HalfEdgeIndex index ) const noexcept
       {
@@ -237,36 +234,35 @@ namespace Dune
 
       HalfEdgeIndex dual ( HalfEdgeIndex index ) const noexcept
       {
-        return HalfEdgeIndex( nodes_[ index.type() ].position_of( indexPair( index ) ), dual( index.type() ) );
+        return HalfEdgeIndex( nodes( index.type() ).position_of( indexPair( index ) ), dual( index.type() ) );
       }
 
       HalfEdgeIndex flip ( HalfEdgeIndex index ) const noexcept { return dual( dual( index ) ); }
 
-      std::size_t size ( NodeIndex index ) const noexcept { return nodes_[ index.type() ].size( index ); }
+      std::size_t size ( NodeIndex index ) const noexcept { return nodes( index.type() ).size( index ); }
 
-      std::size_t numNodes ( MeshType type ) const noexcept { return nodes_[ type ].size(); }
+      std::size_t numNodes ( MeshType type ) const noexcept { return nodes( type ).size(); }
 
       std::size_t numRegularNodes ( MeshType type ) const noexcept { return numRegularNodes_[ type ]; }
 
       std::size_t numBoundaries () const noexcept { return (numNodes( Primal ) - numRegularNodes( Primal )) / 2u; }
 
-      bool regular ( NodeIndex index ) const noexcept
-      {
-        return (static_cast< std::size_t >( index ) < nodes_[ index.type() ].begin_of( numRegularNodes( index.type() ) ));
-      }
+      bool regular ( NodeIndex index ) const noexcept { return (static_cast< std::size_t >( index ) < numRegularNodes( index.type() )); }
 
       HalfEdgeIndex begin ( NodeIndex index ) const noexcept
       {
-        return HalfEdgeIndex( nodes_[ index.type() ].begin_of( index ), dual( index.type() ) );
+        return HalfEdgeIndex( nodes( index.type() ).begin_of( index ), dual( index.type() ) );
       }
 
       HalfEdgeIndex end ( NodeIndex index ) const noexcept
       {
-        return HalfEdgeIndex( nodes_[ index.type() ].end_of( index ), dual( index.type() ) );
+        return HalfEdgeIndex( nodes( index.type() ).end_of( index ), dual( index.type() ) );
       }
 
       NodeIndex begin ( MeshType type ) const noexcept { return NodeIndex( 0u, type ); }
       NodeIndex end ( MeshType type ) const noexcept { return NodeIndex( numRegularNodes( type ), type ); }
+
+      const MultiVector< IndexPair > &nodes ( MeshType type ) const { return nodes_[ type ]; }
 
     private:
       const IndexPair &indexPair ( HalfEdgeIndex index ) const noexcept
