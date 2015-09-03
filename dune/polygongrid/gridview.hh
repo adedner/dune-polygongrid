@@ -60,7 +60,7 @@ namespace Dune
 
       typedef Dune::CollectiveCommunication< No_Comm > CollectiveCommunication;
 
-      GridView ( const Grid &grid ) : grid_( grid ) {}
+      explicit GridView ( const Grid &grid ) : grid_( grid ), indexSet_( grid.mesh(), grid.type() ) {}
 
       const IndexSet &indexSet () const { return indexSet_; }
 

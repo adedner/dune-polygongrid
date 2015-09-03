@@ -47,7 +47,7 @@ namespace Dune
 
     int maxLevel () const { return 0; }
 
-    std::size_t numBoundarySegments () const { return mesh().numBoundaries(); }
+    std::size_t numBoundarySegments () const { return mesh().numBoundaries( type() ); }
 
     MacroGridView macroGridView () const
     {

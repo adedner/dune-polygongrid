@@ -245,7 +245,15 @@ namespace Dune
 
       std::size_t numRegularNodes ( MeshType type ) const noexcept { return numRegularNodes_[ type ]; }
 
-      std::size_t numBoundaries () const noexcept { return (numNodes( Primal ) - numRegularNodes( Primal )) / 2u; }
+      std::size_t numBoundaries ( MeshType type ) const noexcept
+      {
+        return (numNodes( Primal ) - numRegularNodes( Primal )) / (2u - static_cast< std::size_t >( type ));
+      }
+
+      std::size_t numRegularEdges ( MeshType type ) const noexcept
+      {
+        return nodes( Primal ).values().size() / 2u - (type == Primal ? numBoundaries( Primal ) : 0u);
+      }
 
       bool regular ( NodeIndex index ) const noexcept { return (static_cast< std::size_t >( index ) < numRegularNodes( index.type() )); }
 

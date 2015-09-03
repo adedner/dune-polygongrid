@@ -44,7 +44,12 @@ namespace Dune
         typedef Dune::Entity< codim, __PolygonGrid::Entity< Item, codim > > Entity;
       };
 
-      IndexSet () : size_{{ 0u, 0u, 0u }} {}
+      IndexSet ( const Mesh< ct > &mesh, MeshType type )
+      {
+        size_[ 0 ] = mesh.numRegularNodes( dual( type ) );
+        size_[ 1 ] = mesh.numRegularEdges( type );
+        size_[ 2 ] = mesh.numRegularNodes( type );
+      }
 
       template< class Entity >
       Index index ( const Entity &entity ) const
@@ -80,8 +85,6 @@ namespace Dune
       }
 
       Types types ( int codim ) const noexcept { return {{ GeometryType( GeometryType::None(), dimension - codim ) }}; }
-
-      void update ( Index numPolygons, Index numEdges, Index numVertices ) { size_ = {{ numPolygons, numEdges, numVertices }}; }
 
     private:
       std::array< Index, dimension+1 > size_;
