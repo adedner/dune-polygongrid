@@ -93,7 +93,7 @@ namespace Dune
 
     protected:
       static Iterator begin ( const Mesh< ct > &mesh, MeshType type ) { return Iterator( mesh, mesh.begin( mesh.begin( dual( type ) ) ) ); }
-      static Iterator end ( const Mesh< ct > &mesh, MeshType type ) { return Iterator( mesh, --mesh.end( mesh.end( dual( type ) ) ) ); }
+      static Iterator end ( const Mesh< ct > &mesh, MeshType type ) { return Iterator( mesh, mesh.end( --mesh.end( dual( type ) ) ) ); }
 
       Iterator begin () const { return begin( iterator_->mesh(), iterator_->type() ); }
       Iterator end () const { return end( iterator_->mesh(), iterator_->type() ); }
