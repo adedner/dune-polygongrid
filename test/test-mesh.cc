@@ -50,36 +50,64 @@ try
       std::cerr << "Error: Mesh structure not valid." << std::endl;
   }
 
-  std::vector< Dune::FieldVector< double, 2 > > vertices
+  std::vector< Dune::FieldVector< double, 2 > > positions
     = { { 0.0, 0.0 }, { 0.5, 0.0 }, { 1.0, 0.0 },
         { 0.0, 0.4 }, { 0.5, 0.2 }, { 0.7, 0.4 }, { 1.0, 0.4 },
         { 0.0, 0.7 }, { 0.7, 0.6 }, { 1.0, 0.6 },
         { 0.0, 1.0 }, { 0.3, 1.0 }, { 1.0, 1.0 } };
 
-  Mesh< double > mesh( vertices, polys );
+  Mesh< double > mesh( positions, polys );
 
   std::cout << std::endl << std::endl;
   std::cout << "Primal Vertices:" << std::endl << std::endl;
-  for( auto node : nodes( mesh, primalMesh ) )
-    std::cout << node.position() << std::endl;
+  for( auto vtx : vertices( mesh, primalMesh ) )
+    std::cout << vtx.position() << std::endl;
   std::cout << std::endl;
 
   std::cout << std::endl << std::endl;
   std::cout << "Dual Vertices:" << std::endl << std::endl;
-  for( auto node : nodes( mesh, dualMesh ) )
-    std::cout << node.position() << std::endl;
+  for( auto vtx : vertices( mesh, dualMesh ) )
+    std::cout << vtx.position() << std::endl;
   std::cout << std::endl;
 
-  for( auto node : nodes( mesh, dualMesh ) )
+  std::cout << std::endl << std::endl;
+  std::cout << "Primal Cells:" << std::endl << std::endl;
+  for( auto cell : cells( mesh, primalMesh ) )
   {
-    for( auto halfEdge : node.halfEdges() )
+    std::string delim = "{ ";
+    for( auto halfEdge : cell.halfEdges() )
     {
-      if( halfEdge.cell().index() != node.index() )
+      std::cout << delim << halfEdge.target().position();
+      delim = ", ";
+    }
+    std::cout << " }" << std::endl;
+  }
+  std::cout << std::endl;
+
+  std::cout << std::endl << std::endl;
+  std::cout << "Dual Cells:" << std::endl << std::endl;
+  for( auto cell : cells( mesh, dualMesh ) )
+  {
+    std::string delim = "{ ";
+    for( auto halfEdge : cell.halfEdges() )
+    {
+      std::cout << delim << halfEdge.target().position();
+      delim = ", ";
+    }
+    std::cout << " }" << std::endl;
+  }
+  std::cout << std::endl;
+
+  for( auto cell : cells( mesh, primalMesh ) )
+  {
+    for( auto halfEdge : cell.halfEdges() )
+    {
+      if( halfEdge.cell().index() != cell.index() )
       {
-        std::cerr << "Error: halfEdge.flip().target() does not return original node." << std::endl;
+        std::cerr << "Error: halfEdge.cell() does not return original cell." << std::endl;
         std::cerr << "       (halfEdge.index() = " << static_cast< std::size_t >( halfEdge.index() )
                   << ", halfEdge.cell().index() = " << static_cast< std::size_t >( halfEdge.cell().index() )
-                  << ", node.index() = " << static_cast< std::size_t >( node.index() ) << ")" << std::endl;
+                  << ", cell.index() = " << static_cast< std::size_t >( cell.index() ) << ")" << std::endl;
         std::abort();
       }
     }
