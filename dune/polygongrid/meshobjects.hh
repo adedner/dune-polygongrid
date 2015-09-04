@@ -61,6 +61,11 @@ namespace Dune
 
       std::size_t uniqueIndex () const noexcept { return index(); }
 
+      std::size_t boundaryIndex () const noexcept
+      {
+        return uniqueIndex() - mesh().numRegularNodes( index().type() );
+      }
+
       const Mesh &mesh () const noexcept { return *mesh_; }
       Index index () const noexcept { return index_; }
 

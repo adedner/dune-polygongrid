@@ -64,7 +64,7 @@ namespace Dune
 
       int boundaryId () const noexcept { return 1; }
 
-      std::size_t boundarySegmentIndex () const noexcept { assert( boundary() ); return item().index(); }
+      std::size_t boundarySegmentIndex () const noexcept { assert( boundary() ); return item().neighbor().boundaryIndex(); }
 
       Entity inside () const { return EntityImpl( item().cell() ); }
       Entity outside () const { return EntityImpl( item().neighbor() ); }
