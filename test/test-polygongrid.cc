@@ -7,6 +7,9 @@
 #include <dune/polygongrid/grid.hh>
 #include <dune/polygongrid/gridfactory.hh>
 
+#include <dune/grid/test/checkintersectionit.hh>
+#include <dune/grid/test/checkiterators.hh>
+#include <dune/grid/test/checkpartition.hh>
 #include <dune/grid/test/gridcheck.hh>
 
 
@@ -32,6 +35,21 @@ std::unique_ptr< Grid > createArbitraryGrid ()
 }
 
 
+// performCheck
+// ------------
+
+void performCheck ( Grid &grid )
+{
+  std::cerr << ">>> Checking " << grid.type() << " grid..." << std::endl;
+  gridcheck( grid );
+  checkIterators( grid.leafGridView() );
+  checkPartitionType( grid.leafGridView() );
+  std::cerr << "<<< Checking intersection of " << grid.type() << " grid..." << std::endl;
+  checkIntersectionIterator( grid );
+  std::cout << std::endl;
+}
+
+
 // main
 // ----
 
@@ -52,12 +70,10 @@ try
   Dune::__PolygonGrid::printStructure( grid.mesh().nodes( Dune::__PolygonGrid::Dual ) );
   std::cout << std::endl;
 
-  std::cerr << ">>> Checking primal grid... " << std::endl;
-  gridcheck( grid );
+  performCheck( grid );
 
-  std::cerr << ">>> Checking dual grid... " << std::endl;
   Grid dualGrid = grid.dualGrid();
-  gridcheck( dualGrid );
+  performCheck( dualGrid );
 
   return 0;
 }
