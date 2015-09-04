@@ -1,6 +1,8 @@
 #ifndef DUNE_POLYGONGRID_GRID_HH
 #define DUNE_POLYGONGRID_GRID_HH
 
+#include <utility>
+
 #include <dune/geometry/dimension.hh>
 
 #include <dune/grid/common/grid.hh>
@@ -42,8 +44,11 @@ namespace Dune
     typedef __PolygonGrid::MeshType MeshType;
 
     PolygonGrid ( std::shared_ptr< Mesh > mesh, __PolygonGrid::MeshType type )
-      : mesh_( mesh ), type_( type )
+      : mesh_( std::move( mesh ) ), type_( std::move( type ) )
     {}
+
+    PolygonGrid ( const This &other ) : mesh_( other.mesh_ ), type_( other.type_ ) {}
+    PolygonGrid ( This &other ) : mesh_( std::move( other.mesh_ ) ), type_( std::move( other.type_ ) ) {}
 
     int maxLevel () const { return 0; }
 
@@ -93,6 +98,8 @@ namespace Dune
     {
       return 0;
     }
+
+    This dualGrid () const { return This( mesh_, dual( type() ) ); }
 
     const Mesh &mesh () const { return *mesh_; }
     MeshType type () const { return type_; }
