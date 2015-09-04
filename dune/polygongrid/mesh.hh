@@ -13,6 +13,8 @@
 #include <dune/common/fvector.hh>
 #include <dune/common/math.hh>
 
+#include <dune/geometry/dimension.hh>
+
 #include <dune/polygongrid/multivector.hh>
 
 namespace Dune
@@ -250,9 +252,16 @@ namespace Dune
         return (numNodes( Primal ) - numRegularNodes( Primal )) / (2u - static_cast< std::size_t >( type ));
       }
 
-      std::size_t numRegularEdges ( MeshType type ) const noexcept
+      std::size_t numCells ( MeshType type ) const noexcept { return numRegularNodes( dual( type ) ); }
+
+      std::size_t numEdges ( MeshType type ) const noexcept
       {
         return nodes( Primal ).values().size() / 2u - (type == Primal ? numBoundaries( Dual ) : 0u);
+      }
+
+      std::size_t numVertices ( MeshType type ) const noexcept
+      {
+        return (type == Primal ? numRegularNodes( type ) : numNodes( type ));
       }
 
       bool regular ( NodeIndex index ) const noexcept { return (static_cast< std::size_t >( index ) < numRegularNodes( index.type() )); }
@@ -267,8 +276,14 @@ namespace Dune
         return HalfEdgeIndex( nodes( index.type() ).end_of( index ), dual( index.type() ) );
       }
 
-      NodeIndex begin ( MeshType type ) const noexcept { return NodeIndex( 0u, type ); }
-      NodeIndex end ( MeshType type ) const noexcept { return NodeIndex( numRegularNodes( type ), type ); }
+      NodeIndex begin ( MeshType type, Codim< 0 > ) const noexcept { return NodeIndex( 0u, dual( type ) ); }
+      NodeIndex end ( MeshType type, Codim< 0 > ) const noexcept { return NodeIndex( numCells( type ), dual( type ) ); }
+
+      HalfEdgeIndex begin ( MeshType type, Codim< 1 > ) const noexcept { return begin( begin( type, Codim< 0 >() ) ); }
+      HalfEdgeIndex end ( MeshType type, Codim< 1 > ) const noexcept { return end( --end( type, Codim< 0 >() ) ); }
+
+      NodeIndex begin ( MeshType type, Codim< 2 > ) const noexcept { return NodeIndex( 0u, type ); }
+      NodeIndex end ( MeshType type, Codim< 2 > ) const noexcept { return NodeIndex( numVertices( type ), type ); }
 
       const MultiVector< IndexPair > &nodes ( MeshType type ) const { return nodes_[ type ]; }
 

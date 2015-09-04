@@ -47,8 +47,8 @@ namespace Dune
 
       EntityIterator () = default;
 
-      EntityIterator ( Tag::Begin, const Mesh< ct > &mesh, MeshType type ) : iterator_( mesh, mesh.begin( codim == 0 ? dual( type ) : type ) ) {}
-      EntityIterator ( Tag::End, const Mesh< ct > &mesh, MeshType type ) : iterator_( mesh, mesh.end( codim == 0 ? dual( type ) : type ) ) {}
+      EntityIterator ( Tag::Begin, const Mesh< ct > &mesh, MeshType type ) : iterator_( mesh, mesh.begin( type, Codim< codim >() ) ) {}
+      EntityIterator ( Tag::End, const Mesh< ct > &mesh, MeshType type ) : iterator_( mesh, mesh.end( type, Codim< codim >() ) ) {}
 
       Entity dereference () const { return EntityImpl( *iterator_ ); }
 
@@ -92,8 +92,8 @@ namespace Dune
       void increment () noexcept { ++iterator_; advance(); }
 
     protected:
-      static Iterator begin ( const Mesh< ct > &mesh, MeshType type ) { return Iterator( mesh, mesh.begin( mesh.begin( dual( type ) ) ) ); }
-      static Iterator end ( const Mesh< ct > &mesh, MeshType type ) { return Iterator( mesh, mesh.end( --mesh.end( dual( type ) ) ) ); }
+      static Iterator begin ( const Mesh< ct > &mesh, MeshType type ) { return Iterator( mesh, mesh.begin( type, Codim< codim >() ) ); }
+      static Iterator end ( const Mesh< ct > &mesh, MeshType type ) { return Iterator( mesh, mesh.end( type, Codim< codim >() ) ); }
 
       Iterator begin () const { return begin( iterator_->mesh(), iterator_->type() ); }
       Iterator end () const { return end( iterator_->mesh(), iterator_->type() ); }

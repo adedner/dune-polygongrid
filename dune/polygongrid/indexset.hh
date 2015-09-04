@@ -46,9 +46,9 @@ namespace Dune
 
       IndexSet ( const Mesh< ct > &mesh, MeshType type )
       {
-        size_[ 0 ] = mesh.numRegularNodes( dual( type ) );
-        size_[ 1 ] = mesh.numRegularEdges( type );
-        size_[ 2 ] = mesh.numRegularNodes( type );
+        size_[ 0 ] = mesh.numCells( type );
+        size_[ 1 ] = mesh.numEdges( type );
+        size_[ 2 ] = mesh.numVertices( type );
       }
 
       template< class Entity >

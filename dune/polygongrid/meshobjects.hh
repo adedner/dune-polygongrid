@@ -202,10 +202,10 @@ namespace Dune
     // Nodes
     // -----
 
-    template< class ct >
+    template< class ct, class Tag >
     class Nodes
     {
-      typedef Nodes< ct > This;
+      typedef Nodes< ct, Tag > This;
 
     public:
       typedef __PolygonGrid::Mesh< ct > Mesh;
@@ -213,8 +213,8 @@ namespace Dune
 
       Nodes ( const Mesh &mesh, MeshType type ) noexcept : mesh_( &mesh ), type_( type ) {}
 
-      Iterator begin () const noexcept { return Iterator( mesh(), mesh().template begin( type_ ) ); }
-      Iterator end () const noexcept { return Iterator( mesh(), mesh().template end( type_ ) ); }
+      Iterator begin () const noexcept { return Iterator( mesh(), mesh().template begin( type_, Tag() ) ); }
+      Iterator end () const noexcept { return Iterator( mesh(), mesh().template end( type_, Tag() ) ); }
 
       const Mesh &mesh () const noexcept { return *mesh_; }
       MeshType type () const noexcept { return type_; }
@@ -224,10 +224,32 @@ namespace Dune
       MeshType type_;
     };
 
+
+
+    // Cells
+    // -----
+
     template< class ct >
-    inline static Nodes< ct > nodes ( const Mesh< ct > &mesh, MeshType type ) noexcept
+    using Cells = Nodes< ct, Codim< 0 > >;
+
+    template< class ct >
+    inline static Cells< ct > cells ( const Mesh< ct > &mesh, MeshType type ) noexcept
     {
-      return Nodes< ct >( mesh, type );
+      return Cells< ct >( mesh, type );
+    }
+
+
+
+    // Vertices
+    // --------
+
+    template< class ct >
+    using Vertices = Nodes< ct, Codim< 2 > >;
+
+    template< class ct >
+    inline static Vertices< ct > vertices ( const Mesh< ct > &mesh, MeshType type ) noexcept
+    {
+      return Vertices< ct >( mesh, type );
     }
 
 
