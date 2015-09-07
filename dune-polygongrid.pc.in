@@ -8,7 +8,7 @@ DEPENDENCIES=@REQUIRES@
 
 Name: @PACKAGE_NAME@
 Version: @VERSION@
-Description: dune-polygongrid module
+Description: DUNE module providing a fully unstructured polygon grid
 URL: http://dune.mathematik.uni-freiburg.de/
 Requires: ${DEPENDENCIES}
 Libs: -L${libdir}
