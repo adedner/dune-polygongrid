@@ -12,6 +12,10 @@
 #include <dune/grid/test/checkpartition.hh>
 #include <dune/grid/test/gridcheck.hh>
 
+#if HAVE_DUNE_VIZ
+#include <dune/viz/writer/vtk/polygonwriter.hh>
+#endif // #if HAVE_DUNE_VIZ
+
 
 typedef Dune::PolygonGrid< double > Grid;
 
@@ -50,6 +54,15 @@ void performCheck ( Grid &grid )
 }
 
 
+void write ( const Grid &grid, const std::string &name )
+{
+#if HAVE_DUNE_VIZ
+  Dune::Viz::VTKPolygonWriter< Grid::LeafGridView > vtkWriter( grid.leafGridView() );
+  vtkWriter.write( name );
+#endif // #if HAVE_DUNE_VIZ
+}
+
+
 // main
 // ----
 
@@ -71,9 +84,11 @@ try
   std::cout << std::endl;
 
   performCheck( grid );
+  write( grid, "primalgrid" );
 
   Grid dualGrid = grid.dualGrid();
   performCheck( dualGrid );
+  write( dualGrid, "dualgrid" );
 
   return 0;
 }
