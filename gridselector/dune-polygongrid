@@ -1,0 +1,8 @@
+{
+  "PolygonGrid" :
+  {
+    "type"      : "Dune::PolygonGrid< $(ctype) >",
+    "default"   : [ "ctype=double" ],
+    "include"   : [ "dune/polygongrid/grid.hh", "dune/polygongrid/dgf.hh" ]
+  }
+}

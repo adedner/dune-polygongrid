@@ -9,6 +9,7 @@ dune_project()
 
 add_subdirectory( cmake/modules )
 add_subdirectory( dune )
+add_subdirectory( gridselector )
 add_subdirectory( test )
 
 finalize_dune_project( GENERATE_CONFIG_H_CMAKE )
