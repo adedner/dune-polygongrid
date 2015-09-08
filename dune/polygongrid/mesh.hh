@@ -38,8 +38,8 @@ namespace Dune
     namespace
     {
 
-      PrimalType primalMesh = {};
-      DualType dualMesh = {};
+      const PrimalType primalMesh = {};
+      const DualType dualMesh = {};
 
     } // anonymous namespace
 
