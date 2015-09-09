@@ -171,6 +171,12 @@ namespace Dune
       std::copy( parser_.elements[ i ].begin(), parser_.elements[ i ].end(), polygons[ i ].begin() );
       if( counts[ i ] == 4u )
         std::swap( polygons[ i ][ 2u ], polygons[ i ][ 3u ] );
+
+      // insert polygon oriented counter-clockwise
+      const GlobalCoordinate a = vertices[ polygons[ i ][ 1u ] ] - vertices[ polygons[ i ][ 0u ] ];
+      const GlobalCoordinate b = vertices[ polygons[ i ][ 2u ] ] - vertices[ polygons[ i ][ 0u ] ];
+      if( a[ 0 ]*b[ 1 ] - a[ 1 ]*b[ 0 ] < Math::zero )
+        std::reverse( polygons[ i ].begin(), polygons[ i ].end() );
     }
 
     grid_.reset( new Grid( std::make_shared< typename Grid::Mesh >( vertices, polygons ), __PolygonGrid::Primal ) );
