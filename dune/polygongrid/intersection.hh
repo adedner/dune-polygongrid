@@ -102,7 +102,7 @@ namespace Dune
       GlobalCoordinate outerNormal () const
       {
         const GlobalCoordinate tangent = (item().target().position() - item().flip().target().position());
-        return GlobalCoordinate{ -tangent[ 1 ], tangent[ 0 ] };
+        return GlobalCoordinate{ tangent[ 1 ], -tangent[ 0 ] };
       }
 
       Item item_;
