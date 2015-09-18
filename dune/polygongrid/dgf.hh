@@ -56,6 +56,8 @@ namespace Dune
     typedef typename Grid::CollectiveCommunication CollectiveCommunication;
     typedef typename Grid::GlobalCoordinate GlobalCoordinate;
 
+    typedef Dune::Intersection< const PolygonGrid< ct >, __PolygonGrid::Intersection< ct > > Intersection;
+
     explicit DGFGridFactory ( std::istream &input, const CollectiveCommunication &comm = CollectiveCommunication() )
       : parser_( comm.rank(), comm.size() )
     {
@@ -71,49 +73,25 @@ namespace Dune
 
     Grid *grid () { return grid_.release(); }
 
-    template< class Intersection >
-    bool wasInserted ( const Intersection & ) const
-    {
-      return false;
-    }
+    bool wasInserted ( const Intersection &intersection ) const { return (findFace( intersection ) != parser_.facemap.end()); }
 
-    template< class Intersection >
     int boundaryId ( const Intersection &intersection ) const
     {
-#if 0
-      const auto entity = intersection.inside();
-      const int face = intersection.indexInInside();
-
-      const unsigned int p0 = entity.impl().gridLevel().subIndex( entity.impl().index(), 0, (3-face)%3, 2 );
-      const unsigned int p1 = entity.impl().gridLevel().subIndex( entity.impl().index(), 0, (4-face)%3, 2 );
-
-      DuneGridFormatParser::facemap_t::key_type key( { p0, p1 }, false );
-      const auto pos = parser_.facemap.find( key );
+      const auto pos = findFace( intersection );
       if( pos != parser_.facemap.end() )
         return pos->second.first;
       else
-#endif
         return (intersection.boundary() ? 1 : 0);
     }
 
-    bool haveBoundaryParameters () const { return false; }
+    bool haveBoundaryParameters () const { return parser_.haveBndParameters; }
 
-    template< class Intersection >
     const DGFBoundaryParameter::type &boundaryParameter ( const Intersection &intersection ) const
     {
-#if 0
-      const auto entity = intersection.inside();
-      const int face = intersection.indexInInside();
-
-      const unsigned int p0 = entity.impl().subIndex( entity.impl().index(), 0, (3-face)%3, 2 );
-      const unsigned int p1 = entity.impl().subIndex( entity.impl().index(), 0, (4-face)%3, 2 );
-
-      DuneGridFormatParser::facemap_t::key_type key( { p0, p1 }, false );
-      const auto pos = parser_.facemap.find( key );
+      const auto pos = findFace( intersection );
       if( pos != parser_.facemap.end() )
         return pos->second.second;
       else
-#endif
         return DGFBoundaryParameter::defaultValue();
     }
 
@@ -139,6 +117,14 @@ namespace Dune
 
   private:
     void generate ( std::ifstream &input );
+
+    DuneGridFormatParser::facemap_t::const_iterator findFace ( const Intersection &intersection ) const
+    {
+      const unsigned int p0 = intersection.impl().item().target().uniqueIndex();
+      const unsigned int p1 = intersection.impl().item().flip().target().uniqueIndex();
+      DuneGridFormatParser::facemap_t::key_type key( { p0, p1 }, false );
+      return parser_.facemap.find( key );
+    }
 
     std::unique_ptr< Grid > grid_;
     DuneGridFormatParser parser_;
