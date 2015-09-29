@@ -6,10 +6,6 @@
 #include <limits>
 #include <type_traits>
 
-#include <dune/common/inline.hh>
-
-#include <dune/geometry/dimension.hh>
-
 #include <dune/grid/common/entityseed.hh>
 
 namespace Dune
@@ -21,23 +17,23 @@ namespace Dune
     // EntitySeed
     // ----------
 
-    template< class Index, dim_t codim >
+    template< class Index, int codim >
     class EntitySeed
     {
       typedef EntitySeed< Index, codim > This;
 
     public:
-      static const dim_t codimension = codim;
+      static const int codimension = codim;
 
       EntitySeed () = default;
       explicit EntitySeed ( const Index &index ) : index_( index ) {}
 
-      DUNE_INLINE bool isValid () const noexcept { return static_cast< bool >( index() ); }
+      bool isValid () const noexcept { return static_cast< bool >( index() ); }
 
-      DUNE_INLINE bool operator== ( const This &other ) const noexcept { return (index() == other.index()); }
-      DUNE_INLINE bool operator!= ( const This &other ) const noexcept { return (index() != other.index()); }
+      bool operator== ( const This &other ) const noexcept { return (index() == other.index()); }
+      bool operator!= ( const This &other ) const noexcept { return (index() != other.index()); }
 
-      DUNE_INLINE Index index () const noexcept { return index_; }
+      Index index () const noexcept { return index_; }
 
     private:
       Index index_;

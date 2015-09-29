@@ -32,7 +32,7 @@ std::unique_ptr< Grid > createArbitraryGrid ()
   Dune::GridFactory< Grid > factory;
   for( const auto &vertex : vertices )
     factory.insertVertex( vertex );
-  Dune::GeometryType geo( Dune::GeometryType::None(), 2 );
+  Dune::GeometryType geo( Dune::GeometryType::none, 2 );
   for( const auto &poly : polys )
     factory.insertElement( geo, poly );
   return std::unique_ptr< Grid >( factory.createGrid() );

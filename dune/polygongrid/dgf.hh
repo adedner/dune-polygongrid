@@ -51,12 +51,12 @@ namespace Dune
   struct DGFGridFactory< PolygonGrid< ct > >
   {
     typedef PolygonGrid< ct > Grid;
-    static const dim_t dimension = 2;
+    static const int dimension = 2;
 
     typedef typename Grid::CollectiveCommunication CollectiveCommunication;
-    typedef typename Grid::GlobalCoordinate GlobalCoordinate;
+    typedef FieldVector< ct, 2 > GlobalCoordinate;
 
-    typedef Dune::Intersection< const PolygonGrid< ct >, __PolygonGrid::Intersection< ct > > Intersection;
+    typedef Dune::Intersection< const Grid, __PolygonGrid::Intersection< ct > > Intersection;
 
     explicit DGFGridFactory ( std::istream &input, const CollectiveCommunication &comm = CollectiveCommunication() )
       : parser_( comm.rank(), comm.size() )

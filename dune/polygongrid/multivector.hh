@@ -6,7 +6,7 @@
 #include <iterator>
 #include <vector>
 
-#include <dune/common/iterator/tags.hh>
+#include <dune/polygongrid/iteratortags.hh>
 
 namespace Dune
 {

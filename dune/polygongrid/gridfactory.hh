@@ -8,7 +8,6 @@
 
 #include <dune/common/exceptions.hh>
 
-#include <dune/geometry/dimension.hh>
 #include <dune/geometry/type.hh>
 
 #include <dune/grid/common/gridfactory.hh>
@@ -28,10 +27,10 @@ namespace Dune
     typedef GridFactory< PolygonGrid< ct > > This;
 
   public:
-    static const dim_t dimension = 2;
+    static const int dimension = 2;
 
     typedef PolygonGrid< ct > Grid;
-    typedef typename Grid::GlobalCoordinate GlobalCoordinate;
+    typedef FieldVector< ct, 2 > GlobalCoordinate;
 
     GridFactory () {}
 
@@ -39,7 +38,7 @@ namespace Dune
 
     void insertElement ( const GeometryType &type, const std::vector< unsigned int > &nodes )
     {
-      if( type.dimension() != 2 )
+      if( type.dim() != 2 )
         DUNE_THROW( GridError, "PolygonGrid can only handle two-dimensional elements." );
 
       const std::size_t numNodes = nodes.size();
@@ -64,7 +63,7 @@ namespace Dune
       // insert polygon oriented counter-clockwise
       const GlobalCoordinate a = vertices_[ polygon[ 1 ] ] - vertices_[ polygon[ 0 ] ];
       const GlobalCoordinate b = vertices_[ polygon[ 2 ] ] - vertices_[ polygon[ 0 ] ];
-      if( a[ 0 ]*b[ 1 ] - a[ 1 ]*b[ 0 ] < Math::zero )
+      if( a[ 0 ]*b[ 1 ] - a[ 1 ]*b[ 0 ] < ct( 0 ) )
         std::reverse( polygon.begin(), polygon.end() );
 
       // todo: improve to take convex hull of inserted vertices

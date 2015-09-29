@@ -1,8 +1,7 @@
 #ifndef DUNE_POLYGONGRID_MESHOBJECTS_HH
 #define DUNE_POLYGONGRID_MESHOBJECTS_HH
 
-#include <dune/common/iterator/tags.hh>
-
+#include <dune/polygongrid/iteratortags.hh>
 #include <dune/polygongrid/mesh.hh>
 
 namespace Dune
@@ -52,6 +51,8 @@ namespace Dune
       Node () noexcept = default;
 
       Node ( const Mesh &mesh, Index index ) noexcept : mesh_( &mesh ), index_( index ) {}
+
+      bool operator== ( const This &other ) const noexcept { return (index_ == other.index_); }
 
       const GlobalCoordinate &position () const noexcept { return mesh().position( index() ); }
 
@@ -110,6 +111,8 @@ namespace Dune
       HalfEdge () noexcept = default;
 
       HalfEdge ( const Mesh &mesh, Index index ) noexcept : mesh_( &mesh ), index_( index ) {}
+
+      bool operator== ( const This &other ) const noexcept { return (index_ == other.index_); }
 
       /** \brief flip the direction of the half edge */
       This flip () const noexcept { return This( mesh(), mesh().flip( index() ) ); }

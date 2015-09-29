@@ -6,11 +6,10 @@
 
 #include <type_traits>
 
-#include <dune/common/iterator/tags.hh>
-
 #include <dune/geometry/dimension.hh>
 
 #include <dune/polygongrid/entity.hh>
+#include <dune/polygongrid/iteratortags.hh>
 #include <dune/polygongrid/meshobjects.hh>
 
 namespace Dune
@@ -19,42 +18,48 @@ namespace Dune
   namespace __PolygonGrid
   {
 
-    // Internal Forward Declarations
-    // -----------------------------
-
-    template< class, dim_t codim >
-    class EntityIterator;
-
-
-
     // EntityIterator for Node
     // -----------------------
 
-    template< class ct, dim_t codim >
-    class EntityIterator< Node< ct >, codim >
+    template< int codim, class Grid >
+    class EntityIterator
     {
-      typedef EntityIterator< Node< ct >, codim > This;
+      typedef EntityIterator< codim, Grid > This;
 
-      typedef IndexIterator< Node< ct > > Iterator;
-      typedef __PolygonGrid::Entity< Node< ct >, codim > EntityImpl;
+      typedef IndexIterator< Node< typename std::remove_const< Grid >::type::ctype > > Iterator;
+      typedef __PolygonGrid::Entity< codim, 2, Grid > EntityImpl;
 
     public:
-      static const dim_t codimension = codim;
-      static const dim_t dimension = 2;
-      static const dim_t mydimension = dimension - codimension;
+      static const int codimension = codim;
+      static const int dimension = 2;
+      static const int mydimension = dimension - codimension;
 
-      typedef Dune::Entity< codim, EntityImpl > Entity;
+      typedef __PolygonGrid::Mesh< typename std::remove_const< Grid >::type::ctype > Mesh;
+
+      typedef Dune::Entity< codim, 2, Grid, __PolygonGrid::Entity > Entity;
 
       EntityIterator () = default;
 
-      EntityIterator ( Tag::Begin, const Mesh< ct > &mesh, MeshType type ) : iterator_( mesh, mesh.begin( type, Codim< codim >() ) ) {}
-      EntityIterator ( Tag::End, const Mesh< ct > &mesh, MeshType type ) : iterator_( mesh, mesh.end( type, Codim< codim >() ) ) {}
+      EntityIterator ( Tag::Begin, const Mesh &mesh, MeshType type ) : iterator_( mesh, mesh.begin( type, Codim< codim >() ) ) {}
+      EntityIterator ( Tag::End, const Mesh &mesh, MeshType type ) : iterator_( mesh, mesh.end( type, Codim< codim >() ) ) {}
 
       Entity dereference () const { return EntityImpl( *iterator_ ); }
 
       bool equals ( const This &other ) const noexcept { return (iterator_ == other.iterator_); }
 
       void increment () noexcept { ++iterator_; }
+
+       // allow for (deprecated) construction/assignment of EntityPointer from a given iterator
+       operator Dune::DefaultEntityPointer< Entity > () const
+       {
+         return Dune::DefaultEntityPointer< Entity >( dereference() );
+       }
+
+       // allow for (deprecated) comparison of an iterator with an entity pointer
+       bool equals ( const Dune::DefaultEntityPointer< Entity > &rhs ) const
+       {
+         return (dereference() == rhs.dereference());
+       }
 
     protected:
       Iterator iterator_;
@@ -65,25 +70,27 @@ namespace Dune
     // EntityIterator for HalfEdge
     // ---------------------------
 
-    template< class ct, dim_t codim >
-    class EntityIterator< HalfEdge< ct >, codim >
+    template< class Grid >
+    class EntityIterator< 1, Grid >
     {
-      typedef EntityIterator< HalfEdge< ct >, codim > This;
+      typedef EntityIterator< 1, Grid > This;
 
-      typedef IndexIterator< HalfEdge< ct > > Iterator;
-      typedef __PolygonGrid::Entity< HalfEdge< ct >, codim > EntityImpl;
+      typedef IndexIterator< HalfEdge< typename std::remove_const< Grid >::type::ctype > > Iterator;
+      typedef __PolygonGrid::Entity< 1, 2, Grid > EntityImpl;
 
     public:
-      static const dim_t codimension = codim;
-      static const dim_t dimension = 2;
-      static const dim_t mydimension = dimension - codimension;
+      static const int codimension = 1;
+      static const int dimension = 2;
+      static const int mydimension = dimension - codimension;
 
-      typedef Dune::Entity< codimension, EntityImpl > Entity;
+      typedef __PolygonGrid::Mesh< typename std::remove_const< Grid >::type::ctype > Mesh;
+
+      typedef Dune::Entity< 1, 2, Grid, __PolygonGrid::Entity > Entity;
 
       EntityIterator () = default;
 
-      EntityIterator ( Tag::Begin, const Mesh< ct > &mesh, MeshType type ) : iterator_( begin( mesh, type ) ) { advance(); }
-      EntityIterator ( Tag::End, const Mesh< ct > &mesh, MeshType type ) : iterator_( end( mesh, type ) ) {}
+      EntityIterator ( Tag::Begin, const Mesh &mesh, MeshType type ) : iterator_( begin( mesh, type ) ) { advance(); }
+      EntityIterator ( Tag::End, const Mesh &mesh, MeshType type ) : iterator_( end( mesh, type ) ) {}
 
       Entity dereference () const { return EntityImpl( *iterator_ ); }
 
@@ -91,9 +98,21 @@ namespace Dune
 
       void increment () noexcept { ++iterator_; advance(); }
 
+       // allow for (deprecated) construction/assignment of EntityPointer from a given iterator
+       operator Dune::DefaultEntityPointer< Entity > () const
+       {
+         return Dune::DefaultEntityPointer< Entity >( dereference() );
+       }
+
+       // allow for (deprecated) comparison of an iterator with an entity pointer
+       bool equals ( const Dune::DefaultEntityPointer< Entity > &rhs ) const
+       {
+         return (dereference() == rhs.dereference());
+       }
+
     protected:
-      static Iterator begin ( const Mesh< ct > &mesh, MeshType type ) { return Iterator( mesh, mesh.begin( type, Codim< codim >() ) ); }
-      static Iterator end ( const Mesh< ct > &mesh, MeshType type ) { return Iterator( mesh, mesh.end( type, Codim< codim >() ) ); }
+      static Iterator begin ( const Mesh &mesh, MeshType type ) { return Iterator( mesh, mesh.begin( type, Codim< 1 >() ) ); }
+      static Iterator end ( const Mesh &mesh, MeshType type ) { return Iterator( mesh, mesh.end( type, Codim< 1 >() ) ); }
 
       Iterator begin () const { return begin( iterator_->mesh(), iterator_->type() ); }
       Iterator end () const { return end( iterator_->mesh(), iterator_->type() ); }

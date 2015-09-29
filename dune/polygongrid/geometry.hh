@@ -1,6 +1,8 @@
 #ifndef DUNE_POLYGONGRID_GEOMETRY_HH
 #define DUNE_POLYGONGRID_GEOMETRY_HH
 
+#include <type_traits>
+
 #include <dune/common/exceptions.hh>
 #include <dune/common/fmatrix.hh>
 #include <dune/common/fvector.hh>
@@ -22,7 +24,7 @@ namespace Dune
     // Internal Forward Declarations
     // -----------------------------
 
-    template< class, dim_t codim >
+    template< int mydim, int cdim, class Grid >
     class Geometry;
 
 
@@ -30,7 +32,7 @@ namespace Dune
     // BasicGeometry
     // -------------
 
-    template< class ct, dim_t codim >
+    template< class ct, int codim >
     class BasicGeometry
     {
       typedef BasicGeometry< ct, codim > This;
@@ -38,8 +40,8 @@ namespace Dune
     public:
       typedef ct ctype;
 
-      static const dim_t mydimension = 2 - codim;
-      static const dim_t coorddimension = 2;
+      static const int mydimension = 2 - codim;
+      static const int coorddimension = 2;
 
       typedef FieldVector< ctype, mydimension > LocalCoordinate;
       typedef FieldVector< ctype, coorddimension > GlobalCoordinate;
@@ -47,7 +49,7 @@ namespace Dune
       typedef FieldMatrix< ctype, mydimension, coorddimension > JacobianTransposed;
       typedef FieldMatrix< ctype, coorddimension, mydimension > JacobianInverseTransposed;
 
-      DUNE_INLINE constexpr GeometryType type () const noexcept { return GeometryType( GeometryType::None(), mydimension ); }
+      GeometryType type () const noexcept { return GeometryType( GeometryType::none, mydimension ); }
 
       bool affine () const
       {
@@ -85,46 +87,48 @@ namespace Dune
     // Geometry for Codimension 0
     // --------------------------
 
-    template< class Cell >
-    class Geometry< Cell, 0 >
-      : public BasicGeometry< typename Cell::ctype, 0 >
+    template< int cdim, class Grid >
+    class Geometry< 2, cdim, Grid >
+      : public BasicGeometry< typename std::remove_const< Grid >::type::ctype, 0 >
     {
-      typedef Geometry< Cell, 0 > This;
-      typedef BasicGeometry< typename Cell::ctype, 0 > Base;
+      typedef Geometry< 2, cdim, Grid > This;
+      typedef BasicGeometry< typename std::remove_const< Grid >::type::ctype, 0 > Base;
 
     public:
       typedef typename Base::ctype ctype;
       typedef typename Base::GlobalCoordinate GlobalCoordinate;
 
+      typedef __PolygonGrid::Node< ctype > Cell;
+
       Geometry () = default;
 
       explicit Geometry ( const Cell &cell ) : cell_( cell ) {}
 
-      DUNE_INLINE int corners () const noexcept { return numSubEntities( cell_, Dune::Codim< 2 >() ); }
+      int corners () const noexcept { return numSubEntities( cell_, Dune::Codim< 2 >() ); }
 
-      DUNE_INLINE const GlobalCoordinate &corner ( int i ) const noexcept
+      const GlobalCoordinate &corner ( int i ) const noexcept
       {
         return subEntity( cell_, Dune::Codim< 2 >(), i ).position();
       }
 
       GlobalCoordinate center () const noexcept
       {
-        GlobalCoordinate center( Math::zero );
-        ctype volume = Math::zero;
+        GlobalCoordinate center( 0 );
+        ctype volume = 0;
         for( int i = 0; i < corners(); ++i )
         {
           const GlobalCoordinate &x = corner( i );
           const GlobalCoordinate &y = corner( (i+1) % corners() );
           const ctype weight = x[ 0 ]*y[ 1 ] - x[ 1 ]*y[ 0 ];
-          axpy( weight, x+y, center );
+          center.axpy( weight, x+y );
           volume += weight;
         }
-        return center *= Math::one / (ctype( 3 )*volume);
+        return center *= ctype( 1 ) / (ctype( 3 )*volume);
       }
 
       ctype volume () const noexcept
       {
-        ctype volume = Math::zero;
+        ctype volume = 0;
         for( int i = 0; i < corners(); ++i )
         {
           const GlobalCoordinate &x = corner( i );
@@ -143,22 +147,24 @@ namespace Dune
     // Geometry for Codimension 1
     // --------------------------
 
-    template< class HalfEdge >
-    class Geometry< HalfEdge, 1 >
-      : public BasicGeometry< typename HalfEdge::ctype, 1 >
+    template< int cdim, class Grid >
+    class Geometry< 1, cdim, Grid >
+      : public BasicGeometry< typename std::remove_const< Grid >::type::ctype, 1 >
     {
-      typedef Geometry< HalfEdge, 1 > This;
-      typedef BasicGeometry< typename HalfEdge::ctype, 1 > Base;
+      typedef Geometry< 1, cdim, Grid > This;
+      typedef BasicGeometry< typename std::remove_const< Grid >::type::ctype, 1 > Base;
 
     public:
       typedef typename Base::ctype ctype;
       typedef typename Base::GlobalCoordinate GlobalCoordinate;
 
+      typedef __PolygonGrid::HalfEdge< ctype > HalfEdge;
+
       Geometry () = default;
 
       Geometry ( const HalfEdge &halfEdge ) : halfEdge_( halfEdge ) {}
 
-      DUNE_INLINE int corners () const { return numSubEntities( halfEdge_, Dune::Codim< 1 >() ); }
+      int corners () const { return numSubEntities( halfEdge_, Dune::Codim< 1 >() ); }
 
       const GlobalCoordinate &corner ( int i ) const
       {
@@ -182,27 +188,29 @@ namespace Dune
     // Geometry for Codimension 2
     // --------------------------
 
-    template< class Node >
-    class Geometry< Node, 2 >
-      : public BasicGeometry< typename Node::ctype, 2 >
+    template< int cdim, class Grid >
+    class Geometry< 0, cdim, Grid >
+      : public BasicGeometry< typename std::remove_const< Grid >::type::ctype, 2 >
     {
-      typedef Geometry< Node, 2 > This;
-      typedef BasicGeometry< typename Node::ctype, 2 > Base;
+      typedef Geometry< 0, cdim, Grid > This;
+      typedef BasicGeometry< typename std::remove_const< Grid >::type::ctype, 2 > Base;
 
     public:
       typedef typename Base::ctype ctype;
       typedef typename Base::GlobalCoordinate GlobalCoordinate;
 
+      typedef __PolygonGrid::Node< ctype > Node;
+
       Geometry () = default;
 
       explicit Geometry ( const Node &node ) : node_( node ) {}
 
-      DUNE_INLINE int corners () const { return 1; }
+      int corners () const { return 1; }
 
       const GlobalCoordinate &corner ( int i ) const { return center(); }
       const GlobalCoordinate &center () const { return node_.position(); }
 
-      ctype volume () const noexcept { return Math::one; }
+      ctype volume () const noexcept { return ctype( 1 ); }
 
     private:
       Node node_;

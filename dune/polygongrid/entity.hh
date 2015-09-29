@@ -1,6 +1,8 @@
 #ifndef DUNE_POLYGONGRID_ENTITY_HH
 #define DUNE_POLYGONGRID_ENTITY_HH
 
+#include <type_traits>
+
 #include <dune/grid/common/entity.hh>
 
 #include <dune/geometry/dimension.hh>
@@ -22,7 +24,7 @@ namespace Dune
     // Internal Forward Declarations
     // -----------------------------
 
-    template< class, dim_t codim >
+    template< int codim, int dim, class Grid >
     class Entity;
 
 
@@ -30,7 +32,7 @@ namespace Dune
     // External Forward Declarations
     // -----------------------------
 
-    template< class, dim_t codim >
+    template< int codim, class Grid >
     class EntityIterator;
 
 
@@ -38,43 +40,48 @@ namespace Dune
     // BasicEntity
     // -----------
 
-    template< class Item, dim_t codim >
+    template< int codim, class Item, class Grid >
     class BasicEntity
     {
-      typedef BasicEntity< Item, codim > This;
+      typedef BasicEntity< codim, Item, Grid > This;
 
       typedef __PolygonGrid::EntitySeed< typename Item::Index, codim > EntitySeedImpl;
-      typedef __PolygonGrid::Geometry< Item, codim > GeometryImpl;
+      typedef __PolygonGrid::Geometry< 2 - codim, 2, Grid > GeometryImpl;
+
+      typedef typename std::remove_const< Grid >::type::ctype ctype;
 
     public:
-      static const dim_t codimension = codim;
-      static const dim_t dimension = 2;
-      static const dim_t mydimension = dimension - codimension;
+      static const int codimension = codim;
+      static const int dimension = 2;
+      static const int mydimension = dimension - codimension;
 
-      template< dim_t cd >
+      template< int cd >
       struct Codim
       {
-        typedef decltype( __PolygonGrid::subEntity( std::declval< Item >(), Dune::Codim< cd - codimension >(), std::size_t() ) ) SubItem;
-        typedef Dune::Entity< cd, __PolygonGrid::Entity< SubItem, cd > > Entity;
+        typedef Dune::Entity< cd, 2, Grid, __PolygonGrid::Entity > Entity;
       };
 
-      typedef Dune::EntitySeed< EntitySeedImpl > EntitySeed;
-      typedef Dune::Geometry< GeometryImpl > Geometry;
+      typedef Dune::EntitySeed< Grid, EntitySeedImpl > EntitySeed;
+      typedef Dune::Geometry< 2 - codim, 2, Grid, __PolygonGrid::Geometry > Geometry;
 
       explicit BasicEntity ( const Item &item ) : item_( item ) {}
 
-      GeometryType type () const { return GeometryType( GeometryType::None(), mydimension ); }
+      GeometryType type () const { return GeometryType( GeometryType::none, mydimension ); }
 
       PartitionType partitionType () const { return InteriorEntity; }
 
-      Geometry geometry () const { return GeometryImpl( item() ); }
+      Geometry geometry () const { return Geometry( GeometryImpl( item() ) ); }
 
       EntitySeed seed () const { return EntitySeedImpl( item().index() ); }
 
-      template< dim_t cd >
+      int level () const noexcept { return 0; }
+
+      bool equals ( const This &other ) const { return (item_ == other.item_); }
+
+      template< int cd >
       typename Codim< cd >::Entity subEntity ( int i ) const
       {
-        typedef typename Codim< cd >::Entity::Implementation EntityImpl;
+        typedef __PolygonGrid::Entity< cd, 2, Grid > EntityImpl;
         return EntityImpl( __PolygonGrid::subEntity( item(), Dune::Codim< cd - codimension >(), i ) );
       }
 
@@ -91,21 +98,23 @@ namespace Dune
     // Entity for Codimension 2
     // ------------------------
 
-    template< class Item >
-    class Entity< Item, 2 >
-      : public BasicEntity< Item, 2 >
+    template< int dim, class Grid >
+    class Entity< 2, dim, Grid >
+      : public BasicEntity< 2, Node< typename std::remove_const< Grid >::type::ctype >, Grid >
     {
-      typedef Entity< Item, 2 > This;
-      typedef BasicEntity< Item, 2 > Base;
+      typedef Entity< 2, dim, Grid > This;
+      typedef BasicEntity< 2, Node< typename std::remove_const< Grid >::type::ctype >, Grid > Base;
+
+      typedef Node< typename std::remove_const< Grid >::type::ctype > Item;
 
     public:
       using Base::item;
 
       explicit Entity ( const Item &item ) : Base( item ) {}
 
-      std::size_t subEntities ( dim_t codim ) const noexcept { return (codim == 2 ? 1u : 0u); }
+      std::size_t subEntities ( int codim ) const noexcept { return (codim == 2 ? 1u : 0u); }
 
-      std::size_t subIndex ( dim_t codim, std::size_t i ) const noexcept
+      std::size_t subIndex ( int codim, std::size_t i ) const noexcept
       {
         assert( i < subEntities( codim ) );
         return __PolygonGrid::subEntity( item(), Dune::Codim< 0 >(), i ).uniqueIndex();
@@ -117,21 +126,23 @@ namespace Dune
     // Entity for Codimension 1
     // ------------------------
 
-    template< class Item >
-    class Entity< Item, 1 >
-      : public BasicEntity< Item, 1 >
+    template< int dim, class Grid >
+    class Entity< 1, dim, Grid >
+      : public BasicEntity< 1, HalfEdge< typename std::remove_const< Grid >::type::ctype >, Grid >
     {
-      typedef Entity< Item, 1 > This;
-      typedef BasicEntity< Item, 1 > Base;
+      typedef Entity<1, dim, Grid > This;
+      typedef BasicEntity< 1, HalfEdge< typename std::remove_const< Grid >::type::ctype >, Grid > Base;
+
+      typedef HalfEdge< typename std::remove_const< Grid >::type::ctype > Item;
 
     public:
       using Base::item;
 
       explicit Entity ( const Item &item ) : Base( item ) {}
 
-      std::size_t subEntities ( dim_t codim ) const noexcept { return (codim == 2 ? 2u : (codim == 1 ? 1u : 0u)); }
+      std::size_t subEntities ( int codim ) const noexcept { return (codim == 2 ? 2u : (codim == 1 ? 1u : 0u)); }
 
-      std::size_t subIndex ( dim_t codim, std::size_t i ) const noexcept
+      std::size_t subIndex ( int codim, std::size_t i ) const noexcept
       {
         assert( i < subEntities( codim ) );
         if( codim == 2 )
@@ -146,30 +157,38 @@ namespace Dune
     // Entity for codimension 0
     // ------------------------
 
-    template< class Item >
-    class Entity< Item, 0 >
-      : public BasicEntity< Item, 0 >
+    template< int dim, class Grid >
+    class Entity< 0, dim, Grid >
+      : public BasicEntity< 0, Node< typename std::remove_const< Grid >::type::ctype >, Grid >
     {
-      typedef Entity< Item, 0 > This;
-      typedef BasicEntity< Item, 0 > Base;
+      typedef Entity< 0, dim, Grid > This;
+      typedef BasicEntity< 0, Node< typename std::remove_const< Grid >::type::ctype >, Grid > Base;
 
-      typedef __PolygonGrid::EntityIterator< Item, 0 > HierarchicIteratorImpl;
+      typedef Node< typename std::remove_const< Grid >::type::ctype > Item;
+
+      typedef __PolygonGrid::EntityIterator< 0, Grid > HierarchicIteratorImpl;
 
     public:
       typedef typename Base::Geometry LocalGeometry;
 
-      typedef Dune::EntityIterator< HierarchicIteratorImpl > HierarchicIterator;
+      typedef Dune::EntityIterator< 0, Grid, HierarchicIteratorImpl > HierarchicIterator;
 
       using Base::item;
 
       explicit Entity ( const Item &item ) : Base( item ) {}
 
-      unsigned int subEntities ( dim_t codim ) const noexcept
+      unsigned int subEntities ( int codim ) const noexcept
       {
         return ((codim == 1) || (codim == 2) ? item().halfEdges().size() : (codim == 0u ? 1u : 0u));
       }
 
-      std::size_t subIndex ( dim_t codim, std::size_t i ) const noexcept
+      template< int codim >
+      int count () const
+      {
+        return subEntities( codim );
+      }
+
+      std::size_t subIndex ( int codim, std::size_t i ) const noexcept
       {
         assert( i < subEntities( codim ) );
         switch( codim )
@@ -188,11 +207,9 @@ namespace Dune
         }
       }
 
-      int level () const noexcept { return 0; }
-
       bool isLeaf () const noexcept { return true; }
 
-      Entity father () const { DUNE_THROW( GridError, "Father does not exist." ); }
+      Dune::Entity< 0, 2, Grid, __PolygonGrid::Entity > father () const { DUNE_THROW( GridError, "Father does not exist." ); }
 
       bool hasFather () const { return false; }
 
@@ -204,6 +221,14 @@ namespace Dune
       bool isRegular () const { return true; }
       bool isNew () const { return false; }
       bool mightVanish () const { return false; }
+
+      bool hasBoundaryIntersections () const
+      {
+        bool hasBoundaryIntersections = false;
+        for( const auto halfEdge : item().halfEdges() )
+          hasBoundaryIntersections |= !halfEdge.neighbor().regular();
+        return hasBoundaryIntersections;
+      }
     };
 
  } // namespace __PolygonGrid

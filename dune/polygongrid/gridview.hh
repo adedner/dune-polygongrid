@@ -36,15 +36,16 @@ namespace Dune
 
       typedef __PolygonGrid::IndexSet< ct > IndexSet;
 
-      template< dim_t codim >
+      template< int codim >
       struct Codim
       {
         typedef typename std::conditional< codim == 1, HalfEdge< ct >, Node< ct > >::type Item;
 
-        typedef Dune::Entity< codim, __PolygonGrid::Entity< Item, codim > > Entity;
+        typedef Dune::Entity< codim, 2, const Grid, __PolygonGrid::Entity > Entity;
+        typedef Dune::EntityPointer< const Grid, Dune::DefaultEntityPointer< Entity > > EntityPointer;
 
-        typedef typename Entity::EntitySeed EntitySeed;
-        typedef typename Entity::Geometry Geometry;
+        typedef Dune::EntitySeed< const Grid, __PolygonGrid::EntitySeed< typename Item::Index, codim > > EntitySeed;
+        typedef Dune::Geometry< 2 - codim, 2, const Grid, __PolygonGrid::Geometry > Geometry;
 
         // local geometry does not make sense; add a phony typedef
         typedef Geometry LocalGeometry;
@@ -52,17 +53,20 @@ namespace Dune
         template< PartitionIteratorType pitype >
         struct Partition
         {
-          typedef Dune::EntityIterator< __PolygonGrid::EntityIterator< Item, codim > > Iterator;
+          typedef Dune::EntityIterator< codim, const Grid, __PolygonGrid::EntityIterator< codim, const Grid > > Iterator;
         };
+
+        typedef typename Partition< All_Partition >::Iterator Iterator;
       };
 
-      typedef Dune::IntersectionIterator< __PolygonGrid::IntersectionIterator< ct > > IntersectionIterator;
+      typedef Dune::Intersection< const Grid, __PolygonGrid::Intersection< const Grid > > Intersection;
+      typedef Dune::IntersectionIterator< const Grid, __PolygonGrid::IntersectionIterator< const Grid >, __PolygonGrid::Intersection< const Grid > > IntersectionIterator;
 
       typedef Dune::CollectiveCommunication< No_Comm > CollectiveCommunication;
 
-      explicit GridView ( const Grid &grid ) : grid_( grid ), indexSet_( grid.mesh(), grid.type() ) {}
+      explicit GridView ( const Grid &grid ) : grid_( grid ) {}
 
-      const IndexSet &indexSet () const { return indexSet_; }
+      const IndexSet &indexSet () const { return grid().leafIndexSet(); }
 
       template< class Entity >
       bool contains ( const Entity &entity ) const
@@ -77,7 +81,7 @@ namespace Dune
       template< int codim, PartitionIteratorType pitype >
       typename Codim< codim >::template Partition< pitype >::Iterator begin () const
       {
-        typedef typename Codim< codim >::template Partition< pitype >::Iterator::Implementation IteratorImpl;
+        typedef __PolygonGrid::EntityIterator< codim, const Grid > IteratorImpl;
         if( pitype != Ghost_Partition )
           return IteratorImpl( Tag::begin, grid().mesh(), grid().type() );
         else
@@ -87,20 +91,32 @@ namespace Dune
       template< int codim, PartitionIteratorType pitype >
       typename Codim< codim >::template Partition< pitype >::Iterator end () const
       {
-        typedef typename Codim< codim >::template Partition< pitype >::Iterator::Implementation IteratorImpl;
+        typedef __PolygonGrid::EntityIterator< codim, const Grid > IteratorImpl;
         return IteratorImpl( Tag::end, grid().mesh(), grid().type() );
+      }
+
+      template< int codim >
+      typename Codim< codim >::template Partition< All_Partition >::Iterator begin () const
+      {
+        return begin< codim, All_Partition >();
+      }
+
+      template< int codim >
+      typename Codim< codim >::template Partition< All_Partition >::Iterator end () const
+      {
+        return end< codim, All_Partition >();
       }
 
       IntersectionIterator ibegin ( const typename Codim< 0 >::Entity &entity ) const
       {
-        typedef typename IntersectionIterator::Implementation IntersectionIteratorImpl;
-        return IntersectionIteratorImpl( entity.impl().item().halfEdges().begin() );
+        typedef __PolygonGrid::IntersectionIterator< const Grid > IntersectionIteratorImpl;
+        return IntersectionIteratorImpl( Grid::getRealImplementation( entity ).item().halfEdges().begin() );
       }
 
       IntersectionIterator iend ( const typename Codim< 0 >::Entity &entity ) const
       {
-        typedef typename IntersectionIterator::Implementation IntersectionIteratorImpl;
-        return IntersectionIteratorImpl( entity.impl().item().halfEdges().end() );
+        typedef __PolygonGrid::IntersectionIterator< const Grid > IntersectionIteratorImpl;
+        return IntersectionIteratorImpl( Grid::getRealImplementation( entity ).item().halfEdges().end() );
       }
 
       template< class DataHandle, class DataType >
@@ -111,9 +127,11 @@ namespace Dune
 
       const Grid &grid () const { return grid_; }
 
+      int ghostSize ( int codim ) const { return 0; }
+      int overlapSize ( int codim ) const { return 0; }
+
     private:
       std::reference_wrapper< const Grid > grid_;
-      IndexSet indexSet_;
     };
 
   } // namespace __PolygonGrid

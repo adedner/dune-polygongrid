@@ -18,17 +18,22 @@ namespace Dune
 
   template< class ct >
   class PolygonGrid
-    : public Dune::Grid< 2, 2, ct, __PolygonGrid::GridFamily< ct > >
+    : public Dune::GridDefaultImplementation< 2, 2, ct, __PolygonGrid::GridFamily< ct > >
   {
     typedef PolygonGrid< ct > This;
-    typedef Dune::Grid< 2, 2, ct, __PolygonGrid::GridFamily< ct > > Base;
+    typedef Dune::GridDefaultImplementation< 2, 2, ct, __PolygonGrid::GridFamily< ct > > Base;
+
+    friend class __PolygonGrid::IdSet< ct >;
+    friend class __PolygonGrid::IndexSet< ct >;
+    friend class __PolygonGrid::GridView< ct >;
 
   public:
     typedef __PolygonGrid::GridFamily< ct > GridFamily;
 
     typedef typename GridFamily::Traits Traits;
 
-    using Base::dimension;
+    static const int dimension = 2;
+    static const int dimensionworld = 2;
 
     typedef typename Traits::MacroGridView MacroGridView;
 
@@ -38,27 +43,34 @@ namespace Dune
     typedef typename Base::GlobalIdSet GlobalIdSet;
     typedef typename Base::LocalIdSet LocalIdSet;
 
+    typedef typename Base::LeafIndexSet LeafIndexSet;
+    typedef typename Base::LevelIndexSet LevelIndexSet;
+
     typedef typename Base::CollectiveCommunication CollectiveCommunication;
 
     typedef __PolygonGrid::Mesh< ct > Mesh;
     typedef __PolygonGrid::MeshType MeshType;
 
     PolygonGrid ( std::shared_ptr< Mesh > mesh, __PolygonGrid::MeshType type )
-      : mesh_( std::move( mesh ) ), type_( std::move( type ) )
+      : mesh_( std::move( mesh ) ), type_( std::move( type ) ),
+        indexSet_( *mesh_, type_ )
     {}
 
-    PolygonGrid ( const This &other ) : mesh_( other.mesh_ ), type_( other.type_ ) {}
-    PolygonGrid ( This &other ) : mesh_( std::move( other.mesh_ ) ), type_( std::move( other.type_ ) ) {}
+    PolygonGrid ( const This &other )
+      : mesh_( other.mesh_ ), type_( other.type_ ),
+        indexSet_( *mesh_, type_ )
+    {}
+
+    PolygonGrid ( This &other )
+      : mesh_( std::move( other.mesh_ ) ), type_( std::move( other.type_ ) ),
+        indexSet_( *mesh_, type_ )
+    {}
 
     int maxLevel () const { return 0; }
 
     std::size_t numBoundarySegments () const { return mesh().numBoundaries( type() ); }
 
-    MacroGridView macroGridView () const
-    {
-      typedef typename MacroGridView::Implementation GridViewImpl;
-      return GridViewImpl( *this );
-    }
+    MacroGridView macroGridView () const { return __PolygonGrid::GridView< ct > ( *this ); }
 
     LevelGridView levelGridView ( int level ) const { assert( level == 0 ); return macroGridView(); }
     LeafGridView leafGridView () const { return macroGridView(); }
@@ -88,15 +100,9 @@ namespace Dune
     template< class Seed >
     typename Traits::template Codim< Seed::codimension >::Entity entity ( const Seed &seed ) const noexcept
     {
-      typedef typename Traits::template Codim< Seed::codimension >::Entity::Implementation EntityImpl;
+      typedef __PolygonGrid::Entity< Seed::codimension, 2, const This > EntityImpl;
       typedef typename std::conditional< Seed::codimension == 1, __PolygonGrid::HalfEdge< ct >, __PolygonGrid::Node< ct > >::type Item;
-      return EntityImpl( Item( mesh(), seed.impl().index() ) );
-    }
-
-    template< class Entity >
-    int level ( const Entity &entity ) const
-    {
-      return 0;
+      return EntityImpl( Item( mesh(), this->getRealImplementation( seed ).index() ) );
     }
 
     This dualGrid () const { return This( mesh_, dual( type() ) ); }
@@ -109,6 +115,7 @@ namespace Dune
     __PolygonGrid::MeshType type_;
     CollectiveCommunication comm_;
     LocalIdSet idSet_;
+    __PolygonGrid::IndexSet< ct > indexSet_;
   };
 
 } // namespace Dune

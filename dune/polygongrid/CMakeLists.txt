@@ -13,6 +13,7 @@ set( HEADERS
   idset.hh
   indexset.hh
   intersection.hh
+  iteratortags.hh
   mesh.hh
   meshobjects.hh
   multivector.hh

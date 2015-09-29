@@ -1,2 +1,5 @@
-include( GridSelector )
-add_dune_grid_selector_definitions( dune-polygongrid )
+dune_define_gridtype( GRID_CONFIG_H_BOTTOM
+                      GRIDTYPE POLYGONGRID
+                      ASSERTION "GRIDDIM == WORLDDIM"
+                      DUNETYPE "Dune::PolygonGrid< double >"
+                      HEADERS "dune/polygongrid/grid.hh", "dune/polygongrid/dgf.hh" )

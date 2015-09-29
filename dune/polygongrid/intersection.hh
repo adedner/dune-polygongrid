@@ -12,7 +12,6 @@
 
 #include <dune/grid/common/intersection.hh>
 #include <dune/grid/common/intersectioniterator.hh>
-#include <dune/grid/common/normals.hh>
 
 #include <dune/polygongrid/declaration.hh>
 #include <dune/polygongrid/entity.hh>
@@ -28,33 +27,35 @@ namespace Dune
     // Intersection
     // ------------
 
-    template< class ct >
+    template< class Grid >
     class Intersection
     {
-      typedef Intersection< ct > This;
+      typedef Intersection< Grid > This;
 
-      typedef HalfEdge< ct > Item;
+      typedef HalfEdge< typename std::remove_const< Grid >::type::ctype > Item;
 
-      typedef __PolygonGrid::Entity< Node< ct >, 0 > EntityImpl;
-      typedef __PolygonGrid::Geometry< Item, 1 > GeometryImpl;
+      typedef __PolygonGrid::Entity< 0, 2, Grid > EntityImpl;
+      typedef __PolygonGrid::Geometry< 1, 2, Grid > GeometryImpl;
 
     public:
-      static const dim_t dimension = 2;
-      static const dim_t codimension = 1;
-      static const dim_t mydimension = dimension - codimension;
+      static const int dimension = 2;
+      static const int codimension = 1;
+      static const int mydimension = dimension - codimension;
 
-      typedef Dune::Entity< 0, EntityImpl > Entity;
-      typedef Dune::Geometry< GeometryImpl > Geometry;
+      typedef typename std::remove_const< Grid >::type::ctype ctype;
+
+      typedef Dune::Entity< 0, 2, Grid, __PolygonGrid::Entity > Entity;
+      typedef Dune::Geometry< 1, 2, Grid, __PolygonGrid::Geometry > Geometry;
       typedef Geometry LocalGeometry;
 
       typedef typename Geometry::GlobalCoordinate GlobalCoordinate;
       typedef typename Geometry::LocalCoordinate LocalCoordinate;
 
-    private:
-      typedef ConstantLocalFunction< LocalCoordinate, GlobalCoordinate > OuterNormals;
+      Intersection () = default;
 
-    public:
       explicit Intersection ( Item item ) : item_( item ) {}
+
+      bool equals ( const This &other ) const { return (item_ == other.item_); }
 
       bool conforming () const noexcept { return true; }
 
@@ -72,9 +73,9 @@ namespace Dune
       int indexInInside () const { return item().indexInCell(); }
       int indexInOutside () const { return item().indexInNeighbor(); }
 
-      DUNE_INLINE constexpr GeometryType type () const noexcept { return GeometryType( GeometryType::None(), mydimension ); }
+      GeometryType type () const noexcept { return GeometryType( GeometryType::none, mydimension ); }
 
-      Geometry geometry () const { return GeometryImpl( item() ); }
+      Geometry geometry () const { return Geometry( GeometryImpl( item() ) ); }
 
       LocalGeometry geometryInInside () const
       {
@@ -86,14 +87,15 @@ namespace Dune
         DUNE_THROW( InvalidStateException, "Intersection::geometryInOutside does not make for arbitrary polytopes." );
       }
 
-      OuterNormals integrationOuterNormals () const { return OuterNormals( type(), outerNormal() ); }
+      GlobalCoordinate integrationOuterNormal ( const LocalCoordinate & ) const { return outerNormal(); }
+      GlobalCoordinate outerNormal ( const LocalCoordinate & ) const { return outerNormal(); }
 
-      OuterNormals outerNormals () const { return OuterNormals( type(), outerNormal() ); }
+      GlobalCoordinate unitOuterNormal ( const LocalCoordinate & ) const { return centerUnitOuterNormal(); }
 
-      OuterNormals unitOuterNormals () const
+      GlobalCoordinate centerUnitOuterNormal () const
       {
         GlobalCoordinate normal = outerNormal();
-        return OuterNormals( type(), normal *= Math::one / normal.two_norm() );
+        return normal *= ctype( 1 ) / normal.two_norm();
       }
 
       const Item &item () const { return item_; }
@@ -113,27 +115,27 @@ namespace Dune
     // IntersectionIterator
     // --------------------
 
-    template< class ct >
+    template< class Grid >
     class IntersectionIterator
     {
-      typedef IntersectionIterator< ct > This;
+      typedef IntersectionIterator< Grid > This;
 
-      typedef __PolygonGrid::Intersection< ct > IntersectionImpl;
+      typedef __PolygonGrid::Intersection< Grid > IntersectionImpl;
 
     public:
-      typedef typename HalfEdges< ct >::Iterator HalfEdgeIterator;
+      typedef typename HalfEdges< typename std::remove_const< Grid >::type::ctype >::Iterator HalfEdgeIterator;
 
-      typedef Dune::Intersection< const PolygonGrid< ct >, IntersectionImpl > Intersection;
+      typedef Dune::Intersection< const Grid, IntersectionImpl > Intersection;
 
       IntersectionIterator () = default;
 
       explicit IntersectionIterator ( const HalfEdgeIterator halfEdgeIterator ) : halfEdgeIterator_( halfEdgeIterator ) {}
 
-      DUNE_INLINE void increment () { ++halfEdgeIterator_; }
+      void increment () { ++halfEdgeIterator_; }
 
-      DUNE_INLINE Intersection dereference () const { return IntersectionImpl( *halfEdgeIterator_ ); }
+      Intersection dereference () const { return IntersectionImpl( *halfEdgeIterator_ ); }
 
-      DUNE_INLINE bool equals ( const This &other ) const { return (halfEdgeIterator_ == other.halfEdgeIterator_); }
+      bool equals ( const This &other ) const { return (halfEdgeIterator_ == other.halfEdgeIterator_); }
 
     private:
       HalfEdgeIterator halfEdgeIterator_;

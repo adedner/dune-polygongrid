@@ -155,8 +155,8 @@ namespace Dune
       const std::size_t numPolygons = (nodes[ Dual ].size() - 2u*numBoundaries);
 
       std::array< std::vector< V >, 2 > positions;
-      positions[ Primal ].resize( nodes[ Primal ].size(), Math::zero );
-      positions[ Dual ].resize( nodes[ Dual ].size(), Math::zero );
+      positions[ Primal ].resize( nodes[ Primal ].size(), V( 0 ) );
+      positions[ Dual ].resize( nodes[ Dual ].size(), V( 0 ) );
 
       // copy given vertex positions
       std::copy( vertices.begin(), vertices.end(), positions[ Primal ].begin() );
@@ -166,14 +166,14 @@ namespace Dune
       {
         for( IndexPair j : nodes[ Dual ][ i ] )
           positions[ Dual ][ i ] += positions[ Primal ][ j.first ];
-        positions[ Dual ][ i ] *= Math::one / ctype( nodes[ Dual ][ i ].size() );
+        positions[ Dual ][ i ] *= ctype( 1 ) / ctype( nodes[ Dual ][ i ].size() );
       }
 
       // positions for boundary edge cells
       for( std::size_t i = numPolygons; i < numPolygons + numBoundaries; ++i )
       {
         for( std::size_t j = 0u; j < 2u; ++j )
-          axpy( Math::one / ctype( 2 ), positions[ Primal ][ nodes[ Dual ][ i ][ j ].first ], positions[ Dual ][ i ] );
+          positions[ Dual ][ i ].axpy( ctype( 1 ) / ctype( 2 ), positions[ Primal ][ nodes[ Dual ][ i ][ j ].first ] );
       }
 
       // positions for boundary vertex cells
@@ -186,8 +186,8 @@ namespace Dune
         for( std::size_t j = 0u; j < 2u; ++j )
         {
           const std::size_t v = nodes[ Dual ][ numPolygons + i ][ j ].first;
-          axpy( Math::one / ctype( 2 ), positions[ Primal ][ v ], positions[ Primal ][ numVertices + 2*i+j ] );
-          axpy( Math::one / ctype( 2 ), positions[ Dual ][ numPolygons + i ], positions[ Primal ][ numVertices + 2*i+j ] );
+          positions[ Primal ][ numVertices + 2*i+j ].axpy( ctype( 1 ) / ctype( 2 ), positions[ Primal ][ v ] );
+          positions[ Primal ][ numVertices + 2*i+j ].axpy( ctype( 1 ) / ctype( 2 ), positions[ Dual ][ numPolygons + i ] );
         }
       }
 

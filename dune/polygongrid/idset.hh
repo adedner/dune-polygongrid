@@ -28,16 +28,14 @@ namespace Dune
       typedef Dune::IdSet< const PolygonGrid< ct >, This, std::size_t > Base;
 
     public:
-      typedef typename Base::Id Id;
+      typedef std::size_t Id;
 
-      static const dim_t dimension = 2;
+      static const int dimension = 2;
 
-      template< dim_t codim >
+      template< int codim >
       struct Codim
       {
-        typedef typename std::conditional< codim == 1, HalfEdge< ct >, Node< ct > >::type Item;
-
-        typedef Dune::Entity< codim, __PolygonGrid::Entity< Item, codim > > Entity;
+        typedef Dune::Entity< codim, 2, const PolygonGrid< ct >, __PolygonGrid::Entity > Entity;
       };
 
     public:
@@ -47,22 +45,22 @@ namespace Dune
         return id< Entity::codimension >( entity );
       }
 
-      template< dim_t codim >
+      template< int codim >
       Id id ( const typename Codim< codim >::Entity &entity ) const
       {
-        return id( entity.impl().index(), codim );
+        return id( PolygonGrid< ct >::getRealImplementation( entity ).index(), codim );
       }
 
       template< class Entity >
-      Id subId ( const Entity &entity, int i, dim_t codim ) const
+      Id subId ( const Entity &entity, int i, int codim ) const
       {
         return subId< Entity::codimension >( entity, i, codim );
       }
 
-      template< dim_t cd >
-      Id subId ( const typename Codim< cd >::Entity &entity, int i, dim_t codim ) const
+      template< int cd >
+      Id subId ( const typename Codim< cd >::Entity &entity, int i, int codim ) const
       {
-        return id( entity.impl().subIndex( codim, i ), codim );
+        return id( PolygonGrid< ct >::getRealImplementation( entity ).subIndex( codim, i ), codim );
       }
 
     private:

@@ -11,7 +11,7 @@ namespace Dune
   namespace Capabilities
   {
 
-    template< class ct, dim_t codim >
+    template< class ct, int codim >
     struct hasEntity< PolygonGrid< ct >, codim >
     {
       static const bool v = true;
@@ -35,7 +35,7 @@ namespace Dune
       static const bool v = true;
     };
 
-    template< class ct, dim_t codim >
+    template< class ct, int codim >
     struct canCommunicate< PolygonGrid< ct >, codim >
     {
       static const bool v = false;

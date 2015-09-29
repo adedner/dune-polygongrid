@@ -28,20 +28,18 @@ namespace Dune
       : public Dune::IndexSet< const PolygonGrid< ct >, IndexSet< ct >, std::size_t, std::array< GeometryType,1 > >
     {
       typedef IndexSet< ct > This;
-      typedef Dune::IndexSet< const PolygonGrid< ct >, This, std::size_t, std::array< GeometryType,1 > > Base;
+      typedef Dune::IndexSet< const PolygonGrid< ct >, IndexSet< ct >, std::size_t, std::array< GeometryType,1 > > Base;
 
     public:
-      static const dim_t dimension = 2;
+      static const int dimension = 2;
 
-      typedef typename Base::Index Index;
+      typedef std::size_t Index;
       typedef typename Base::Types Types;
 
-      template< dim_t codim >
+      template< int codim >
       struct Codim
       {
-        typedef typename std::conditional< codim == 1, HalfEdge< ct >, Node< ct > >::type Item;
-
-        typedef Dune::Entity< codim, __PolygonGrid::Entity< Item, codim > > Entity;
+        typedef Dune::Entity< codim, 2, const PolygonGrid< ct >, __PolygonGrid::Entity > Entity;
       };
 
       IndexSet ( const Mesh< ct > &mesh, MeshType type )
@@ -57,26 +55,26 @@ namespace Dune
         return index< Entity::codimension >( entity );
       }
 
-      template< dim_t cd >
+      template< int cd >
       Index index ( const typename Codim< cd >::Entity &entity ) const
       {
-        return entity.impl().index();
+        return PolygonGrid< ct >::getRealImplementation( entity ).index();
       }
 
       template< class Entity >
-      Index subIndex ( const Entity &entity, int i, dim_t codim ) const
+      Index subIndex ( const Entity &entity, int i, int codim ) const
       {
         return subIndex< Entity::codimension >( entity, i, codim );
       }
 
-      template< dim_t cd >
-      Index subIndex ( const typename Codim< cd >::Entity &entity, int i, dim_t codim ) const
+      template< int cd >
+      Index subIndex ( const typename Codim< cd >::Entity &entity, int i, int codim ) const
       {
-        return entity.impl().subIndex( codim, i );
+        return PolygonGrid< ct >::getRealImplementation( entity ).subIndex( codim, i );
       }
 
-      Index size ( GeometryType type ) const { return (type.isNone() ? size( dimension - type.dimension() ) : 0u); }
-      Index size ( dim_t codim ) const { assert( (codim >= 0) && (codim <= dimension) ); return size_[ codim ]; }
+      Index size ( GeometryType type ) const { return (type.isNone() ? size( dimension - type.dim() ) : 0u); }
+      Index size ( int codim ) const { assert( (codim >= 0) && (codim <= dimension) ); return size_[ codim ]; }
 
       template< class Entity >
       bool contains ( const Entity &entity ) const
@@ -84,7 +82,7 @@ namespace Dune
         return true;
       }
 
-      Types types ( int codim ) const noexcept { return {{ GeometryType( GeometryType::None(), dimension - codim ) }}; }
+      Types types ( int codim ) const noexcept { return {{ GeometryType( GeometryType::none, dimension - codim ) }}; }
 
     private:
       std::array< Index, dimension+1 > size_;
