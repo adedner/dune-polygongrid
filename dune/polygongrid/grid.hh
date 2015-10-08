@@ -102,7 +102,7 @@ namespace Dune
     {
       typedef __PolygonGrid::Entity< Seed::codimension, 2, const This > EntityImpl;
       typedef typename std::conditional< Seed::codimension == 1, __PolygonGrid::HalfEdge< ct >, __PolygonGrid::Node< ct > >::type Item;
-      return EntityImpl( Item( mesh(), this->getRealImplementation( seed ).index() ) );
+      return EntityImpl( Item( mesh_.get(), this->getRealImplementation( seed ).index() ) );
     }
 
     // deprecated interface methods
@@ -111,6 +111,9 @@ namespace Dune
     int size ( GeometryType type ) const { return leafGridView().size( type ); }
     int size ( int level, int codim ) const { return levelGridView( level ).size( codim ); }
     int size ( int level, GeometryType type ) const { return levelGridView( level ).size( type ); }
+
+    const LeafIndexSet &leafIndexSet () const { return indexSet_; }
+    const LevelIndexSet &levelIndexSet ( int level ) const { assert( level == 0 ); return indexSet_; }
 
     // non-interface methods
 

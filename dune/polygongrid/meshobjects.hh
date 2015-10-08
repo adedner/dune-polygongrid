@@ -50,7 +50,7 @@ namespace Dune
 
       Node () noexcept = default;
 
-      Node ( const Mesh &mesh, Index index ) noexcept : mesh_( &mesh ), index_( index ) {}
+      Node ( const Mesh *mesh, Index index ) noexcept : mesh_( mesh ), index_( index ) {}
 
       bool operator== ( const This &other ) const noexcept { return (index_ == other.index_); }
 
@@ -110,18 +110,18 @@ namespace Dune
 
       HalfEdge () noexcept = default;
 
-      HalfEdge ( const Mesh &mesh, Index index ) noexcept : mesh_( &mesh ), index_( index ) {}
+      HalfEdge ( const Mesh *mesh, Index index ) noexcept : mesh_( mesh ), index_( index ) {}
 
       bool operator== ( const This &other ) const noexcept { return (index_ == other.index_); }
 
       /** \brief flip the direction of the half edge */
-      This flip () const noexcept { return This( mesh(), mesh().flip( index() ) ); }
+      This flip () const noexcept { return This( mesh_, mesh().flip( index() ) ); }
 
       /** \brief obtain node, the half edge points to */
-      Node target () const noexcept { return Node( mesh(), mesh().target( index() ) ); }
+      Node target () const noexcept { return Node( mesh_, mesh().target( index() ) ); }
 
       /** \brief obtain neighboring cell (whose boundary contains the flipped half edge) */
-      Cell neighbor () const noexcept { return Cell( mesh(), mesh().target( mesh().dual( index() ) ) ); }
+      Cell neighbor () const noexcept { return Cell( mesh_, mesh().target( mesh().dual( index() ) ) ); }
 
       /** \brief obtain cell whose boundary contains this half edge */
       Cell cell () const noexcept { return flip().neighbor(); }
@@ -165,10 +165,10 @@ namespace Dune
       IndexIterator () = default;
       IndexIterator ( const Mesh &mesh, Index index ) : mesh_( &mesh ), index_( index ) {}
 
-      reference operator* () const noexcept { return value_type( mesh(), index_ ); }
-      pointer operator-> () const noexcept { return pointer( mesh(), index_ ); }
+      reference operator* () const noexcept { return value_type( mesh_, index_ ); }
+      pointer operator-> () const noexcept { return pointer( mesh_, index_ ); }
 
-      reference operator[] ( std::ptrdiff_t n ) const noexcept { return value_type( mesh(), index_ + n ); }
+      reference operator[] ( std::ptrdiff_t n ) const noexcept { return value_type( mesh_, index_ + n ); }
 
       bool operator== ( const This &other ) const noexcept { return (index_ == other.index_); }
       bool operator!= ( const This &other ) const noexcept { return (index_ != other.index_); }
