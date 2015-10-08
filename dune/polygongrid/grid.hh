@@ -105,6 +105,15 @@ namespace Dune
       return EntityImpl( Item( mesh(), this->getRealImplementation( seed ).index() ) );
     }
 
+    // deprecated interface methods
+
+    int size ( int codim ) const { return leafGridView().size( codim ); }
+    int size ( GeometryType type ) const { return leafGridView().size( type ); }
+    int size ( int level, int codim ) const { return levelGridView( level ).size( codim ); }
+    int size ( int level, GeometryType type ) const { return levelGridView( level ).size( type ); }
+
+    // non-interface methods
+
     This dualGrid () const { return This( mesh_, dual( type() ) ); }
 
     const Mesh &mesh () const { return *mesh_; }
