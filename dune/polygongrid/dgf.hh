@@ -16,7 +16,7 @@
 #include <dune/geometry/dimension.hh>
 #include <dune/geometry/type.hh>
 
-#include <dune/grid/io/dgf/gridfactory.hh>
+#include <dune/grid/io/file/dgfparser/dgfgridfactory.hh>
 
 #include <dune/polygongrid/grid.hh>
 
@@ -53,19 +53,19 @@ namespace Dune
     typedef PolygonGrid< ct > Grid;
     static const int dimension = 2;
 
-    typedef typename Grid::CollectiveCommunication CollectiveCommunication;
+    typedef typename MPIHelper::MPICommunicator MPICommunicator;
     typedef FieldVector< ct, 2 > GlobalCoordinate;
 
-    typedef Dune::Intersection< const Grid, __PolygonGrid::Intersection< ct > > Intersection;
+    typedef Dune::Intersection< const Grid, __PolygonGrid::Intersection< const Grid > > Intersection;
 
-    explicit DGFGridFactory ( std::istream &input, const CollectiveCommunication &comm = CollectiveCommunication() )
-      : parser_( comm.rank(), comm.size() )
+    explicit DGFGridFactory ( std::istream &input, const MPICommunicator comm = MPIHelper::getCommunicator() )
+      : parser_( 0, 1 )
     {
       generate( input );
     }
 
-    explicit DGFGridFactory ( const std::string &filename, const CollectiveCommunication &comm = CollectiveCommunication() )
-      : parser_( comm.rank(), comm.size() )
+    explicit DGFGridFactory ( const std::string &filename, MPICommunicator comm = MPIHelper::getCommunicator() )
+      : parser_( 0, 1 )
     {
       std::ifstream input( filename );
       generate( input );
@@ -138,7 +138,7 @@ namespace Dune
   template< class ct >
   inline void DGFGridFactory< PolygonGrid< ct > >::generate ( std::ifstream &input )
   {
-    parser_.element = dgf::General;
+    parser_.element = DuneGridFormatParser::General;
 
     if( !parser_.readDuneGrid( input, dimension, GlobalCoordinate::dimension ) )
       DUNE_THROW( DGFException, "Unable to read DGF stream." );
@@ -161,7 +161,7 @@ namespace Dune
       // insert polygon oriented counter-clockwise
       const GlobalCoordinate a = vertices[ polygons[ i ][ 1u ] ] - vertices[ polygons[ i ][ 0u ] ];
       const GlobalCoordinate b = vertices[ polygons[ i ][ 2u ] ] - vertices[ polygons[ i ][ 0u ] ];
-      if( a[ 0 ]*b[ 1 ] - a[ 1 ]*b[ 0 ] < Math::zero )
+      if( a[ 0 ]*b[ 1 ] < a[ 1 ]*b[ 0 ] )
         std::reverse( polygons[ i ].begin(), polygons[ i ].end() );
     }
 
