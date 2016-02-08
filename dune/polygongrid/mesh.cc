@@ -45,7 +45,7 @@ namespace Dune
             boundaries.push_back( edge );
         }
       }
-      return std::move( boundaries );
+      return boundaries;
     }
 
 
@@ -191,7 +191,7 @@ namespace Dune
         }
       }
 
-      return std::move( nodes );
+      return nodes;
     }
 
 
@@ -263,7 +263,7 @@ namespace Dune
       }
 
       assert( 2u*numEdges == size );
-      return std::move( edgeIndices );
+      return edgeIndices;
     }
 
   } // namespace __PolygonGrid

@@ -233,7 +233,7 @@ namespace Dune
         std::vector< size_type > sizes( n );
         for( std::size_t k = 0; k < n; ++k )
           sizes[ k ] = end_of( k ) - begin_of( k );
-        return std::move( sizes );
+        return sizes;
       }
 
       void assign ( std::initializer_list< value_type > values )
