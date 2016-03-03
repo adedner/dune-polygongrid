@@ -26,10 +26,10 @@ namespace Dune
     // GridView
     // --------
 
-    template< class ct >
+    template< class ct, PartitionIteratorType pit >
     class GridView
     {
-      typedef GridView< ct > This;
+      typedef GridView< ct, pit > This;
 
     public:
       typedef PolygonGrid< ct > Grid;
@@ -98,13 +98,13 @@ namespace Dune
       template< int codim >
       typename Codim< codim >::template Partition< All_Partition >::Iterator begin () const
       {
-        return begin< codim, All_Partition >();
+        return begin< codim, pit >();
       }
 
       template< int codim >
       typename Codim< codim >::template Partition< All_Partition >::Iterator end () const
       {
-        return end< codim, All_Partition >();
+        return end< codim, pit >();
       }
 
       IntersectionIterator ibegin ( const typename Codim< 0 >::Entity &entity ) const

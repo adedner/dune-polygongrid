@@ -25,7 +25,9 @@ namespace Dune
 
     friend class __PolygonGrid::IdSet< ct >;
     friend class __PolygonGrid::IndexSet< ct >;
-    friend class __PolygonGrid::GridView< ct >;
+
+    template< class, PartitionIteratorType >
+    friend class __PolygonGrid::GridView;
 
   public:
     typedef __PolygonGrid::GridFamily< ct > GridFamily;
@@ -35,7 +37,14 @@ namespace Dune
     static const int dimension = 2;
     static const int dimensionworld = 2;
 
-    typedef typename Traits::MacroGridView MacroGridView;
+    template< PartitionIteratorType pitype >
+    struct Partition
+      : public Base::template Partition< pitype >
+    {
+      typedef typename Traits::template Partition< pitype >::MacroGridView MacroGridView;
+    };
+
+    typedef typename Partition< All_Partition >::MacroGridView MacroGridView;
 
     typedef typename Base::LeafGridView LeafGridView;
     typedef typename Base::LevelGridView LevelGridView;
@@ -70,10 +79,29 @@ namespace Dune
 
     std::size_t numBoundarySegments () const { return mesh().numBoundaries( type() ); }
 
-    MacroGridView macroGridView () const { return __PolygonGrid::GridView< ct > ( *this ); }
+    MacroGridView macroGridView () const { return __PolygonGrid::GridView< ct, All_Partition > ( *this ); }
+
+    template< PartitionIteratorType pitype >
+    typename Partition< pitype >::MacroGridView macroGridView () const
+    {
+      return __PolygonGrid::GridView< ct, pitype > ( *this );
+    }
 
     LevelGridView levelGridView ( int level ) const { assert( level == 0 ); return macroGridView(); }
     LeafGridView leafGridView () const { return macroGridView(); }
+
+    template< PartitionIteratorType pitype >
+    typename Partition< pitype >::LevelGridView levelGridView ( int level ) const
+    {
+      assert( level == 0 );
+      return macroGridView();
+    }
+
+    template< PartitionIteratorType pitype >
+    typename Partition< pitype >::LeafGridView leafGridView () const
+    {
+      return macroGridView< pitype >();
+    }
 
     const GlobalIdSet &globalIdSet () const { return idSet_; }
     const LocalIdSet &localIdSet () const { return idSet_; }

@@ -21,10 +21,10 @@ namespace Dune
     // GridViewTraits
     // --------------
 
-    template< class ct >
+    template< class ct, PartitionIteratorType pit >
     struct GridViewTraits
     {
-      typedef __PolygonGrid::GridView< ct > GridViewImp;
+      typedef __PolygonGrid::GridView< ct, pit > GridViewImp;
 
       typedef ct ctype;
 
@@ -56,9 +56,13 @@ namespace Dune
 
         typedef Dune::PolygonGrid< ct > Grid;
 
-        typedef Dune::GridView< GridViewTraits< ct > > MacroGridView;
-        typedef MacroGridView LeafGridView;
-        typedef MacroGridView LevelGridView;
+        template< PartitionIteratorType pitype >
+        struct Partition
+        {
+          typedef Dune::GridView< GridViewTraits< ct, pitype > > MacroGridView;
+          typedef MacroGridView LeafGridView;
+          typedef MacroGridView LevelGridView;
+        };
 
         typedef __PolygonGrid::IdSet< ct > LocalIdSet;
         typedef LocalIdSet GlobalIdSet;
