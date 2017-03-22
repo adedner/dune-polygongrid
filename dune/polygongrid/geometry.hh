@@ -63,7 +63,8 @@ namespace Dune
 
       LocalCoordinate local ( const GlobalCoordinate &global ) const
       {
-        DUNE_THROW( InvalidStateException, "Geometry::local does not make for arbitrary polytopes." );
+        return LocalCoordinate(0.5);
+        //DUNE_THROW( InvalidStateException, "Geometry::local does not make for arbitrary polytopes." );
       }
 
       ctype integrationElement ( const LocalCoordinate &local ) const
@@ -97,6 +98,7 @@ namespace Dune
     public:
       typedef typename Base::ctype ctype;
       typedef typename Base::GlobalCoordinate GlobalCoordinate;
+      typedef typename Base::LocalCoordinate  LocalCoordinate;
 
       typedef __PolygonGrid::Node< ctype > Cell;
 
@@ -109,6 +111,16 @@ namespace Dune
       const GlobalCoordinate &corner ( int i ) const noexcept
       {
         return subEntity( cell_, Dune::Codim< 2 >(), i ).position();
+      }
+
+      GlobalCoordinate global ( const LocalCoordinate &local ) const
+      {
+        return center();
+      }
+
+      ctype integrationElement ( const LocalCoordinate &local ) const
+      {
+        return volume();
       }
 
       GlobalCoordinate center () const noexcept
@@ -157,6 +169,7 @@ namespace Dune
     public:
       typedef typename Base::ctype ctype;
       typedef typename Base::GlobalCoordinate GlobalCoordinate;
+      typedef typename Base::LocalCoordinate  LocalCoordinate;
 
       typedef __PolygonGrid::HalfEdge< ctype > HalfEdge;
 
@@ -179,6 +192,16 @@ namespace Dune
 
       ctype volume () const noexcept { return (corner( 1 ) - corner( 0 )).two_norm(); }
 
+      GlobalCoordinate global ( const LocalCoordinate &local ) const
+      {
+        return center();
+      }
+
+      ctype integrationElement ( const LocalCoordinate &local ) const
+      {
+        return volume();
+      }
+
     private:
       HalfEdge halfEdge_;
     };
@@ -198,6 +221,7 @@ namespace Dune
     public:
       typedef typename Base::ctype ctype;
       typedef typename Base::GlobalCoordinate GlobalCoordinate;
+      typedef typename Base::LocalCoordinate  LocalCoordinate;
 
       typedef __PolygonGrid::Node< ctype > Node;
 
@@ -206,6 +230,16 @@ namespace Dune
       explicit Geometry ( const Node &node ) : node_( node ) {}
 
       int corners () const { return 1; }
+
+      GlobalCoordinate global ( const LocalCoordinate &local ) const
+      {
+        return center();
+      }
+
+      ctype integrationElement ( const LocalCoordinate &local ) const
+      {
+        return volume();
+      }
 
       const GlobalCoordinate &corner ( int i ) const { return center(); }
       const GlobalCoordinate &center () const { return node_.position(); }
