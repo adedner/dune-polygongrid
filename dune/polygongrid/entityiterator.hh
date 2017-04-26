@@ -49,18 +49,6 @@ namespace Dune
 
       void increment () noexcept { ++iterator_; }
 
-       // allow for (deprecated) construction/assignment of EntityPointer from a given iterator
-       operator Dune::DefaultEntityPointer< Entity > () const
-       {
-         return Dune::DefaultEntityPointer< Entity >( dereference() );
-       }
-
-       // allow for (deprecated) comparison of an iterator with an entity pointer
-       bool equals ( const Dune::DefaultEntityPointer< Entity > &rhs ) const
-       {
-         return (dereference() == rhs.dereference());
-       }
-
     protected:
       Iterator iterator_;
     };
@@ -97,18 +85,6 @@ namespace Dune
       bool equals ( const This &other ) const noexcept { return (iterator_ == other.iterator_); }
 
       void increment () noexcept { ++iterator_; advance(); }
-
-       // allow for (deprecated) construction/assignment of EntityPointer from a given iterator
-       operator Dune::DefaultEntityPointer< Entity > () const
-       {
-         return Dune::DefaultEntityPointer< Entity >( dereference() );
-       }
-
-       // allow for (deprecated) comparison of an iterator with an entity pointer
-       bool equals ( const Dune::DefaultEntityPointer< Entity > &rhs ) const
-       {
-         return (dereference() == rhs.dereference());
-       }
 
     protected:
       static Iterator begin ( const Mesh &mesh, MeshType type ) { return Iterator( mesh, mesh.begin( type, Codim< 1 >() ) ); }

@@ -115,12 +115,6 @@ namespace Dune
     const LeafIndexSet &leafIndexSet () const { return indexSet_; }
     const LevelIndexSet &levelIndexSet ( int level ) const { assert( level == 0 ); return indexSet_; }
 
-    template< class Seed >
-    typename Traits::template Codim< Seed::codimension >::EntityPointer entityPointer ( const Seed &seed ) const noexcept
-    {
-      return entity( seed );
-    }
-
     // non-interface methods
 
     This dualGrid () const { return This( mesh_, dual( type() ) ); }

@@ -5,7 +5,6 @@
 
 #include <dune/geometry/dimension.hh>
 
-#include <dune/grid/common/entitypointer.hh>
 #include <dune/grid/common/entityseed.hh>
 #include <dune/grid/common/grid.hh>
 
@@ -82,7 +81,6 @@ namespace Dune
           typedef typename std::conditional< codim == 1, HalfEdge< ct >, Node< ct > >::type Item;
 
           typedef Dune::Entity< codim, 2, const Grid, __PolygonGrid::Entity > Entity;
-          typedef Dune::EntityPointer< const Grid, Dune::DefaultEntityPointer< Entity > > EntityPointer;
 
           typedef Dune::EntitySeed< const Grid, __PolygonGrid::EntitySeed< typename Item::Index, codim > > EntitySeed;
           typedef Dune::Geometry< 2 - codim, 2, const Grid, __PolygonGrid::Geometry > Geometry;
