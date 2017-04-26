@@ -1,6 +1,9 @@
 #ifndef DUNE_POLYGONGRID_ENTITY_HH
 #define DUNE_POLYGONGRID_ENTITY_HH
 
+#include <cassert>
+
+#include <exception>
 #include <type_traits>
 
 #include <dune/grid/common/entity.hh>
@@ -9,7 +12,6 @@
 
 #include <dune/grid/common/entity.hh>
 #include <dune/grid/common/entityiterator.hh>
-#include <dune/grid/common/exceptions.hh>
 
 #include <dune/polygongrid/entityseed.hh>
 #include <dune/polygongrid/geometry.hh>
@@ -203,17 +205,17 @@ namespace Dune
           return __PolygonGrid::subEntity( item(), Dune::Codim< 2 >(), i ).uniqueIndex();
 
         default:
-          DUNE_THROW( GridError, "Requesting subIndex for invalid codimension: " << codim << "." );
+          std::terminate();
         }
       }
 
       bool isLeaf () const noexcept { return true; }
 
-      Dune::Entity< 0, 2, Grid, __PolygonGrid::Entity > father () const { DUNE_THROW( GridError, "Father does not exist." ); }
+      Dune::Entity< 0, 2, Grid, __PolygonGrid::Entity > father () const { assert( hasFather() ); std::terminate(); }
 
       bool hasFather () const { return false; }
 
-      LocalGeometry geometryInFather () const { DUNE_THROW( GridError, "Father does not exist." ); }
+      LocalGeometry geometryInFather () const { assert( hasFather() ); std::terminate(); }
 
       HierarchicIterator hbegin ( int maxLevel ) const { return HierarchicIteratorImpl(); }
       HierarchicIterator hend ( int maxLevel ) const { return HierarchicIteratorImpl(); }
