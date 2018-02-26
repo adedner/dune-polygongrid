@@ -19,6 +19,7 @@
 #include <dune/grid/io/file/dgfparser/dgfgridfactory.hh>
 
 #include <dune/polygongrid/grid.hh>
+#include <dune/polygongrid/gridfactory.hh>
 
 namespace Dune
 {
@@ -116,7 +117,7 @@ namespace Dune
     }
 
   private:
-    void generate ( std::ifstream &input );
+    void generate ( std::istream &input );
 
     DuneGridFormatParser::facemap_t::const_iterator findFace ( const Intersection &intersection ) const
     {
@@ -136,7 +137,7 @@ namespace Dune
   // ------------------------
 
   template< class ct >
-  inline void DGFGridFactory< PolygonGrid< ct > >::generate ( std::ifstream &input )
+  inline void DGFGridFactory< PolygonGrid< ct > >::generate ( std::istream &input )
   {
     parser_.element = DuneGridFormatParser::General;
 
