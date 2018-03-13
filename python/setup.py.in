@@ -1,0 +1,11 @@
+from setuptools import setup, find_packages
+
+setup(name="dune.polygongrid",
+    namespace_packages=['dune'],
+    description="Polygonal Grid Implementation for DUNE",
+    version="${DUNE_POLYGONGRID_VERSION}",
+    author="Martin Nolte",
+    packages = find_packages(),
+    zip_safe = 0,
+    package_data = {'': ['*.so']}
+  )

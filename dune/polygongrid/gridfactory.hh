@@ -76,6 +76,11 @@ namespace Dune
       DUNE_THROW( NotImplemented, "Method insertBoundarySegment() not implemented yet" );
     }
 
+    void insertBoundarySegment ( const std::vector< unsigned int > &, std::shared_ptr< BoundarySegment< dimension, 2 > > )
+    {
+      DUNE_THROW( NotImplemented, "Method insertBoundarySegment() not implemented yet" );
+    }
+
     Grid *createGrid ()
     {
       return new Grid( std::make_shared< typename Grid::Mesh >( vertices_, polygons_ ), __PolygonGrid::Primal );
