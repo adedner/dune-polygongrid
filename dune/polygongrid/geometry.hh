@@ -49,7 +49,7 @@ namespace Dune
       typedef FieldMatrix< ctype, mydimension, coorddimension > JacobianTransposed;
       typedef FieldMatrix< ctype, coorddimension, mydimension > JacobianInverseTransposed;
 
-      GeometryType type () const noexcept { return GeometryType( GeometryType::none, mydimension ); }
+      GeometryType type () const noexcept { return GeometryTypes::none( mydimension ); }
 
       bool affine () const
       {

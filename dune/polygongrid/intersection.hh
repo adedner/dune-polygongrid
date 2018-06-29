@@ -73,7 +73,7 @@ namespace Dune
       int indexInInside () const { return item().indexInCell(); }
       int indexInOutside () const { return item().indexInNeighbor(); }
 
-      GeometryType type () const noexcept { return GeometryType( GeometryType::none, mydimension ); }
+      GeometryType type () const noexcept { return GeometryTypes::none( mydimension ); }
 
       Geometry geometry () const { return Geometry( GeometryImpl( item() ) ); }
 

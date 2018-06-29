@@ -82,7 +82,7 @@ namespace Dune
         return true;
       }
 
-      Types types ( int codim ) const noexcept { return {{ GeometryType( GeometryType::none, dimension - codim ) }}; }
+      Types types ( int codim ) const noexcept { return {{ GeometryTypes::none( dimension - codim ) }}; }
 
     private:
       std::array< Index, dimension+1 > size_;

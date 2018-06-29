@@ -68,7 +68,7 @@ namespace Dune
 
       explicit BasicEntity ( const Item &item ) : item_( item ) {}
 
-      GeometryType type () const { return GeometryType( GeometryType::none, mydimension ); }
+      GeometryType type () const { return GeometryTypes::none( mydimension ); }
 
       PartitionType partitionType () const { return InteriorEntity; }
 
