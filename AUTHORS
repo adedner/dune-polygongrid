@@ -1,7 +1,7 @@
   The DUNE (see www.dune-project.org) module dune-polygongrid provides a
   fully unstructured dune grid consisting of arbitrary polygons.
 
-  Copyright (C) 2013 - 2015 Martin Nolte
+  Copyright (C) 2013 - 2018 Martin Nolte
 
   The dune-polygongrid module is free software; you can redistribute it and/or 
   modify it under the terms of the GNU General Public License as 
