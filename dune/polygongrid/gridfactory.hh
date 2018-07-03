@@ -32,6 +32,8 @@ namespace Dune
     typedef PolygonGrid< ct > Grid;
     typedef FieldVector< ct, 2 > GlobalCoordinate;
 
+    typedef typename Grid::CollectiveCommunication Communication;
+
     GridFactory () {}
 
     void insertVertex ( const GlobalCoordinate &vertex ) { vertices_.push_back( vertex ); }
@@ -85,6 +87,8 @@ namespace Dune
     {
       return new Grid( std::make_shared< typename Grid::Mesh >( vertices_, polygons_ ), __PolygonGrid::Primal );
     }
+
+    Communication comm () const { return Communication(); }
 
   private:
     std::vector< GlobalCoordinate > vertices_;
