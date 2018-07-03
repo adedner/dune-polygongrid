@@ -58,7 +58,7 @@ namespace Dune
       template< int cd >
       Index index ( const typename Codim< cd >::Entity &entity ) const
       {
-        return PolygonGrid< ct >::getRealImplementation( entity ).index();
+        return entity.impl().index();
       }
 
       template< class Entity >
@@ -70,7 +70,7 @@ namespace Dune
       template< int cd >
       Index subIndex ( const typename Codim< cd >::Entity &entity, int i, int codim ) const
       {
-        return PolygonGrid< ct >::getRealImplementation( entity ).subIndex( codim, i );
+        return entity.impl().subIndex( codim, i );
       }
 
       Index size ( GeometryType type ) const { return (type.isNone() ? size( dimension - type.dim() ) : 0u); }

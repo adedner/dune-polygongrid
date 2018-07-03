@@ -48,7 +48,7 @@ namespace Dune
       template< int codim >
       Id id ( const typename Codim< codim >::Entity &entity ) const
       {
-        return id( PolygonGrid< ct >::getRealImplementation( entity ).index(), codim );
+        return id( entity.impl().index(), codim );
       }
 
       template< class Entity >
@@ -60,7 +60,7 @@ namespace Dune
       template< int cd >
       Id subId ( const typename Codim< cd >::Entity &entity, int i, int codim ) const
       {
-        return id( PolygonGrid< ct >::getRealImplementation( entity ).subIndex( codim, i ), codim );
+        return id( entity.impl().subIndex( codim, i ), codim );
       }
 
     private:

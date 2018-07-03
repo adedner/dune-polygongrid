@@ -102,7 +102,7 @@ namespace Dune
     {
       typedef __PolygonGrid::Entity< Seed::codimension, 2, const This > EntityImpl;
       typedef typename std::conditional< Seed::codimension == 1, __PolygonGrid::HalfEdge< ct >, __PolygonGrid::Node< ct > >::type Item;
-      return EntityImpl( Item( mesh_.get(), this->getRealImplementation( seed ).index() ) );
+      return EntityImpl( Item( mesh_.get(), seed.impl().index() ) );
     }
 
     // deprecated interface methods

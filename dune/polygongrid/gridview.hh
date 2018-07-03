@@ -109,13 +109,13 @@ namespace Dune
       IntersectionIterator ibegin ( const typename Codim< 0 >::Entity &entity ) const
       {
         typedef __PolygonGrid::IntersectionIterator< const Grid > IntersectionIteratorImpl;
-        return IntersectionIteratorImpl( Grid::getRealImplementation( entity ).item().halfEdges().begin() );
+        return IntersectionIteratorImpl( entity.impl().item().halfEdges().begin() );
       }
 
       IntersectionIterator iend ( const typename Codim< 0 >::Entity &entity ) const
       {
         typedef __PolygonGrid::IntersectionIterator< const Grid > IntersectionIteratorImpl;
-        return IntersectionIteratorImpl( Grid::getRealImplementation( entity ).item().halfEdges().end() );
+        return IntersectionIteratorImpl( entity.impl().item().halfEdges().end() );
       }
 
       template< class DataHandle, class DataType >
