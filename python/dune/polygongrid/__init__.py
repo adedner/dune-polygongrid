@@ -2,6 +2,9 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from dune.common.checkconfiguration import assertHave, ConfigurationError
 
+from .blossoms import blossomDomain
+from .voronoi import voronoiDomain
+
 try:
     assertHave("HAVE_DUNE_POLYGONGRID")
 except ConfigurationError:
