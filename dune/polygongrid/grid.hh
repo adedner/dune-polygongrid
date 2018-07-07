@@ -1,6 +1,7 @@
 #ifndef DUNE_POLYGONGRID_GRID_HH
 #define DUNE_POLYGONGRID_GRID_HH
 
+#include <memory>
 #include <utility>
 
 #include <dune/geometry/dimension.hh>
