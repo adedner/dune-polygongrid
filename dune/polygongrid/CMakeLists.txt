@@ -1,4 +1,4 @@
-set( HEADERS
+set(HEADERS
   capabilities.hh
   declaration.hh
   dgf.hh
@@ -11,6 +11,7 @@ set( HEADERS
   gridfactory.hh
   gridview.hh
   idset.hh
+  identitymatrix.hh
   indexset.hh
   intersection.hh
   iteratortags.hh
@@ -20,9 +21,9 @@ set( HEADERS
   subentity.hh
 )
 
-install( FILES ${HEADERS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/dune/polygongrid )
+install(FILES ${HEADERS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/dune/polygongrid)
 
-dune_add_library( dunepolygongrid
+dune_add_library(dunepolygongrid
   mesh.cc
   ADD_LIBS ${DUNE_LIBS}
 )
