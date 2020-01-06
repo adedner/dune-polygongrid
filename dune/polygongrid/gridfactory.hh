@@ -83,9 +83,37 @@ namespace Dune
       DUNE_THROW( NotImplemented, "Method insertBoundarySegment() not implemented yet" );
     }
 
-    Grid *createGrid ()
+    virtual unsigned int
+    insertionIndex ( const typename Grid::Traits::template Codim< 0 >::Entity &entity ) const
     {
-      return new Grid( std::make_shared< typename Grid::Mesh >( vertices_, polygons_ ), __PolygonGrid::Primal );
+      DUNE_THROW( NotImplemented, "Method insertionIndex(entity) not implemented yet" );
+      return -1;
+    }
+
+    virtual unsigned int
+    insertionIndex ( const typename Grid::Traits::template Codim< dimension >::Entity &entity ) const
+    {
+      DUNE_THROW( NotImplemented, "Method insertionIndex(entity) not implemented yet" );
+      return -1;
+    }
+
+    virtual unsigned int insertionIndex ( const typename Grid::Traits::LevelIntersection &intersection ) const
+    {
+      DUNE_THROW( NotImplemented, "Method insertionIndex(intersection) not implemented yet" );
+      return -1;
+    }
+
+    /*
+    virtual unsigned int insertionIndex ( const typename Grid::Traits::LeafIntersection &intersection ) const
+    {
+      DUNE_THROW( NotImplemented, "Method insertionIndex(intersection) not implemented yet" );
+      return -1;
+    }
+    */
+
+    std::unique_ptr< Grid >createGrid ()
+    {
+      return std::unique_ptr< Grid > (new Grid( std::make_shared< typename Grid::Mesh >( vertices_, polygons_ ), __PolygonGrid::Primal ));
     }
 
     Communication comm () const { return Communication(); }
