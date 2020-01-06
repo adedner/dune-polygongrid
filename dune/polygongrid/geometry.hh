@@ -10,6 +10,7 @@
 
 #include <dune/geometry/dimension.hh>
 #include <dune/geometry/type.hh>
+#include <dune/geometry/axisalignedcubegeometry.hh>
 
 #include <dune/grid/common/geometry.hh>
 
@@ -50,11 +51,33 @@ namespace Dune
       typedef IdentityMatrix< ctype, mydimension > JacobianTransposed;
       typedef IdentityMatrix< ctype, mydimension > JacobianInverseTransposed;
 
+      typedef Dune::AxisAlignedCubeGeometry< ctype, mydimension, coorddimension> CartesianGeometryType;
+
+      void computeBoundingBox( GlobalCoordinate& lower,
+                               GlobalCoordinate& upper ) const
+      {
+        const int nCorners = corners();
+        lower = corner( 0 );
+        upper = lower;
+        for( int i=1; i<nCorners; ++i )
+        {
+          const auto& corn = corner( i );
+          for( int d=0; d<coorddimension; ++d )
+          {
+            lower[ d ] = std::min( lower[ d ], corn[ d ]);
+            upper[ d ] = std::max( upper[ d ], corn[ d ]);
+          }
+        }
+      }
+
+
       typedef __PolygonGrid::Node< ctype > Cell;
 
       Geometry () = default;
 
-      explicit Geometry ( const Cell &cell ) : cell_( cell ) {}
+      explicit Geometry ( const Cell &cell ) : cell_( cell ), bboxImpl_()
+      {
+      }
 
       int corners () const noexcept { return numSubEntities( cell_, Dune::Codim< 2 >() ); }
 
@@ -94,16 +117,46 @@ namespace Dune
 
       bool affine () const { return true; }
 
-      GlobalCoordinate global ( const LocalCoordinate &local ) const { return local; }
-      LocalCoordinate local ( const GlobalCoordinate &global ) const { return global; }
+      GlobalCoordinate global ( const LocalCoordinate &local ) const
+      {
+        return bboxImpl().global( local );
+      }
 
-      ctype integrationElement ( const LocalCoordinate &local ) const { return ctype( 1 ); }
+      LocalCoordinate local ( const GlobalCoordinate &global ) const
+      {
+        return bboxImpl().local( global );
+      }
 
-      JacobianTransposed jacobianTransposed ( const LocalCoordinate &local ) const { return {}; }
-      JacobianInverseTransposed jacobianInverseTransposed ( const LocalCoordinate &local ) const { return {}; }
+      ctype integrationElement ( const LocalCoordinate &local ) const
+      {
+        return bboxImpl().integrationElement( local );
+      }
+
+      JacobianTransposed jacobianTransposed ( const LocalCoordinate &local ) const
+      {
+        return bboxImpl().jacobianTransposed( local );
+      }
+
+      JacobianInverseTransposed jacobianInverseTransposed ( const LocalCoordinate &local ) const
+      {
+        bboxImpl().jacobianInverseTransposed( local );
+      }
 
     private:
+      const CartesianGeometryType& bboxImpl() const
+      {
+        if( ! bboxImpl_ )
+        {
+          GlobalCoordinate lower;
+          GlobalCoordinate upper;
+          computeBoundingBox( lower, upper );
+          bboxImpl_.reset( new CartesianGeometryType( lower, upper ) );
+        }
+        return *bboxImpl_;
+      }
+
       Cell cell_;
+      mutable std::shared_ptr< CartesianGeometryType > bboxImpl_;
     };
 
 
