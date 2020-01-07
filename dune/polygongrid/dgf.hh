@@ -38,7 +38,7 @@ namespace Dune
   template< class ct >
   struct DGFGridInfo< PolygonGrid< ct > >
   {
-    static constexpr int refineStepsForHalf () { return 0; }
+    static constexpr int refineStepsForHalf () { return std::numeric_limits< int > :: max(); }
 
     static constexpr double refineWeight () { return 1.0; }
   };

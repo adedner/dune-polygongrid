@@ -115,7 +115,7 @@ namespace Dune
         return volume / ctype( 2 );
       }
 
-      bool affine () const { return true; }
+      bool affine () const { return false; }
 
       GlobalCoordinate global ( const LocalCoordinate &local ) const
       {
@@ -129,7 +129,7 @@ namespace Dune
 
       ctype integrationElement ( const LocalCoordinate &local ) const
       {
-        return bboxImpl().integrationElement( local );
+        return volume(); // bboxImpl().integrationElement( local );
       }
 
       JacobianTransposed jacobianTransposed ( const LocalCoordinate &local ) const
