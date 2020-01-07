@@ -4,7 +4,7 @@
 #include <functional>
 #include <type_traits>
 
-#include <dune/common/parallel/collectivecommunication.hh>
+#include <dune/common/parallel/communication.hh>
 
 #include <dune/geometry/type.hh>
 

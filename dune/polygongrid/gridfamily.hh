@@ -1,7 +1,7 @@
 #ifndef DUNE_POLYGONGRID_GRIDFAMILY_HH
 #define DUNE_POLYGONGRID_GRIDFAMILY_HH
 
-#include <dune/common/parallel/mpicollectivecommunication.hh>
+#include <dune/common/parallel/mpicommunication.hh>
 
 #include <dune/geometry/dimension.hh>
 
