@@ -36,6 +36,7 @@ namespace Dune
 
       typedef __PolygonGrid::Entity< 0, 2, Grid > EntityImpl;
       typedef __PolygonGrid::Geometry< 1, 2, Grid > GeometryImpl;
+      typedef __PolygonGrid::LocalGeometry< 1, 2, Grid > LocalGeometryImpl;
 
     public:
       static const int dimension = 2;
@@ -46,7 +47,8 @@ namespace Dune
 
       typedef Dune::Entity< 0, 2, Grid, __PolygonGrid::Entity > Entity;
       typedef Dune::Geometry< 1, 2, Grid, __PolygonGrid::Geometry > Geometry;
-      typedef Geometry LocalGeometry;
+      typedef Dune::Geometry< 1, 2, Grid, __PolygonGrid::LocalGeometry > LocalGeometry;
+      //typedef Geometry LocalGeometry;
 
       typedef typename Geometry::GlobalCoordinate GlobalCoordinate;
       typedef typename Geometry::LocalCoordinate LocalCoordinate;
@@ -79,11 +81,23 @@ namespace Dune
 
       LocalGeometry geometryInInside () const
       {
+        const auto& geom = this->geometry();
+        const auto& elemGeo = this->inside().geometry();
+        const auto& c0 = elemGeo.local( geom.corner( 0 ) );
+        const auto& c1 = elemGeo.local( geom.corner( 1 ) );
+        return LocalGeometry( LocalGeometryImpl(c0 , c1) );
+        assert( false );
         DUNE_THROW( InvalidStateException, "Intersection::geometryInOutside does not make for arbitrary polytopes." );
       }
 
       LocalGeometry geometryInOutside () const
       {
+        const auto& geom = this->geometry();
+        const auto& elemGeo = this->outside().geometry();
+        const auto& c0 = elemGeo.local( geom.corner( 0 ) );
+        const auto& c1 = elemGeo.local( geom.corner( 1 ) );
+        return LocalGeometry( LocalGeometryImpl(c0 , c1) );
+        assert( false );
         DUNE_THROW( InvalidStateException, "Intersection::geometryInOutside does not make for arbitrary polytopes." );
       }
 

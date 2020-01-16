@@ -47,7 +47,10 @@ namespace Dune
         typedef Dune::Geometry< 2 - codim, 2, const Grid, __PolygonGrid::Geometry > Geometry;
 
         // local geometry does not make sense; add a phony typedef
-        typedef Geometry LocalGeometry;
+        //typedef Geometry LocalGeometry;
+        typedef typename std::conditional< codim == 1,
+            Dune::Geometry< 2 - codim, 2, const Grid, __PolygonGrid::LocalGeometry >,
+            Geometry > :: type LocalGeometry;
 
         template< PartitionIteratorType pitype >
         struct Partition

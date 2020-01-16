@@ -243,6 +243,90 @@ namespace Dune
     };
 
 
+    // Geometry for Codimension 1
+    // --------------------------
+
+    template< int mydim, int cdim, class Grid >
+    class LocalGeometry
+    {
+      typedef LocalGeometry< mydim, cdim, Grid > This;
+
+       static_assert( mydim == 1 ,"Only implemented for mydim == 1 ");
+    public:
+      typedef typename std::remove_const_t< Grid >::ctype ctype;
+
+      static const int mydimension = 1;
+      static const int coorddimension = 2;
+
+      typedef FieldVector< ctype, mydimension > LocalCoordinate;
+      typedef FieldVector< ctype, coorddimension > GlobalCoordinate;
+
+      typedef FieldMatrix< ctype, mydimension, coorddimension > JacobianTransposed;
+      typedef FieldMatrix< ctype, coorddimension, mydimension > JacobianInverseTransposed;
+
+      LocalGeometry () = default;
+
+      LocalGeometry ( const GlobalCoordinate& c0, const GlobalCoordinate& c1 )
+      {
+        corners_[ 0 ] = c0;
+        corners_[ 1 ] = c1;
+      }
+
+      int corners () const { return 2; }
+
+      const GlobalCoordinate &corner ( int i ) const
+      {
+        assert( i < corners() );
+        return corners_[ i ];
+      }
+
+      GlobalCoordinate center () const
+      {
+        GlobalCoordinate center( corner( 0 ) + corner( 1 ) );
+        return center /= ctype( 2 );
+      }
+
+      GeometryType type () const noexcept { return GeometryTypes::cube( mydimension ); }
+
+      ctype volume () const noexcept { return (corner( 1 ) - corner( 0 )).two_norm(); }
+
+      bool affine () const { return true; }
+
+      GlobalCoordinate global ( const LocalCoordinate &local ) const
+      {
+        GlobalCoordinate global( corner( 0 ) );
+        global.axpy( local[ 0 ], corner( 1 ) - corner( 0 ) );
+        return global;
+      }
+
+      LocalCoordinate local ( const GlobalCoordinate &global ) const
+      {
+        const GlobalCoordinate h = corner( 1 ) - corner( 0 );
+        return LocalCoordinate{ (global - corner( 0 )) * h / h.two_norm2() };
+      }
+
+      ctype integrationElement ( const LocalCoordinate &local ) const { return jacobianTransposed( local )[ 0 ].two_norm(); }
+
+      JacobianTransposed jacobianTransposed ( const LocalCoordinate &local ) const
+      {
+        return JacobianTransposed{ corner( 1 ) - corner( 0 ) };
+      }
+
+      JacobianInverseTransposed jacobianInverseTransposed ( const LocalCoordinate &local ) const
+      {
+        const GlobalCoordinate h = corner( 1 ) - corner( 0 );
+        const ctype w = ctype( 1 ) / h.two_norm2();
+        JacobianInverseTransposed jit;
+        jit[ 0 ][ 0 ] = w*h[ 0 ];
+        jit[ 1 ][ 0 ] = w*h[ 1 ];
+        return jit;
+      }
+
+    private:
+      GlobalCoordinate corners_[ 2 ];
+    };
+
+
 
     // Geometry for Codimension 2
     // --------------------------
