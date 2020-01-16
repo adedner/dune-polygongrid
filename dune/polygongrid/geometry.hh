@@ -141,7 +141,7 @@ namespace Dune
 
       JacobianInverseTransposed jacobianInverseTransposed ( const LocalCoordinate &local ) const
       {
-        bboxImpl().jacobianInverseTransposed( local );
+        return bboxImpl().jacobianInverseTransposed( local );
       }
 
     private:
@@ -202,7 +202,7 @@ namespace Dune
         return center /= ctype( 2 );
       }
 
-      GeometryType type () const noexcept { return GeometryTypes::none( mydimension ); }
+      GeometryType type () const noexcept { return GeometryTypes::cube( mydimension ); }
 
       ctype volume () const noexcept { return (corner( 1 ) - corner( 0 )).two_norm(); }
 
