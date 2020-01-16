@@ -48,10 +48,12 @@ namespace Dune
       typedef FieldVector< ctype, mydimension > LocalCoordinate;
       typedef FieldVector< ctype, coorddimension > GlobalCoordinate;
 
-      typedef IdentityMatrix< ctype, mydimension > JacobianTransposed;
-      typedef IdentityMatrix< ctype, mydimension > JacobianInverseTransposed;
+      //typedef IdentityMatrix< ctype, mydimension > JacobianTransposed;
+      //typedef IdentityMatrix< ctype, mydimension > JacobianInverseTransposed;
 
       typedef Dune::AxisAlignedCubeGeometry< ctype, mydimension, coorddimension> CartesianGeometryType;
+      typedef typename CartesianGeometryType :: JacobianTransposed          JacobianTransposed;
+      typedef typename CartesianGeometryType :: JacobianInverseTransposed   JacobianInverseTransposed;
 
       void computeBoundingBox( GlobalCoordinate& lower,
                                GlobalCoordinate& upper ) const

@@ -67,6 +67,7 @@ namespace Dune
       typedef Dune::Geometry< 2 - codim, 2, Grid, __PolygonGrid::Geometry > Geometry;
 
       explicit BasicEntity ( const Item &item ) : item_( item ) {}
+      BasicEntity () noexcept = default;
 
       GeometryType type () const { return GeometryTypes::none( mydimension ); }
 
@@ -113,6 +114,7 @@ namespace Dune
       using Base::item;
 
       explicit Entity ( const Item &item ) : Base( item ) {}
+      Entity () noexcept = default;
 
       std::size_t subEntities ( int codim ) const noexcept { return (codim == 2 ? 1u : 0u); }
 
@@ -141,6 +143,7 @@ namespace Dune
       using Base::item;
 
       explicit Entity ( const Item &item ) : Base( item ) {}
+      Entity () noexcept = default;
 
       std::size_t subEntities ( int codim ) const noexcept { return (codim == 2 ? 2u : (codim == 1 ? 1u : 0u)); }
 
@@ -178,6 +181,7 @@ namespace Dune
       using Base::item;
 
       explicit Entity ( const Item &item ) : Base( item ) {}
+      Entity () noexcept = default;
 
       unsigned int subEntities ( int codim ) const noexcept
       {

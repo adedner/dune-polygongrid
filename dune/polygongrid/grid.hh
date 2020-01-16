@@ -113,6 +113,9 @@ namespace Dune
     int size ( int level, int codim ) const { return levelGridView( level ).size( codim ); }
     int size ( int level, GeometryType type ) const { return levelGridView( level ).size( type ); }
 
+    int ghostSize( int ) const { return 0; }
+    int overlapSize( int ) const { return 0; }
+
     const LeafIndexSet &leafIndexSet () const { return indexSet_; }
     const LevelIndexSet &levelIndexSet ( int level ) const { assert( level == 0 ); return indexSet_; }
 
