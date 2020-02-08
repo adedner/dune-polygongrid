@@ -12,7 +12,7 @@ except ConfigurationError:
     raise ImportError("DUNE module dune-polygongrid was not found.")
 
 
-def polygonGrid(domain, ctype="double"):
+def polygonGrid(domain, ctype="double", dualGrid=False ):
     from ..grid.grid_generator import module, getDimgrid
 
     typeName = "Dune::PolygonGrid< " + ctype + " >"
@@ -21,7 +21,12 @@ def polygonGrid(domain, ctype="double"):
     dualGrid = Method('dualGrid', '''[]( DuneType &self ) { return self.dualGrid(); }''' )
     gridModule = module(includes, typeName, dualGrid)
 
-    return gridModule.LeafGrid(gridModule.reader(domain))
+    grid = gridModule.LeafGrid(gridModule.reader(domain))
+    if dualGrid:
+        grid = grid.hierarchicalGrid.dualGrid()
+        return grid.leafView
+    else:
+        return grid
 
 
 registry = {}
