@@ -1,7 +1,7 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 from dune.common.checkconfiguration import assertHave, ConfigurationError
-from dune.generator import Method
+from dune.generator import Constructor, Method
 
 from .blossoms import blossomDomain
 from .voronoi import voronoiDomain
@@ -18,15 +18,15 @@ def polygonGrid(domain, ctype="double", dualGrid=False ):
     typeName = "Dune::PolygonGrid< " + ctype + " >"
     includes = ["dune/polygongrid/grid.hh", "dune/polygongrid/dgf.hh"]
 
-    dualGrid = Method('dualGrid', '''[]( DuneType &self ) { return self.dualGrid(); }''' )
-    gridModule = module(includes, typeName, dualGrid)
+    dualGridMethod = Method('dualGrid', '''[]( DuneType &self ) { return self.dualGrid(); }''' )
+    cachingStorage = Method('cachingStorage', '''[]( DuneType &self ) { return false; }''' )
+    gridModule = module(includes, typeName, dualGridMethod, cachingStorage)
 
     grid = gridModule.LeafGrid(gridModule.reader(domain))
     if dualGrid:
         grid = grid.hierarchicalGrid.dualGrid()
-        return grid.leafView
-    else:
-        return grid
+        grid = grid.leafView
+    return grid
 
 
 registry = {}
