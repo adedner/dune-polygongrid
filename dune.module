@@ -1,6 +1,6 @@
 Module: dune-polygongrid
-Version: 2.6
+Version: 2.7
 Maintainer: nolte.mrtn@gmail.com
-Depends: dune-grid (>= 2.6)
-Suggests: dune-python (>= 2.6)
+Depends: dune-grid (>= 2.7)
+Suggests: dune-python (>= 2.7)
 Whitespace-Hook: Yes
