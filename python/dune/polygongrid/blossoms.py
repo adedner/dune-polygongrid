@@ -1,5 +1,4 @@
 import numpy
-
 import dune.geometry
 
 def blossomDomain(nx, ny):
