@@ -2,5 +2,4 @@ Module: dune-polygongrid
 Version: 2.8-git
 Maintainer: nolte.mrtn@gmail.com
 Depends: dune-grid (>= 2.8)
-Suggests: dune-python (>= 2.8)
 Whitespace-Hook: Yes
