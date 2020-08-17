@@ -191,7 +191,7 @@ namespace Dune
         }
       }
 
-      return std::move( positions );
+      return positions;
     }
 
 

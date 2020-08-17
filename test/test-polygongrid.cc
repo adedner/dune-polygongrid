@@ -6,6 +6,7 @@
 
 #include <dune/polygongrid/grid.hh>
 #include <dune/polygongrid/gridfactory.hh>
+#include <dune/polygongrid/dgf.hh>
 
 #include <dune/grid/test/checkintersectionit.hh>
 #include <dune/grid/test/checkiterators.hh>
@@ -45,8 +46,6 @@ std::unique_ptr< Grid > createArbitraryGrid ()
 
 void performCheck ( Grid &grid )
 {
-  return ;
-
   std::cerr << ">>> Checking " << grid.type() << " grid..." << std::endl;
   gridcheck( grid );
   checkIterators( grid.leafGridView() );
@@ -77,24 +76,62 @@ try
 {
   Dune::MPIHelper::instance( argc, argv );
 
-  Grid grid = *createArbitraryGrid();
+  {
+    //Grid grid = *createArbitraryGrid();
+    std::stringstream file;
+    file << "DGF" << std::endl;
+    file << "Interval" << std::endl;
+    file << "0 0" << std::endl;
+    file << "1 0.25" << std::endl;
+    file << "8 2" << std::endl;
+    file << "#" << std::endl;
+    file << "Simplex" << std::endl;
+    file << "#" << std::endl;
 
-  std::cout << std::endl << std::endl;
-  std::cout << "Primal Structure:" << std::endl;
-  Dune::__PolygonGrid::printStructure( grid.mesh().nodes( Dune::__PolygonGrid::Primal ) );
-  std::cout << std::endl;
+    Dune::GridPtr< Grid > dgf( file );
 
-  std::cout << std::endl << std::endl;
-  std::cout << "Dual Structure:" << std::endl;
-  Dune::__PolygonGrid::printStructure( grid.mesh().nodes( Dune::__PolygonGrid::Dual ) );
-  std::cout << std::endl;
+    Grid grid = *dgf;
+    //Grid grid = *createArbitraryGrid();
 
-  performCheck( grid );
-  write( grid, "primalgrid" );
+    std::cout << std::endl << std::endl;
+    std::cout << "Primal Structure:" << std::endl;
+    Dune::__PolygonGrid::printStructure( grid.mesh().nodes( Dune::__PolygonGrid::Primal ) );
+    std::cout << std::endl;
 
-  Grid dualGrid = grid.dualGrid();
-  performCheck( dualGrid );
-  write( dualGrid, "dualgrid" );
+    std::cout << std::endl << std::endl;
+    std::cout << "Dual Structure:" << std::endl;
+    Dune::__PolygonGrid::printStructure( grid.mesh().nodes( Dune::__PolygonGrid::Dual ) );
+    std::cout << std::endl;
+
+    performCheck( grid );
+    write( grid, "primalgrid-dgf" );
+
+    Grid dualGrid = grid.dualGrid();
+    performCheck( dualGrid );
+    write( dualGrid, "dualgrid-dgf" );
+  }
+
+  {
+    // create arbitrary grid
+    Grid grid = *createArbitraryGrid();
+
+    std::cout << std::endl << std::endl;
+    std::cout << "Primal Structure:" << std::endl;
+    Dune::__PolygonGrid::printStructure( grid.mesh().nodes( Dune::__PolygonGrid::Primal ) );
+    std::cout << std::endl;
+
+    std::cout << std::endl << std::endl;
+    std::cout << "Dual Structure:" << std::endl;
+    Dune::__PolygonGrid::printStructure( grid.mesh().nodes( Dune::__PolygonGrid::Dual ) );
+    std::cout << std::endl;
+
+    performCheck( grid );
+    write( grid, "primalgrid-arbi" );
+
+    Grid dualGrid = grid.dualGrid();
+    performCheck( dualGrid );
+    write( dualGrid, "dualgrid-arbi" );
+  }
 
   return 0;
 }
