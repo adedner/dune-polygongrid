@@ -17,6 +17,12 @@ namespace Dune
       static const bool v = true;
     };
 
+    template< class ct, int codim >
+    struct hasEntityIterator< PolygonGrid< ct >, codim >
+     : public hasEntity< PolygonGrid< ct >, codim >
+    {
+    };
+
     template< class ct >
     struct isCartesian< PolygonGrid< ct > >
     {
