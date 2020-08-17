@@ -16,6 +16,7 @@
 #include <dune/geometry/dimension.hh>
 #include <dune/geometry/type.hh>
 
+#include <dune/grid/io/file/dgfparser/dgfparser.hh>
 #include <dune/grid/io/file/dgfparser/dgfgridfactory.hh>
 
 #include <dune/polygongrid/grid.hh>
