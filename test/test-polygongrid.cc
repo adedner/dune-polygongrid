@@ -77,7 +77,8 @@ try
   Dune::MPIHelper::instance( argc, argv );
 
   {
-    //Grid grid = *createArbitraryGrid();
+    Grid grid = *createArbitraryGrid();
+    /*
     std::stringstream file;
     file << "DGF" << std::endl;
     file << "Interval" << std::endl;
@@ -91,6 +92,8 @@ try
     Dune::GridPtr< Grid > dgf( file );
 
     Grid grid = *dgf;
+    */
+
     //Grid grid = *createArbitraryGrid();
 
     std::cout << std::endl << std::endl;
