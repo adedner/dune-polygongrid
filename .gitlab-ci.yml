@@ -8,31 +8,19 @@ before_script:
   - duneci-install-module https://gitlab.dune-project.org/core/dune-geometry.git
   - duneci-install-module https://gitlab.dune-project.org/core/dune-grid.git
 
-debian:11--gcc-9-17:
-  image: duneci/debian:11
+debian:11:
+  image: registry.dune-project.org/docker/ci/debian:11
   script: duneci-standard-test
   tags: [duneci]
     
-ubuntu:18.04--gcc-7-17:
-  image: duneci/ubuntu:18.04
+ubuntu:20.04:
+  image: registry.dune-project.org/docker/ci/ubuntu:20.04
   script: duneci-standard-test
-  variables:
-    DUNECI_TOOLCHAIN: gcc-7-17
   tags: [duneci]
 
-ubuntu:18.04--clang:
-  image: duneci/ubuntu:18.04
-  script: duneci-standard-test
-  variables: 
-    DUNECI_TOOLCHAIN: clang-6-17
-  tags: [duneci]
-
-debian:11--gcc-9-17:headercheck:
-  image: duneci/debian:11
+debian:11--headercheck:
+  image: registry.dune-project.org/docker/ci/debian:11
   script:
-    - duneci-install-module https://gitlab.dune-project.org/extensions/dune-alugrid.git
-    - cd /duneci/modules/dune-alugrid/build-cmake
+    - cd /duneci/modules/dune-polygongrid/build-cmake
     - make headercheck
-  variables:
-    DUNECI_TOOLCHAIN: gcc-9-17
   tags: [duneci]
