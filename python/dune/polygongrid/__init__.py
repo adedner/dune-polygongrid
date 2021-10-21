@@ -6,12 +6,6 @@ from dune.generator import Constructor, Method
 from .blossoms import blossomDomain
 from .voronoi import voronoiDomain
 
-try:
-    assertHave("HAVE_DUNE_POLYGONGRID")
-except ConfigurationError:
-    raise ImportError("DUNE module dune-polygongrid was not found.")
-
-
 def polygonGrid(domain, ctype="double", dualGrid=False ):
     from ..grid.grid_generator import module, getDimgrid
 

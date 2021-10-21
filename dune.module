@@ -1,5 +1,5 @@
 Module: dune-polygongrid
 Version: 2.9-git
 Maintainer: nolte.mrtn@gmail.com
-Depends: dune-grid (>= 2.8)
+Depends: dune-grid (>= 2.9)
 Whitespace-Hook: Yes
