@@ -14,7 +14,6 @@ add_subdirectory(test)
 # if Python bindings are enabled, include necessary sub directories.
 if( DUNE_ENABLE_PYTHONBINDINGS )
   add_subdirectory(python)
-  dune_python_install_package(PATH "python")
 endif()
 
 finalize_dune_project(GENERATE_CONFIG_H_CMAKE)
