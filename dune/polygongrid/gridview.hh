@@ -64,7 +64,7 @@ namespace Dune
       typedef Dune::Intersection< const Grid, __PolygonGrid::Intersection< const Grid > > Intersection;
       typedef Dune::IntersectionIterator< const Grid, __PolygonGrid::IntersectionIterator< const Grid >, __PolygonGrid::Intersection< const Grid > > IntersectionIterator;
 
-      typedef Dune::CollectiveCommunication< No_Comm > CollectiveCommunication;
+      typedef Dune::Communication< No_Comm > CollectiveCommunication;
 
       explicit GridView ( const Grid &grid ) : grid_( grid ) {}
 

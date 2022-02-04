@@ -73,7 +73,7 @@ namespace Dune
 
         typedef Dune::EntityIterator< 0, const Grid, __PolygonGrid::EntityIterator< 0, const Grid > > HierarchicIterator;
 
-        typedef Dune::CollectiveCommunication< No_Comm > CollectiveCommunication;
+        typedef Dune::Communication< No_Comm > CollectiveCommunication;
 
         template< int codim >
         struct Codim
