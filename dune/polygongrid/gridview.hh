@@ -12,6 +12,7 @@
 #include <dune/grid/common/gridenums.hh>
 
 #include <dune/polygongrid/declaration.hh>
+#include <dune/polygongrid/capabilities.hh>
 #include <dune/polygongrid/entity.hh>
 #include <dune/polygongrid/entityiterator.hh>
 #include <dune/polygongrid/indexset.hh>
@@ -66,9 +67,13 @@ namespace Dune
 
       typedef Dune::CollectiveCommunication< No_Comm > CollectiveCommunication;
 
+      static const bool conforming = Capabilities::isLevelwiseConforming< Grid >::v;
+
       explicit GridView ( const Grid &grid ) : grid_( grid ) {}
 
       const IndexSet &indexSet () const { return grid().leafIndexSet(); }
+
+      bool isConforming() const { return bool(conforming); }
 
       template< class Entity >
       bool contains ( const Entity &entity ) const
