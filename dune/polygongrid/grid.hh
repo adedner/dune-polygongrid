@@ -47,7 +47,8 @@ namespace Dune
     typedef typename Base::LeafIndexSet LeafIndexSet;
     typedef typename Base::LevelIndexSet LevelIndexSet;
 
-    typedef typename Base::CollectiveCommunication CollectiveCommunication;
+    typedef typename Base::Communication Communication;
+    typedef Communication CollectiveCommunication;
 
     typedef __PolygonGrid::Mesh< ct > Mesh;
     typedef __PolygonGrid::MeshType MeshType;
@@ -88,7 +89,7 @@ namespace Dune
     bool adapt () { return false; }
     void postAdapt () {}
 
-    const CollectiveCommunication &comm () const { return comm_; }
+    const Communication &comm () const { return comm_; }
 
     bool loadBalance () { return false; }
 
@@ -129,7 +130,7 @@ namespace Dune
   private:
     std::shared_ptr< Mesh > mesh_;
     __PolygonGrid::MeshType type_;
-    CollectiveCommunication comm_;
+    Communication comm_;
     LocalIdSet idSet_;
     __PolygonGrid::IndexSet< ct > indexSet_;
   };

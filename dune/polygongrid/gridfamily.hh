@@ -36,7 +36,8 @@ namespace Dune
       typedef typename GridViewImp::IntersectionIterator IntersectionIterator;
       typedef typename GridViewImp::Intersection Intersection;
 
-      typedef typename GridViewImp::CollectiveCommunication CollectiveCommunication;
+      typedef typename GridViewImp::Communication Communication;
+      typedef Communication CollectiveCommunication;
 
       static const bool conforming = true;
     };
@@ -73,7 +74,8 @@ namespace Dune
 
         typedef Dune::EntityIterator< 0, const Grid, __PolygonGrid::EntityIterator< 0, const Grid > > HierarchicIterator;
 
-        typedef Dune::CollectiveCommunication< No_Comm > CollectiveCommunication;
+        typedef Dune::Communication< No_Comm > Communication;
+        typedef Communication CollectiveCommunication;
 
         template< int codim >
         struct Codim
