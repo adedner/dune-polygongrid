@@ -29,13 +29,15 @@ namespace Dune
     template< int mydim, int cdim, class Grid >
     class Geometry;
 
+    template< int mydim, int cdim, class Grid >
+    class LocalGeometry;
 
 
     // Geometry for Codimension 0
     // --------------------------
 
     template< int cdim, class Grid >
-    class Geometry< 2, cdim, Grid >
+    class Geometry< 2, cdim, Grid > : public GeometryDefaultImplementation<2, cdim, Grid, Geometry>
     {
       typedef Geometry< 2, cdim, Grid > This;
 
@@ -167,7 +169,7 @@ namespace Dune
     // --------------------------
 
     template< int cdim, class Grid >
-    class Geometry< 1, cdim, Grid >
+    class Geometry< 1, cdim, Grid > : public GeometryDefaultImplementation<1, cdim, Grid, Geometry>
     {
       typedef Geometry< 1, cdim, Grid > This;
 
@@ -247,7 +249,7 @@ namespace Dune
     // --------------------------
 
     template< int mydim, int cdim, class Grid >
-    class LocalGeometry
+    class LocalGeometry : public GeometryDefaultImplementation<mydim, cdim, Grid, LocalGeometry>
     {
       typedef LocalGeometry< mydim, cdim, Grid > This;
 
@@ -332,7 +334,7 @@ namespace Dune
     // --------------------------
 
     template< int cdim, class Grid >
-    class Geometry< 0, cdim, Grid >
+    class Geometry< 0, cdim, Grid > : public GeometryDefaultImplementation<0, cdim, Grid, Geometry>
     {
       typedef Geometry< 0, cdim, Grid > This;
 
