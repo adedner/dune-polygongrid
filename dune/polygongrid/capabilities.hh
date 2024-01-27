@@ -56,7 +56,9 @@ namespace Dune
     template< class ct >
     struct viewThreadSafe< PolygonGrid< ct > >
     {
-      static const bool v = false;
+      // this might be a problem but to our
+      // knowledge the grid is thread safe
+      static const bool v = true;
     };
 
     template< class ct >
