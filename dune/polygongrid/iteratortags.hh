@@ -1,7 +1,8 @@
 #ifndef DUNE_POLYGONGRID_ITERATORTAGS_HH
 #define DUNE_POLYGONGRID_ITERATORTAGS_HH
 
-#include <iterator>
+#include <cstddef>
+#include <utility>
 
 namespace Dune
 {
@@ -80,14 +81,24 @@ namespace Dune
       element_type element_;
     };
 
-
+    namespace detail {
+      template <class Category, class T, class Distance = ptrdiff_t,
+                class Pointer = T*, class Reference = T&>
+      struct std_iterator {
+        typedef T         value_type;
+        typedef Distance  difference_type;
+        typedef Pointer   pointer;
+        typedef Reference reference;
+        typedef Category  iterator_category;
+      };
+    }
 
 
     // VirtualIterator
     // ---------------
 
     template< class C, class T, class D = std::ptrdiff_t, class R = T >
-    using VirtualIterator = std::iterator< C, T, D, Envelope< R >, R >;
+    using VirtualIterator = detail::std_iterator< C, T, D, Envelope< R >, R >;
 
   } // namespace __PolygonGrid
 

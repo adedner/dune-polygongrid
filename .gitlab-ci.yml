@@ -21,6 +21,10 @@ ubuntu:20.04:
 debian:11--headercheck:
   image: registry.dune-project.org/docker/ci/debian:11
   script:
+    - DUNECI_CMAKE_FLAGS="-DENABLE_HEADERCHECK=ON"
+    - duneci-install-module https://gitlab.dune-project.org/extensions/dune-polygongrid.git
     - cd /duneci/modules/dune-polygongrid/build-cmake
     - make headercheck
+  variables:
+    DUNECI_TOOLCHAIN: gcc-10-20    
   tags: [duneci]
