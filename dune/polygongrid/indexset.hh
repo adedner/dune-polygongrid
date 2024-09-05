@@ -13,6 +13,7 @@
 #include <dune/grid/common/indexidset.hh>
 
 #include <dune/polygongrid/declaration.hh>
+#include <dune/polygongrid/entity.hh>
 
 namespace Dune
 {
