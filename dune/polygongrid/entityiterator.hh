@@ -36,7 +36,8 @@ namespace Dune
 
       typedef __PolygonGrid::Mesh< typename std::remove_const< Grid >::type::ctype > Mesh;
 
-      typedef Dune::Entity< codim, 2, Grid, __PolygonGrid::Entity > Entity;
+      typedef typename Grid::Traits::template Codim< codim >:: Entity Entity;
+      //typedef Dune::Entity< codim, 2, Grid, __PolygonGrid::Entity > Entity;
 
       EntityIterator () = default;
 

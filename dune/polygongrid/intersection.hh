@@ -45,7 +45,7 @@ namespace Dune
 
       typedef typename std::remove_const< Grid >::type::ctype ctype;
 
-      typedef Dune::Entity< 0, 2, Grid, __PolygonGrid::Entity > Entity;
+      typedef typename Grid::Traits::template Codim< 0 >::Entity Entity;
       typedef Dune::Geometry< 1, 2, Grid, __PolygonGrid::Geometry > Geometry;
       typedef Dune::Geometry< 1, 2, Grid, __PolygonGrid::LocalGeometry > LocalGeometry;
       //typedef Geometry LocalGeometry;

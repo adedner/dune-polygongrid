@@ -361,7 +361,7 @@ namespace Dune
       const GlobalCoordinate &corner ( int i ) const { return center(); }
       const GlobalCoordinate &center () const { return node_.position(); }
 
-      GeometryType type () const noexcept { return GeometryTypes::none( mydimension ); }
+      GeometryType type () const noexcept { return GeometryTypes::cube( mydimension ); }
 
       ctype volume () const noexcept { return ctype( 1 ); }
 
