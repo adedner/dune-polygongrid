@@ -60,7 +60,7 @@ namespace Dune
       template< int cd >
       struct Codim
       {
-        typedef Dune::Entity< cd, 2, Grid, __PolygonGrid::Entity > Entity;
+        typedef typename Grid::Traits::template Codim<cd>::Entity Entity;
       };
 
       typedef Dune::EntitySeed< Grid, EntitySeedImpl > EntitySeed;
@@ -69,7 +69,15 @@ namespace Dune
       explicit BasicEntity ( const Item &item ) : item_( item ) {}
       BasicEntity () noexcept = default;
 
-      GeometryType type () const { return GeometryTypes::none( mydimension ); }
+      GeometryType type () const
+      {
+        if constexpr ( codimension > 0 )
+        {
+          return GeometryTypes::cube( mydimension );
+        }
+        else
+          return GeometryTypes::none( mydimension );
+      }
 
       PartitionType partitionType () const { return InteriorEntity; }
 

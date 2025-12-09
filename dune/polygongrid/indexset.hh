@@ -45,6 +45,11 @@ namespace Dune
 
       IndexSet ( const Mesh< ct > &mesh, MeshType type )
       {
+        update( mesh, type );
+      }
+
+      void update( const Mesh< ct > &mesh, MeshType type )
+      {
         size_[ 0 ] = mesh.numCells( type );
         size_[ 1 ] = mesh.numEdges( type );
         size_[ 2 ] = mesh.numVertices( type );
@@ -83,7 +88,13 @@ namespace Dune
         return true;
       }
 
-      Types types ( int codim ) const noexcept { return {{ GeometryTypes::none( dimension - codim ) }}; }
+      Types types ( int codim ) const noexcept
+      {
+        if( codim > 0 )
+          return {{ GeometryTypes::cube( dimension - codim ) }};
+        else
+          return {{ GeometryTypes::none( dimension - codim ) }};
+      }
 
     private:
       std::array< Index, dimension+1 > size_;
