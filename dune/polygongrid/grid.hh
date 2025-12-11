@@ -10,6 +10,7 @@
 
 #include <dune/polygongrid/capabilities.hh>
 #include <dune/polygongrid/gridfamily.hh>
+#include <dune/polygongrid/mesh.hh>
 
 namespace Dune
 {
@@ -127,7 +128,21 @@ namespace Dune
     const Mesh &mesh () const { return *mesh_; }
     MeshType type () const { return type_; }
 
+    template <class GridView>
+    void update( const GridView& gridView, const bool dual = false )
+    {
+      static_assert( dimension == GridView::dimension );
+      update( __PolygonGrid::createMeshfromGridView( gridView ), dual ? __PolygonGrid::Dual : __PolygonGrid::Primal );
+    }
+
   private:
+    void update( std::shared_ptr< Mesh > mesh, __PolygonGrid::MeshType type )
+    {
+      mesh_ = mesh;
+      type_ = type;
+      indexSet_.update( this->mesh(), this->type() );
+    }
+
     std::shared_ptr< Mesh > mesh_;
     __PolygonGrid::MeshType type_;
     Communication comm_;
