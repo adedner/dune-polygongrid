@@ -5,7 +5,23 @@ find_package(dune-common)
 list(APPEND CMAKE_MODULE_PATH ${dune-common_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/modules")
 
 include(DuneMacros)
+
+# deactivate global include-directories
+dune_policy(SET DP_DEFAULT_INCLUDE_DIRS NEW)
+
+# deactivate global calls to add_dune_all_flags in tests
+dune_policy(SET DP_TEST_ADD_ALL_FLAGS NEW)
+
+# do not make suggested dependencies required automatically
+dune_policy(SET DP_SUGGESTED_MODULE_DEPENDENCIES_REQUIRED_DOWNSTREAM NEW)
+
 dune_project()
+
+# Define the dune-polygon library
+dune_add_library(dunepolygongrid EXPORT_NAME PolygonGrid NAMESPACE Dune::)
+dune_enable_all_packages()
+target_link_libraries(dunepolygongrid PUBLIC Dune::Grid)
+dune_default_include_directories(dunepolygongrid PUBLIC)
 
 add_subdirectory(cmake/modules)
 add_subdirectory(dune)

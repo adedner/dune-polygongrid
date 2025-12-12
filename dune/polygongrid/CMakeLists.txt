@@ -23,7 +23,4 @@ set(HEADERS
 
 install(FILES ${HEADERS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/dune/polygongrid)
 
-dune_add_library(dunepolygongrid
-  mesh.cc
-  ADD_LIBS ${DUNE_LIBS}
-)
+target_sources(dunepolygongrid PRIVATE mesh.cc)
