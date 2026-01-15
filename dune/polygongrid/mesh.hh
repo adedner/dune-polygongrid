@@ -7,6 +7,7 @@
 #include <array>
 #include <iostream>
 #include <limits>
+#include <memory>
 #include <utility>
 #include <vector>
 
@@ -195,7 +196,6 @@ namespace Dune
     }
 
 
-
     // Mesh
     // ----
 
@@ -300,6 +300,63 @@ namespace Dune
       std::vector< std::size_t > edgeIndices_;
     };
 
+    // created mesh from grid view
+    template <class GridView>
+    std::shared_ptr< Mesh< typename GridView::ctype >  >
+    createMeshfromGridView( const GridView& gridView )
+    {
+      static const int dimension = GridView::dimension;
+      const auto& idxSet = gridView.indexSet();
+
+      typedef typename GridView:: template Codim< 0 >::Entity EntityType;
+      typedef typename EntityType::Geometry::GlobalCoordinate   GlobalCoordinate;
+      std::vector< GlobalCoordinate > vertices( idxSet.size(dimension) );
+
+      std::vector< std::vector< size_t > > polygons( idxSet.size(0) );
+
+      const auto end = gridView.template end<0>();
+      for( auto it = gridView.template begin<0>(); it != end; ++it )
+      {
+        const auto& entity = *it;
+        const auto& geom = entity.geometry();
+        const int nVx = geom.corners();
+        const int idx = idxSet.index( entity );
+
+        auto& elempoly = polygons[ idx ];
+        elempoly.resize( nVx );
+
+        // vertices
+        for( int i=0; i<nVx; ++i )
+        {
+          elempoly[ i ] = idxSet.subIndex( entity, i, dimension );
+          vertices[ elempoly[ i ] ] = geom.corner( i );
+        }
+
+        if( nVx == 4 )
+          std::swap( elempoly[ 2 ], elempoly[ 3 ] );
+
+        // insert polygon oriented counter-clockwise
+        const GlobalCoordinate a = vertices[ elempoly[ 1 ] ] - vertices[ elempoly[ 0 ] ];
+        const GlobalCoordinate b = vertices[ elempoly[ 2 ] ] - vertices[ elempoly[ 0 ] ];
+        if( a[ 0 ]*b[ 1 ] < a[ 1 ]*b[ 0 ] )
+          std::reverse( elempoly.begin(), elempoly.end() );
+      }
+      const size_t nPoly = idxSet.size(0);
+      std::vector< size_t > counts( nPoly );
+
+      for( size_t i=0; i<nPoly; ++i )
+      {
+        counts[ i ] = polygons[i].size();
+      }
+
+      __PolygonGrid::MultiVector< size_t > polyvec( counts );
+      for( size_t i=0; i<nPoly; ++i )
+      {
+        std::copy( polygons[i].begin(), polygons[i].end(), polyvec[ i ].begin() );
+      }
+
+      return std::make_shared< Mesh< typename GridView::ctype > >(vertices, polyvec);
+    }
   } // namespace __PolygonGrid
 
 } // namespace Dune

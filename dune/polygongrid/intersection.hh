@@ -45,7 +45,7 @@ namespace Dune
 
       typedef typename std::remove_const< Grid >::type::ctype ctype;
 
-      typedef Dune::Entity< 0, 2, Grid, __PolygonGrid::Entity > Entity;
+      typedef typename Grid::Traits::template Codim< 0 >::Entity Entity;
       typedef Dune::Geometry< 1, 2, Grid, __PolygonGrid::Geometry > Geometry;
       typedef Dune::Geometry< 1, 2, Grid, __PolygonGrid::LocalGeometry > LocalGeometry;
       //typedef Geometry LocalGeometry;
@@ -75,6 +75,28 @@ namespace Dune
       int indexInInside () const { return item().indexInCell(); }
       int indexInOutside () const { return item().indexInNeighbor(); }
 
+      /*
+      int twistInInside () const
+      {
+        return 0;
+      }
+
+      int twistInOutside () const
+      {
+        if( neighbor() )
+        {
+          auto geom = geometry();
+          auto inVx0 = geom.corner(0);
+          auto outVx0 = outside().geometry().global( geometryInOutside().corner(0) );
+          if( (inVx0 - outVx0 ).two_norm2() < 1e-12 )
+            return 0;
+          else
+            return 1;
+        }
+        return 0;
+      }
+      */
+
       GeometryType type () const noexcept { return GeometryTypes::cube( mydimension ); }
 
       Geometry geometry () const { return Geometry( GeometryImpl( item() ) ); }
@@ -86,8 +108,8 @@ namespace Dune
         const auto& c0 = elemGeo.local( geom.corner( 0 ) );
         const auto& c1 = elemGeo.local( geom.corner( 1 ) );
         return LocalGeometry( LocalGeometryImpl(c0 , c1) );
-        assert( false );
-        DUNE_THROW( InvalidStateException, "Intersection::geometryInOutside does not make for arbitrary polytopes." );
+        //assert( false );
+        //DUNE_THROW( InvalidStateException, "Intersection::geometryInOutside does not make for arbitrary polytopes." );
       }
 
       LocalGeometry geometryInOutside () const
